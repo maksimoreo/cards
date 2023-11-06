@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(47, 53, 53);
+  border-radius: 3px;
+}
+
+html {
+  font-family: 'Roboto', sans-serif;
+}
+
+.owl-font-playpen-sans {
+  font-family: 'Playpen Sans', 'Roboto', Arial, Helvetica, sans-serif;
+}

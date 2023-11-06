@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  server:
+    build: .
+    image: cards_server_dev:latest
+    container_name: cards_server_dev
+    ports:
+      - '5000:5000'
+    environment:
+      OWL_SERVER_EXPRESS_APP_HOSTNAME: 0.0.0.0
+      OWL_SERVER_EXPRESS_APP_PORT: 5000

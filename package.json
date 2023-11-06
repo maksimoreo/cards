@@ -1,0 +1,17 @@
+{
+  "name": "cards",
+  "version": "1.0.0",
+  "description": "Cards Game",
+  "main": "index.js",
+  "author": "me",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "common"
+  ],
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
