@@ -2,12 +2,14 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import socketio, { io } from 'socket.io-client'
 import App from './App'
-import { LOCAL_STORAGE_KEY__SERVER_IP } from './const'
+import { LOCAL_STORAGE_KEY__SERVER_URL } from './const'
 import './index.css'
 
 // For debug on devices on the same network
-const ipAddress = localStorage.getItem(LOCAL_STORAGE_KEY__SERVER_IP) || 'localhost'
-const socket = io(`http://${ipAddress}:5000`)
+const serverAddress =
+  localStorage.getItem(LOCAL_STORAGE_KEY__SERVER_URL) || import.meta.env.VITE_SERVER_URL || 'http://localhost:5000'
+console.log(`Using "${serverAddress} to connect to the server.`)
+const socket = io(serverAddress)
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

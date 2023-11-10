@@ -1,5 +1,5 @@
 import { faPen } from '@fortawesome/free-solid-svg-icons'
-import { LOCAL_STORAGE_KEY__SERVER_IP } from '../../const'
+import { LOCAL_STORAGE_KEY__SERVER_URL } from '../../const'
 import Button from '../Button'
 
 export default function DebugSection() {
@@ -12,17 +12,17 @@ export default function DebugSection() {
       <Button
         iconProps={{ icon: faPen }}
         onClick={() => {
-          localStorage.setItem(LOCAL_STORAGE_KEY__SERVER_IP, 'localhost')
+          localStorage.setItem(LOCAL_STORAGE_KEY__SERVER_URL, 'http://localhost:5000')
         }}
       >
-        Set server IP to "localhost"
+        Set server IP to "http://localhost:5000"
       </Button>
 
       {import.meta.env.VITE_SET_SERVER_ADDRESS_BUTTON ? (
         <Button
           iconProps={{ icon: faPen }}
           onClick={() => {
-            localStorage.setItem(LOCAL_STORAGE_KEY__SERVER_IP, import.meta.env.VITE_SET_SERVER_ADDRESS_BUTTON)
+            localStorage.setItem(LOCAL_STORAGE_KEY__SERVER_URL, import.meta.env.VITE_SET_SERVER_ADDRESS_BUTTON)
           }}
         >
           Set server IP to "{import.meta.env.VITE_SET_SERVER_ADDRESS_BUTTON}"
@@ -39,7 +39,7 @@ export default function DebugSection() {
 
       <ul>
         <li className='mx-4 text-neutral-400'>
-          {LOCAL_STORAGE_KEY__SERVER_IP}: {localStorage.getItem(LOCAL_STORAGE_KEY__SERVER_IP)}
+          {LOCAL_STORAGE_KEY__SERVER_URL}: {localStorage.getItem(LOCAL_STORAGE_KEY__SERVER_URL)}
         </li>
       </ul>
     </>
