@@ -14,6 +14,8 @@ export interface Room {
 export interface GameOptions {
   type: 'takeSix'
   mode: 'normal' | 'expert'
+  stepTimeout: number
+  stepTimeoutDoneStrategy: 'forcePlay' | 'moveToSpectators' | 'kick'
 }
 
 export type Game = {

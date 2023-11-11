@@ -66,7 +66,7 @@ function App({ socket }: AppProps): JSX.Element {
               </div>
 
               {/* Main view */}
-              <div className='flex-grow'>
+              <div className='flex-grow overflow-y-scroll'>
                 <AppMainView />
               </div>
 
