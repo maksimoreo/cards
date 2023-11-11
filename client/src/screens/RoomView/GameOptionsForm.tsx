@@ -26,7 +26,6 @@ export default function GameForm({ allowChange }: Props) {
 
   const handleSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault()
-    console.log('handleSubmit')
   }
 
   const isGameModeNormalChecked = gameMode === 'normal'

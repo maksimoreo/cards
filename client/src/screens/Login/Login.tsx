@@ -28,9 +28,7 @@ export default function Login(): JSX.Element {
     setName(generateRandomName())
     setColor(generateRandomColor())
   }
-  console.log('render')
   const handleSubmit = (e: React.SyntheticEvent): void => {
-    console.log('handleSubmit')
     e.preventDefault()
 
     setLoading(true)
