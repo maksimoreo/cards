@@ -8,7 +8,7 @@ interface Props {
 
 export default function CardsField({ rows, allowSelectRow, onRowSelected }: Props): JSX.Element {
   return (
-    <ul className='py-1'>
+    <ul className='px-2 py-1'>
       {rows.map((row, rowIndex) => (
         <li key={rowIndex}>
           <Row cardsFieldRow={row} allowClick={allowSelectRow} onClick={(): void => onRowSelected(rowIndex)} />

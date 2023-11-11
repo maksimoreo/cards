@@ -22,3 +22,41 @@ html {
 .owl-font-playpen-sans {
   font-family: 'Playpen Sans', 'Roboto', Arial, Helvetica, sans-serif;
 }
+
+.owl-takesix-row-bg {
+  clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+}
+
+/*
+  <s>Stolen</s> Taken from here:
+  https://codepen.io/Chokcoco/pen/NWRevaJ?editors=1100
+  https://dev.to/chokcoco/fantastic-css-border-animation-5166
+*/
+.owl-dashed-border-animated {
+  background:
+    linear-gradient(90deg, #777 50%, transparent 0) repeat-x,
+    linear-gradient(90deg, #777 50%, transparent 0) repeat-x,
+    linear-gradient(0deg, #777 50%, transparent 0) repeat-y,
+    linear-gradient(0deg, #777 50%, transparent 0) repeat-y;
+  background-size:
+    16px 3px,
+    16px 3px,
+    3px 16px,
+    3px 16px;
+  background-position:
+    0 0,
+    0 100%,
+    0 0,
+    100% 0;
+  animation: linearGradientMove 0.4s infinite linear;
+}
+
+@keyframes linearGradientMove {
+  100% {
+    background-position:
+      16px 0,
+      -16px 100%,
+      0 -16px,
+      100% 16px;
+  }
+}

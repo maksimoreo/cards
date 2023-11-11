@@ -24,7 +24,7 @@ function App({ socket }: AppProps): JSX.Element {
         <Provider store={store}>
           <div className='bg-neutral-900'>
             {/* Navbar */}
-            <div className='fixed top-0 z-30 flex h-12 w-full flex-row items-center justify-between'>
+            <div className='fixed top-0 z-[200] flex h-12 w-full flex-row items-center justify-between'>
               <Button
                 iconProps={{ icon: faBars }}
                 onClick={() => {
@@ -54,10 +54,9 @@ function App({ socket }: AppProps): JSX.Element {
 
             <div className='flex h-screen flex-row xl:mx-12 2xl:mx-36'>
               {/* Sidebar */}
-
               <div
                 className={classNames(
-                  'fixed left-0 top-0 z-20 h-full w-full transition-transform sm:w-80 xl:relative xl:block xl:translate-x-0 xl:border-r-2 xl:border-neutral-800 xl:transition-none',
+                  'fixed left-0 top-0 z-[100] h-full w-full transition-transform sm:w-80 xl:relative xl:block xl:translate-x-0 xl:border-r-2 xl:border-neutral-800 xl:transition-none',
                   { '-translate-x-full': !isSideMenuOpen },
                 )}
               >
@@ -74,7 +73,7 @@ function App({ socket }: AppProps): JSX.Element {
               {/* (Left) Chat v2 */}
               <div
                 className={classNames(
-                  'fixed right-0 top-0 z-20 h-full w-full transition-transform sm:w-80 md:relative md:block md:translate-x-0 md:border-l-2 md:border-neutral-800 md:transition-none',
+                  'fixed right-0 top-0 z-[100] h-full w-full transition-transform sm:w-80 md:relative md:block md:translate-x-0 md:border-l-2 md:border-neutral-800 md:transition-none',
                   { 'translate-x-full': !isChatOpen },
                 )}
               >

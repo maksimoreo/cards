@@ -48,7 +48,7 @@ export default function PlayerHand({ cards, selectedCard, onCardSelected, allowS
 
   return (
     // <ul className='flex flex-row justify-center mx-auto' style={{ width: listWidth }}>
-    <ul className='fixed bottom-0 flex w-[calc(100vw-16px)] flex-row justify-center md:w-full'>
+    <ul className='fixed bottom-0 z-50 flex w-[calc(100vw-16px)] flex-row justify-center md:w-full'>
       {cardsCount === 1 ? (
         <PlayerHandItem
           key={cards[0].value}
