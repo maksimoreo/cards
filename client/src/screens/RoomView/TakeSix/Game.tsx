@@ -483,7 +483,7 @@ export default function Game(props: Props): JSX.Element {
   return (
     <>
       <div className='flex flex-col md:flex-row' style={{ height: 'calc(100vh - 48px)' }}>
-        <div className='md:shrink-0'>
+        <div className='mx-2 flex items-center md:mx-4'>
           <PlayerList
             entries={playerList.map((playerListItem, index) => ({
               playerListItem,
