@@ -1,4 +1,4 @@
-import { useSpring, animated, easings } from 'react-spring'
+import { animated, easings, useSpring } from 'react-spring'
 
 import PlayingCard from './PlayingCard'
 import { Card } from './types'
@@ -40,7 +40,7 @@ export default function FlyingCardView({ card, from, to, duration }: FlyingCard)
   })
 
   return (
-    <animated.div className='absolute' style={styles}>
+    <animated.div className='absolute z-30 origin-top-left' style={styles}>
       <PlayingCard card={card} />
     </animated.div>
   )

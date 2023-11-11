@@ -1,7 +1,7 @@
 import { cloneDeep } from 'lodash'
 import { useEffect, useRef, useState } from 'react'
-
 import { useSelector } from 'react-redux'
+
 import { RootState } from '../../../app/store'
 import { selectRequired, useRequiredAllRoomUsers } from '../../../features/room/selectors'
 import { useSocket } from '../../../hooks/useSocket'
@@ -16,7 +16,7 @@ import PlayerHand from './PlayerHand'
 import PlayerList, { PlayerCardContainerHtmlElement, PlayerListItem } from './PlayerList'
 import { Card, GameState, GameStep, PlayerMove } from './types'
 
-const CARD_FLY_DURATION = 500
+const CARD_FLY_DURATION = 700
 const PLAYER_CARDS_REVEAL_DURATION = 700
 
 interface Props {
@@ -362,8 +362,8 @@ export default function Game(props: Props): JSX.Element {
             },
             to: {
               rotate: 0,
-              left: destinationRect.left - 20,
-              top: destinationRect.top - 28,
+              left: destinationRect.left,
+              top: destinationRect.top,
               scale: 0.5,
               opacity: 0.5,
             },
