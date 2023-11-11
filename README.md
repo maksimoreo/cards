@@ -1,6 +1,6 @@
 # About
 
-Play Now: TODO
+PLAY NOW: https://cards-paf0.onrender.com
 
 Read more about the game and rules on Wikipedia page: https://en.wikipedia.org/wiki/6_nimmt!
 
@@ -9,7 +9,6 @@ Read more about the game and rules on Wikipedia page: https://en.wikipedia.org/w
 - Chat, rooms, WebSockets, Socket.io
 - "6th takes" card game
 - Responsive design
-- Bots
 
 # Project Structure
 
