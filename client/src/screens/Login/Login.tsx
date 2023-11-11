@@ -51,6 +51,9 @@ export default function Login(): JSX.Element {
           setError(response.message)
         }
       } else if (response.code === 'SUCCESS') {
+        localStorage.setItem(LOCAL_STORAGE_KEY__LAST_USED_NAME, name)
+        localStorage.setItem(LOCAL_STORAGE_KEY__LAST_USED_COLOR, color)
+
         dispatch(setIdentity({ name, color }))
         dispatch(setScreen('rooms'))
       }
