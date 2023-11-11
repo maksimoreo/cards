@@ -13,7 +13,7 @@ interface Props {
 export function ChatView({ onMessageFormSubmit, messages, connected, messageFormDisabled }: Props): JSX.Element {
   return (
     <div className='flex min-h-0 flex-1 flex-col'>
-      <div className='flex min-h-0 flex-1 flex-col-reverse overflow-y-scroll'>
+      <div className='flex min-h-0 flex-1 flex-col-reverse overflow-x-hidden overflow-y-scroll break-words'>
         <div className=''>
           {messages.map((message) => {
             return <Line message={message} key={message.id} />
