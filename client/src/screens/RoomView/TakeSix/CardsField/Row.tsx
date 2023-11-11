@@ -41,17 +41,17 @@ export default function Row({
     >
       <div className={classNames('absolute z-30 h-full w-full', allowClick && 'owl-dashed-border-animated')}></div>
 
-      <div className='relative m-2 mx-auto w-[196px] md:w-[352px]'>
+      <div className='relative m-2 mx-auto w-[196px] lg:w-[352px]'>
         <div className='owl-takesix-row-bg absolute bottom-0 h-8 w-full bg-neutral-800'></div>
 
         <ul className={classNames('flex')}>
           {items.map((item) => (
-            <li key={item.tiltedCard.card.value} className='z-20 w-9 md:w-16'>
+            <li key={item.tiltedCard.card.value} className='z-20 w-9 lg:w-16'>
               <Item tiltedCardWithRef={item} />
             </li>
           ))}
 
-          <li className='w-9 md:w-16' ref={newItemEmptySpaceRefSetter}></li>
+          <li className='w-9 lg:w-16' ref={newItemEmptySpaceRefSetter}></li>
         </ul>
       </div>
     </button>

@@ -85,7 +85,7 @@ function App({ socket }: AppProps): JSX.Element {
               {/* Backdrop */}
               <div
                 className={classNames(
-                  'transition-color fixed left-0 top-12 z-10 h-full w-full bg-neutral-950 opacity-75 xl:hidden',
+                  'transition-color fixed left-0 top-12 z-[99] h-full w-full bg-neutral-950 opacity-75 xl:hidden',
                   { hidden: !isChatOpen && !isSideMenuOpen },
                 )}
                 onClick={() => {

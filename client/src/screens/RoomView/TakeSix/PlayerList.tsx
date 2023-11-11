@@ -65,23 +65,23 @@ export default function PlayerList({ entries }: Props): JSX.Element {
                 <UserNameFromUser user={playerListItem.user} isInactive={!playerListItem.isActive} />
               </td>
 
-              <td className='px-2 text-center text-base text-neutral-400 md:text-2xl'>
+              <td className='px-2 text-center text-base text-neutral-400 lg:text-2xl'>
                 {playerListItem.penaltyPoints}
               </td>
 
               <td className='py-1 pr-2'>
-                <div className='h-7 w-5 md:h-14 md:w-10'>
-                  <div ref={refSetter} className='h-7 w-5 md:h-14 md:w-10'>
+                <div className='h-7 w-5 lg:h-14 lg:w-10'>
+                  <div ref={refSetter} className='h-7 w-5 lg:h-14 lg:w-10'>
                     {playerListItem.hasSelectedCard ? (
                       playerListItem.selectedCard === undefined ? (
-                        <div className='h-7 w-5 rounded bg-neutral-500 md:h-14 md:w-10'></div>
+                        <div className='h-7 w-5 rounded bg-neutral-500 lg:h-14 lg:w-10'></div>
                       ) : (
                         <div style={{ transform: 'scale(0.5) translate(-50%, -50%)' }}>
                           <PlayingCard card={playerListItem.selectedCard} />
                         </div>
                       )
                     ) : (
-                      <div className='h-7 w-5 rounded bg-neutral-800 md:h-14 md:w-10'></div>
+                      <div className='h-7 w-5 rounded bg-neutral-800 lg:h-14 lg:w-10'></div>
                     )}
                   </div>
                 </div>

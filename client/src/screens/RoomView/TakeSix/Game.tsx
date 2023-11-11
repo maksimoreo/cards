@@ -16,8 +16,8 @@ import PlayerHand from './PlayerHand'
 import PlayerList, { PlayerCardContainerHtmlElement, PlayerListItem } from './PlayerList'
 import { Card, GameState, GameStep, PlayerMove } from './types'
 
-const CARD_FLY_DURATION = 300
-const PLAYER_CARDS_REVEAL_DURATION = 500
+const CARD_FLY_DURATION = 500
+const PLAYER_CARDS_REVEAL_DURATION = 700
 
 interface Props {
   readonly onGameDone?: (finalGameState: GameState) => void
@@ -494,8 +494,8 @@ export default function Game(props: Props): JSX.Element {
           />
         </div>
 
-        <div className='mt-2 overflow-y-scroll pb-36 md:mt-0 md:flex-grow'>
-          <div className='mx-auto'>
+        <div className='mt-2 flex flex-col justify-center md:mt-0 md:flex-grow'>
+          <div className='overflow-y-scroll pb-16 lg:pb-36'>
             <CardsField
               rows={cardsFieldRows.map((row, rowIndex) => ({
                 items: row.map((tiltedCard, cardIndex) => ({

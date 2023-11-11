@@ -25,7 +25,7 @@ export default function PlayerHandItem({ card, tilt, lift, allowClick, onClick, 
       className={classNames(
         'min-w-0 shrink overflow-visible duration-100 ease-in-out',
         selectedState === 'selected' ? '-translate-y-4' : isHovered && '-translate-y-2',
-        highlight ? 'basis-11 md:basis-20' : 'basis-9 md:basis-14 ',
+        highlight ? 'basis-11 lg:basis-20' : 'basis-9 lg:basis-14 ',
       )}
       onMouseEnter={(): void => {
         allowClick && setIsHovered(true)
