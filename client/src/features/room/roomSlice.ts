@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { Room, User } from '../../commonTypes'
+import { GameOptions, Room, User } from '../../commonTypes'
 
 export type RoomState = Room | null
 
@@ -29,9 +29,13 @@ export const roomSlice = createSlice({
       const index = state.users.findIndex((member) => member.id === action.payload)
       if (index !== -1) state.users.splice(index, 1)
     }),
+
+    setGameOptions: ifNotNull((state, action: PayloadAction<GameOptions>) => {
+      state.gameOptions = action.payload
+    }),
   },
 })
 
-export const { setRoom } = roomSlice.actions
+export const { setRoom, setGameOptions } = roomSlice.actions
 
 export default roomSlice.reducer

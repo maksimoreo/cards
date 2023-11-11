@@ -8,10 +8,12 @@ export interface Room {
   name: string
   owner: User
   users: User[]
-  gameOptions: {
-    type: 'takeSix'
-    mode: 'normal' | 'expert'
-  }
+  gameOptions: GameOptions
+}
+
+export interface GameOptions {
+  type: 'takeSix'
+  mode: 'normal' | 'expert'
 }
 
 export type Game = {

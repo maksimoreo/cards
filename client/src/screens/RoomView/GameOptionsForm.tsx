@@ -1,8 +1,13 @@
-import { faDice, faMugHot } from '@fortawesome/free-solid-svg-icons'
+import { faDice, faMugHot, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import classNames from 'classnames'
 import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import Button from '../../components/Button'
+import { setGame } from '../../features/game/gameSlice'
+import { setGameOptions } from '../../features/room/roomSlice'
 import { useRequiredAllRoomUsers, useRequiredRoom } from '../../features/room/selectors'
+import { useIsOwner } from '../../hooks/useIsOwner'
 import { useSocket } from '../../hooks/useSocket'
 import useSocketEventListener from '../../hooks/useSocketEventListener'
 
@@ -12,15 +17,12 @@ function isValueGameMode(value: string): value is GameModes {
   return (GAME_MODE_VALUES as readonly string[]).indexOf(value) !== -1
 }
 
-interface Props {
-  readonly allowChange: boolean
-}
-
-export default function GameForm({ allowChange }: Props) {
+export default function GameForm() {
   const { send } = useSocket()
+  const dispatch = useDispatch()
+  const isRoomOwner = useIsOwner()
   const room = useRequiredRoom()
   const allRoomUsers = useRequiredAllRoomUsers()
-  const cardsCount = Math.max(2, allRoomUsers.length) * 10 + 4
 
   const [gameMode, setGameMode] = useState<GameModes>(room.gameOptions.mode)
 
@@ -39,14 +41,31 @@ export default function GameForm({ allowChange }: Props) {
     }
   }
 
+  const handleStartGameButtonClick = (): void => {
+    dispatch(setGameOptions({ type: 'takeSix', mode: gameMode }))
+
+    send('startGame', null, (response) => {
+      if (response.code === 'SUCCESS') {
+        dispatch(setGame({ ...response.data, type: 'takesix', playersWithSelectedCard: [] }))
+      }
+    })
+  }
+
   useSocketEventListener('gameOptionsUpdated', (data) => {
     setGameMode(data.gameOptions.mode)
   })
 
+  useSocketEventListener('notifyGameStarted', () => {
+    dispatch(setGameOptions({ type: 'takeSix', mode: gameMode }))
+  })
+
+  const cardsCount = Math.max(2, allRoomUsers.length) * 10 + 4
+  const isStartButtonDisabled = allRoomUsers.length < 2
+
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <fieldset disabled={!allowChange}>
+        <fieldset disabled={!isRoomOwner}>
           <legend className='mb-4 text-center text-neutral-400'>Game mode:</legend>
 
           <div className='flex flex-row justify-center gap-4'>
@@ -111,6 +130,31 @@ export default function GameForm({ allowChange }: Props) {
             </label>
           </div>
         </fieldset>
+
+        {isRoomOwner ? (
+          <>
+            <div className='mt-4 flex flex-row justify-center gap-2'>
+              <Button
+                onClick={handleStartGameButtonClick}
+                disabled={isStartButtonDisabled}
+                iconProps={{ icon: faPlay }}
+                color='success'
+              >
+                Start
+              </Button>
+            </div>
+
+            {isStartButtonDisabled && (
+              <p className='mx-2 text-center text-sm italic text-neutral-400'>
+                (You can start the game when there are 2 or more players in the room)
+              </p>
+            )}
+          </>
+        ) : (
+          <p className='mx-2 mt-4 text-center text-sm italic text-neutral-400'>
+            Only room owner is allowed to start the game.
+          </p>
+        )}
       </form>
     </>
   )
