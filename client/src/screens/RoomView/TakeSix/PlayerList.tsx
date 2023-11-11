@@ -1,3 +1,4 @@
+import classNames from 'classnames'
 import { User } from '../../../commonTypes'
 import UserNameFromUser from '../../../components/Chat/UserName/UserNameFromUser'
 import { useRequiredRoom } from '../../../features/room/selectors'
@@ -19,6 +20,8 @@ export interface PlayerListItem {
   // If hasSelectedCard === true && selectedCard === undefined -> selectedCard is hidden
   readonly hasSelectedCard: boolean
   readonly selectedCard: Card | undefined
+
+  readonly isPickingRow: boolean
 }
 
 interface Props {
@@ -54,8 +57,11 @@ export default function PlayerList({ entries }: Props): JSX.Element {
       <tbody>
         {entriesWithAdditionalData.map(({ playerListItem, refSetter }) => {
           return (
-            <tr key={playerListItem.user.id}>
-              <td className='pr-4'>
+            <tr
+              key={playerListItem.user.id}
+              className={classNames('', playerListItem.isPickingRow && 'owl-takesix-player-list-item-selecting-row')}
+            >
+              <td className='pl-2 pr-4'>
                 <UserNameFromUser user={playerListItem.user} isInactive={!playerListItem.isActive} />
               </td>
 
@@ -63,7 +69,7 @@ export default function PlayerList({ entries }: Props): JSX.Element {
                 {playerListItem.penaltyPoints}
               </td>
 
-              <td>
+              <td className='py-1 pr-2'>
                 <div className='h-7 w-5 md:h-14 md:w-10'>
                   <div ref={refSetter} className='h-7 w-5 md:h-14 md:w-10'>
                     {playerListItem.hasSelectedCard ? (

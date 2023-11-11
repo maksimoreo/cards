@@ -40,6 +40,11 @@ export default function Game(props: Props): JSX.Element {
         hasSelectedCard: player.hasSelectedCard,
         selectedCard: undefined,
         isActive: player.isActive, // This prob will always be `true`
+        isPickingRow:
+          (initialGameState.lastStep &&
+            'waitingPlayer' in initialGameState.lastStep &&
+            initialGameState.lastStep.waitingPlayer === player.id) ??
+          false,
       }
     }),
   )
@@ -120,6 +125,7 @@ export default function Game(props: Props): JSX.Element {
         return {
           ...player,
           selectedCard: playerOnClient ? playerOnClient.selectedCard : undefined,
+          isPickingRow: playerOnClient?.isPickingRow ?? false,
         }
       }),
     )
@@ -155,6 +161,7 @@ export default function Game(props: Props): JSX.Element {
         hasSelectedCard: postponedCardSelections.includes(player.id),
         selectedCard: undefined,
         isActive: player.isActive,
+        isPickingRow: false,
       })),
     )
     setPostponedCardSelections([])
@@ -212,9 +219,18 @@ export default function Game(props: Props): JSX.Element {
           if ('waitingPlayer' in gameStep) {
             setAnimationStep(undefined)
 
-            if (gameStep.waitingPlayer === currentUserId) {
+            const waitingPlayerId = gameStep.waitingPlayer
+
+            if (waitingPlayerId === currentUserId) {
               setAllowSelectRow(true)
             }
+
+            setPlayerList((playerList) =>
+              playerList.map((playerListItem) => ({
+                ...playerListItem,
+                isPickingRow: waitingPlayerId === playerListItem.user.id,
+              })),
+            )
 
             // Wait for 'notifyGameStep' message
           } else {
