@@ -6,6 +6,8 @@ import User from './User'
 export type GameOptions = {
   type: 'takeSix'
   mode: 'normal' | 'expert'
+  stepTimeout: number
+  stepTimeoutDoneStrategy: 'forcePlay' | 'moveToSpectators' | 'kick'
 }
 
 export default class Room {
@@ -23,7 +25,7 @@ export default class Room {
     this.id = options.id ?? uuidv4()
     this.owner = options.owner
     this.password = options.password ?? ''
-    this.gameOptions = { type: 'takeSix', mode: 'normal' }
+    this.gameOptions = { type: 'takeSix', mode: 'normal', stepTimeout: 30000, stepTimeoutDoneStrategy: 'forcePlay' }
   }
 
   public get allUsers(): User[] {

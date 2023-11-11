@@ -1,3 +1,5 @@
+import { StepTimeoutDoneStrategy } from '../misc'
+
 export interface EventToInputDataTypeMapT {
   setName: { name: string; color: string }
   createRoom: { name: string; password?: string }
@@ -8,13 +10,18 @@ export interface EventToInputDataTypeMapT {
   startGame: undefined | null
   playCard: { card: number }
   selectRow: { rowIndex: number }
-  updateGameOptions: { type: 'takeSix', mode: 'normal' | 'expert' }
+  updateGameOptions: {
+    type: 'takeSix'
+    mode?: 'normal' | 'expert'
+    stepTimeout?: number
+    stepTimeoutDoneStrategy?: StepTimeoutDoneStrategy
+  }
 }
 
 type ClientToServerEvents = {
   [MesssageName in keyof EventToInputDataTypeMapT]: (
     data: EventToInputDataTypeMapT[MesssageName],
-    acknowledgeCallback: (unknownResponse: unknown) => void,
+    acknowledgeCallback: (unknownResponse: unknown) => void
   ) => void
 }
 

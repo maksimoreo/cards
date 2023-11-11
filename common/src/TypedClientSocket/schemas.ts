@@ -9,6 +9,8 @@ export const USER_SCHEMA = z.object({
 export const GAME_OPTIONS_SCHEMA = z.object({
   type: z.literal('takeSix'),
   mode: z.union([z.literal('normal'), z.literal('expert')]),
+  stepTimeout: z.number(),
+  stepTimeoutDoneStrategy: z.union([z.literal('forcePlay'), z.literal('moveToSpectators'), z.literal('kick')]),
 })
 
 export const ROOM_SCHEMA = z.object({

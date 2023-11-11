@@ -62,6 +62,11 @@ export default function GameForm() {
 
   useSocketEventListener('gameOptionsUpdated', (data) => {
     setGameMode(data.gameOptions.mode)
+    setStepTimeout(
+      STEP_TIMEOUT_NUMBER_TO_STEP_TIMEOUT_VALUE_MAP[data.gameOptions.stepTimeout] ||
+        DEFAULT_STEP_TIMEOUT_DONE_STRATEGY_VALUE,
+    )
+    setStepTimeoutDoneStrategy(data.gameOptions.stepTimeoutDoneStrategy)
   })
 
   useSocketEventListener('notifyGameStarted', () => {
@@ -74,13 +79,38 @@ export default function GameForm() {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <GameModeField value={gameMode} onChange={setGameMode} disabled={!isRoomOwner} cardsCount={cardsCount} />
+        <GameModeField
+          value={gameMode}
+          onChange={(value) => {
+            setGameMode(value)
 
-        <StepTimeoutField value={stepTimeout} onChange={setStepTimeout} disabled={!isRoomOwner} />
+            send('updateGameOptions', { type: 'takeSix', mode: value }, () => {})
+          }}
+          disabled={!isRoomOwner}
+          cardsCount={cardsCount}
+        />
+
+        <StepTimeoutField
+          value={stepTimeout}
+          onChange={(value) => {
+            setStepTimeout(value)
+
+            send(
+              'updateGameOptions',
+              { type: 'takeSix', stepTimeout: STEP_TIMEOUT_VALUE_TO_STEP_TIMEOUT_NUMBER_MAP[value] },
+              () => {},
+            )
+          }}
+          disabled={!isRoomOwner}
+        />
 
         <StepTimeoutDoneStrategyField
           value={stepTimeoutDoneStrategy}
-          onChange={setStepTimeoutDoneStrategy}
+          onChange={(value) => {
+            setStepTimeoutDoneStrategy(value)
+
+            send('updateGameOptions', { type: 'takeSix', stepTimeoutDoneStrategy: value }, () => {})
+          }}
           disabled={!isRoomOwner}
         />
 
@@ -104,7 +134,7 @@ export default function GameForm() {
             )}
           </>
         ) : (
-          <p className='mx-2 mt-4 text-center text-sm italic text-neutral-400'>
+          <p className='mx-2 mt-8 text-center text-sm italic text-neutral-400'>
             Only room owner is allowed to start the game.
           </p>
         )}

@@ -92,8 +92,8 @@ export default class StartGameHandler extends ResponseReturningMessageHandler<St
     const game = new RoomGameTakeSix({
       room,
       game: takeSix,
-      stepTimeout: input?.stepTimeout,
-      selectRowTimeout: input?.selectRowTimeout,
+      stepTimeout: input?.stepTimeout || room.gameOptions.stepTimeout,
+      selectRowTimeout: input?.selectRowTimeout || room.gameOptions.stepTimeout,
     })
 
     room.game = game
