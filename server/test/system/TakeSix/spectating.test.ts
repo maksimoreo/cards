@@ -97,6 +97,8 @@ describe('Game spectating', () => {
             gameOptions: {
               type: 'takeSix',
               mode: 'normal',
+              stepTimeout: 30000,
+              stepTimeoutDoneStrategy: 'forcePlay',
             },
           },
           game: {
@@ -170,6 +172,8 @@ describe('Game spectating', () => {
             gameOptions: {
               type: 'takeSix',
               mode: 'normal',
+              stepTimeout: 30000,
+              stepTimeoutDoneStrategy: 'forcePlay',
             },
           },
           game: {
@@ -400,6 +404,8 @@ describe('Game spectating', () => {
             gameOptions: {
               type: 'takeSix',
               mode: 'normal',
+              stepTimeout: 30000,
+              stepTimeoutDoneStrategy: 'forcePlay',
             },
           },
           game: {
