@@ -112,25 +112,27 @@ export default function RoomView(): JSX.Element {
         </header>
       </MainViewHeader>
 
-      {game ? (
-        <Game onGameDone={handleGameDone} />
-      ) : (
-        <>
-          <GameOptionsForm />
+      <div className='relative mt-12'>
+        {game ? (
+          <Game onGameDone={handleGameDone} />
+        ) : (
+          <>
+            <GameOptionsForm />
 
-          <div className='flex flex-col p-8'>
-            <div className='px-3 py-1'>
-              <UserNameFromUser user={room.owner} />
-            </div>
-
-            {room.users.map((user) => (
-              <div key={user.id} className='px-3 py-1'>
-                <UserNameFromUser user={user} />
+            <div className='flex flex-col p-8'>
+              <div className='px-3 py-1'>
+                <UserNameFromUser user={room.owner} />
               </div>
-            ))}
-          </div>
-        </>
-      )}
+
+              {room.users.map((user) => (
+                <div key={user.id} className='px-3 py-1'>
+                  <UserNameFromUser user={user} />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }

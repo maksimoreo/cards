@@ -40,6 +40,26 @@ html {
     background-color: #ffffff11;
   }
 }
+
+.owl-takesix-timeout-indicator {
+  animation: owl-takesix-timeout-indicator 10s linear forwards;
+}
+
+@keyframes owl-takesix-timeout-indicator {
+  0% {
+    width: 100%;
+    background-color: #00ff00;
+  }
+  50% {
+    width: 50%;
+    background-color: #fffb00;
+  }
+  100% {
+    width: 0%;
+    background-color: #ff0000;
+  }
+}
+
 /*
   <s>Stolen</s> Taken from here:
   https://codepen.io/Chokcoco/pen/NWRevaJ?editors=1100

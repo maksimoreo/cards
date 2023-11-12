@@ -14,6 +14,7 @@ import { FlyingCard } from './FlyingCardView'
 import FlyingCardsContainer from './FlyingCardsContainer'
 import PlayerHand from './PlayerHand'
 import PlayerList, { PlayerCardContainerHtmlElement, PlayerListItem } from './PlayerList'
+import StepTimeoutIndicator from './StepTimeoutIndicator/StepTimeoutIndicator'
 import { Card, GameState, GameStep, PlayerMove } from './types'
 
 const CARD_FLY_DURATION = 700
@@ -104,6 +105,10 @@ export default function Game(props: Props): JSX.Element {
   const [_animationStepTimer, setAnimationStepTimer] = useState<ReturnType<typeof setTimeout> | undefined>()
   const [animationStep, setAnimationStep] = useState<AnimationStep | undefined>()
   const [postponedCardSelections, setPostponedCardSelections] = useState<readonly string[]>([])
+
+  // Step timeout indication
+  const [stepTimeoutIndicatorKey, setStepTimeoutIndicatorKey] = useState(false)
+  const resetStepTimeoutIndicator = () => setStepTimeoutIndicatorKey((currentValue) => !currentValue)
 
   useSocketEventListener('notifyUserPlayedCard', ({ userId }) => {
     if (animationStep) {
@@ -428,6 +433,9 @@ export default function Game(props: Props): JSX.Element {
   }, [animationStep])
 
   useSocketEventListener('notifyGameStep', (data): void => {
+    // Players will see animations for up to ~ 5-10 seconds, but server is already counting step timeout
+    resetStepTimeoutIndicator()
+
     // Render player cards from server cards
     setCurrentPlayerCards(data.playerCards)
 
@@ -436,6 +444,7 @@ export default function Game(props: Props): JSX.Element {
 
     // Disallow selection of cards during animation
     setAllowSelectCard(false)
+    setAllowSelectRow(false)
 
     // Start game step animation
     setAnimationStep({
@@ -528,6 +537,9 @@ export default function Game(props: Props): JSX.Element {
       )}
 
       <FlyingCardsContainer flyingCards={flyingCards} />
+
+      {/* By changing React's key, we can forcefully re-render this component, to restart animations */}
+      <StepTimeoutIndicator key={stepTimeoutIndicatorKey.toString()} />
     </>
   )
 }

@@ -70,7 +70,7 @@ export default function RoomsList(): JSX.Element {
         </header>
       </MainViewHeader>
 
-      <div className='my-2 ml-auto flex flex-row gap-2 border-b border-b-neutral-800'>
+      <div className='mb-2 ml-auto mt-12 flex flex-row gap-2 border-b border-b-neutral-800'>
         <Button iconProps={{ icon: faRefresh }} onClick={(): void => fetchAllRooms()}>
           Refresh
         </Button>
