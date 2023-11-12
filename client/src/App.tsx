@@ -3,6 +3,7 @@ import classNames from 'classnames'
 import { ClientSocketT } from 'common/src/TypedClientSocket/ClientSocketT'
 import { useState } from 'react'
 import { Provider } from 'react-redux'
+import { useKeyPressEvent } from 'react-use'
 import AppMainView from './AppMainView'
 import { store } from './app/store'
 import Button from './components/Button'
@@ -17,6 +18,11 @@ type AppProps = {
 function App({ socket }: AppProps): JSX.Element {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false)
+
+  useKeyPressEvent('Escape', () => {
+    setIsChatOpen(false)
+    setIsSideMenuOpen(false)
+  })
 
   return (
     <div className='dark'>
