@@ -1,4 +1,4 @@
-import { StepTimeoutDoneStrategy } from 'common/src/misc'
+import { PlayerInactivityStrategy } from 'common/src/misc'
 
 export interface User {
   readonly id: string
@@ -17,7 +17,7 @@ export interface GameOptions {
   type: 'takeSix'
   mode: 'normal' | 'expert'
   stepTimeout: number
-  stepTimeoutDoneStrategy: StepTimeoutDoneStrategy
+  playerInactivityStrategy: PlayerInactivityStrategy
 }
 
 export type Game = {

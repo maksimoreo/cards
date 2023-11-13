@@ -2,23 +2,23 @@ import { faBolt, faEye, faRightFromBracket } from '@fortawesome/free-solid-svg-i
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import FieldsetOption from '../../FieldsetOption'
 import {
-  DEFAULT_STEP_TIMEOUT_DONE_STRATEGY_VALUE,
-  StepTimeoutDoneStrategyValue,
-  isValueStepTimeoutDoneStrategy,
+  DEFAULT_PLAYER_INACTIVITY_STRATEGY_VALUE,
+  PlayerInactivityStrategyValue,
+  isValuePlayerInactivityStrategy,
 } from './extra'
 
-interface StepTimeoutDoneStrategyFieldOptionProps {
+interface PlayerInactivityStrategyFieldOptionProps {
   readonly id: string
   readonly title: JSX.Element
-  readonly onChange: (newValue: StepTimeoutDoneStrategyValue) => void
-  readonly value: StepTimeoutDoneStrategyValue
-  readonly selectedValue: StepTimeoutDoneStrategyValue
+  readonly onChange: (newValue: PlayerInactivityStrategyValue) => void
+  readonly value: PlayerInactivityStrategyValue
+  readonly selectedValue: PlayerInactivityStrategyValue
 
   readonly labelSelectedClasses: string
   readonly titleSelectedClasses: string
 }
 
-const StepTimeoutDoneStrategyFieldFieldsetOption = ({
+const PlayerInactivityStrategyFieldFieldsetOption = ({
   id,
   value,
   selectedValue,
@@ -26,15 +26,15 @@ const StepTimeoutDoneStrategyFieldFieldsetOption = ({
   title,
   labelSelectedClasses,
   titleSelectedClasses,
-}: StepTimeoutDoneStrategyFieldOptionProps) => (
+}: PlayerInactivityStrategyFieldOptionProps) => (
   <FieldsetOption
     id={id}
-    name='stepTimeoutDoneStrategy'
+    name='playerInactivityStrategy'
     title={title}
     value={value}
     selectedValue={selectedValue}
     onChange={(newValue) =>
-      onChange(isValueStepTimeoutDoneStrategy(newValue) ? newValue : DEFAULT_STEP_TIMEOUT_DONE_STRATEGY_VALUE)
+      onChange(isValuePlayerInactivityStrategy(newValue) ? newValue : DEFAULT_PLAYER_INACTIVITY_STRATEGY_VALUE)
     }
     labelClasses={'px-4 py-3'}
     labelSelectedClasses={labelSelectedClasses}
@@ -44,18 +44,18 @@ const StepTimeoutDoneStrategyFieldFieldsetOption = ({
 )
 
 interface Props {
-  readonly value: StepTimeoutDoneStrategyValue
-  readonly onChange: (newValue: StepTimeoutDoneStrategyValue) => void
+  readonly value: PlayerInactivityStrategyValue
+  readonly onChange: (newValue: PlayerInactivityStrategyValue) => void
   readonly disabled: boolean
 }
 
-export default function StepTimeoutDoneStrategyField({ value, onChange, disabled }: Props) {
+export default function PlayerInactivityStrategyField({ value, onChange, disabled }: Props) {
   return (
     <fieldset className='mt-6' disabled={disabled}>
       <legend className='mb-4 mt-8 text-center text-neutral-400'>Action for inactive players:</legend>
 
       <div className='flex flex-row flex-wrap justify-center gap-4'>
-        <StepTimeoutDoneStrategyFieldFieldsetOption
+        <PlayerInactivityStrategyFieldFieldsetOption
           id='game-options-take-six-step-timeout-done-strategy-force-play'
           value='forcePlay'
           onChange={onChange}
@@ -70,7 +70,7 @@ export default function StepTimeoutDoneStrategyField({ value, onChange, disabled
           titleSelectedClasses='text-yellow-500'
         />
 
-        <StepTimeoutDoneStrategyFieldFieldsetOption
+        <PlayerInactivityStrategyFieldFieldsetOption
           id='game-options-take-six-step-timeout-done-strategy-move-to-spectators'
           value='moveToSpectators'
           onChange={onChange}
@@ -85,7 +85,7 @@ export default function StepTimeoutDoneStrategyField({ value, onChange, disabled
           titleSelectedClasses='text-yellow-500'
         />
 
-        <StepTimeoutDoneStrategyFieldFieldsetOption
+        <PlayerInactivityStrategyFieldFieldsetOption
           id='game-options-take-six-step-timeout-done-strategy-kick'
           value='kick'
           onChange={onChange}

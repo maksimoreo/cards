@@ -5,7 +5,7 @@ const inputSchema = z.object({
   type: z.literal('takeSix'),
   mode: z.union([z.literal('normal'), z.literal('expert')]).optional(),
   stepTimeout: z.number().optional(),
-  stepTimeoutDoneStrategy: z
+  playerInactivityStrategy: z
     .union([z.literal('forcePlay'), z.literal('moveToSpectators'), z.literal('kick')])
     .optional(),
 })
@@ -42,8 +42,8 @@ export default class UpdateGameOptionsHandler extends VoidMessageHandler {
       room.gameOptions.stepTimeout = validationResult.data.stepTimeout
     }
 
-    if (validationResult.data.stepTimeoutDoneStrategy) {
-      room.gameOptions.stepTimeoutDoneStrategy = validationResult.data.stepTimeoutDoneStrategy
+    if (validationResult.data.playerInactivityStrategy) {
+      room.gameOptions.playerInactivityStrategy = validationResult.data.playerInactivityStrategy
     }
 
     // Notify all room members except owner.

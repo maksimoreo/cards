@@ -10,8 +10,8 @@ import { useSocket } from '../../hooks/useSocket'
 import useSocketEventListener from '../../hooks/useSocketEventListener'
 import GameModeField from './GameOptionsForm/TakeSix/GameModeField/GameModeField'
 import { GameModeValue } from './GameOptionsForm/TakeSix/GameModeField/extra'
-import StepTimeoutDoneStrategyField from './GameOptionsForm/TakeSix/StepTimeoutDoneStrategyField/StepTimeoutDoneStrategyField'
-import { DEFAULT_STEP_TIMEOUT_DONE_STRATEGY_VALUE } from './GameOptionsForm/TakeSix/StepTimeoutDoneStrategyField/extra'
+import PlayerInactivityStrategyField from './GameOptionsForm/TakeSix/PlayerInactivityStrategyField/PlayerInactivityStrategyField'
+import { DEFAULT_PLAYER_INACTIVITY_STRATEGY_VALUE } from './GameOptionsForm/TakeSix/PlayerInactivityStrategyField/extra'
 import StepTimeoutField from './GameOptionsForm/TakeSix/StepTimeoutField/StepTimeoutField'
 import {
   DEFAULT_STEP_TIMEOUT_VALUE,
@@ -31,8 +31,8 @@ export default function GameForm() {
   const [stepTimeout, setStepTimeout] = useState<StepTimeoutValue>(
     STEP_TIMEOUT_NUMBER_TO_STEP_TIMEOUT_VALUE_MAP[room.gameOptions.stepTimeout] || DEFAULT_STEP_TIMEOUT_VALUE,
   )
-  const [stepTimeoutDoneStrategy, setStepTimeoutDoneStrategy] = useState(
-    room.gameOptions.stepTimeoutDoneStrategy || DEFAULT_STEP_TIMEOUT_DONE_STRATEGY_VALUE,
+  const [playerInactivityStrategy, setPlayerInactivityStrategy] = useState(
+    room.gameOptions.playerInactivityStrategy || DEFAULT_PLAYER_INACTIVITY_STRATEGY_VALUE,
   )
 
   const handleSubmit = (event: React.SyntheticEvent) => {
@@ -45,7 +45,7 @@ export default function GameForm() {
         type: 'takeSix',
         mode: gameMode,
         stepTimeout: STEP_TIMEOUT_VALUE_TO_STEP_TIMEOUT_NUMBER_MAP[stepTimeout],
-        stepTimeoutDoneStrategy,
+        playerInactivityStrategy,
       }),
     )
   }
@@ -64,9 +64,9 @@ export default function GameForm() {
     setGameMode(data.gameOptions.mode)
     setStepTimeout(
       STEP_TIMEOUT_NUMBER_TO_STEP_TIMEOUT_VALUE_MAP[data.gameOptions.stepTimeout] ||
-        DEFAULT_STEP_TIMEOUT_DONE_STRATEGY_VALUE,
+        DEFAULT_PLAYER_INACTIVITY_STRATEGY_VALUE,
     )
-    setStepTimeoutDoneStrategy(data.gameOptions.stepTimeoutDoneStrategy)
+    setPlayerInactivityStrategy(data.gameOptions.playerInactivityStrategy)
   })
 
   useSocketEventListener('notifyGameStarted', () => {
@@ -104,12 +104,12 @@ export default function GameForm() {
           disabled={!isRoomOwner}
         />
 
-        <StepTimeoutDoneStrategyField
-          value={stepTimeoutDoneStrategy}
+        <PlayerInactivityStrategyField
+          value={playerInactivityStrategy}
           onChange={(value) => {
-            setStepTimeoutDoneStrategy(value)
+            setPlayerInactivityStrategy(value)
 
-            send('updateGameOptions', { type: 'takeSix', stepTimeoutDoneStrategy: value }, () => {})
+            send('updateGameOptions', { type: 'takeSix', playerInactivityStrategy: value }, () => {})
           }}
           disabled={!isRoomOwner}
         />

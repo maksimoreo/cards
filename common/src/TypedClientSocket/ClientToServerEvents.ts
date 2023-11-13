@@ -1,4 +1,4 @@
-import { StepTimeoutDoneStrategy } from '../misc'
+import { PlayerInactivityStrategy } from '../misc'
 
 export interface EventToInputDataTypeMapT {
   setName: { name: string; color: string }
@@ -14,7 +14,7 @@ export interface EventToInputDataTypeMapT {
     type: 'takeSix'
     mode?: 'normal' | 'expert'
     stepTimeout?: number
-    stepTimeoutDoneStrategy?: StepTimeoutDoneStrategy
+    playerInactivityStrategy?: PlayerInactivityStrategy
   }
 }
 

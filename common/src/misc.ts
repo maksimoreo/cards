@@ -1,1 +1,1 @@
-export type StepTimeoutDoneStrategy = 'forcePlay' | 'moveToSpectators' | 'kick'
+export type PlayerInactivityStrategy = 'forcePlay' | 'moveToSpectators' | 'kick'
