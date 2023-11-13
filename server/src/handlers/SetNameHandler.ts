@@ -5,11 +5,12 @@ import { VoidMessageHandler, VoidMessageHandlerReturnValue } from '../Router/Mes
 
 export const MIN_USERNAME_LENGTH = 2
 export const MAX_USERNAME_LENGTH = 20
-export const ALLOWED_CHARACTERS_IN_USERNAME_REGEX = /^[a-zA-Z0-9]+$/
+export const ALLOWED_CHARACTERS_IN_USERNAME_REGEX = /^[a-zA-Z0-9\s]+$/
 
 const inputSchema = z.object({
   name: z
     .string()
+    .trim()
     .min(MIN_USERNAME_LENGTH, `Name must contain at least ${MIN_USERNAME_LENGTH} characters`)
     .max(MAX_USERNAME_LENGTH, `Name must contain at most ${MAX_USERNAME_LENGTH} characters`)
     .regex(ALLOWED_CHARACTERS_IN_USERNAME_REGEX, 'Name must contain only a-z, A-Z or 0-9 characters'),

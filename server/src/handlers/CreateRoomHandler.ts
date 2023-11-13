@@ -6,12 +6,16 @@ import { DecoratedRoom, decorateRoom } from '../decorators/RoomDecorator'
 import Room from '../models/Room'
 import ScheduleRoomsEventToLobbyUsers from '../services/ScheduleRoomsEventToLobbyUsers'
 
+const MIN_USERNAME_LENGTH = 1
+const MAX_USERNAME_LENGTH = 20
+
 const inputSchema = z.object({
   name: z
     .string()
-    .min(1)
-    .max(20)
-    .regex(/^[a-zA-Z0-9_-]*$/, 'Can only contain letters and digits'),
+    .trim()
+    .min(MIN_USERNAME_LENGTH, `Name must contain at least ${MIN_USERNAME_LENGTH} characters`)
+    .max(MAX_USERNAME_LENGTH, `Name must contain at most ${MAX_USERNAME_LENGTH} characters`)
+    .regex(/^[a-zA-Z0-9\s]+$/, 'Name must contain only a-z, A-Z or 0-9 characters'),
   password: z
     .string()
     .min(1)
