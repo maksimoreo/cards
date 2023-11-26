@@ -15,10 +15,15 @@ export default class PlayCardHandler extends BasicMessageHandler<void> {
     }
 
     const { game } = room
+
+    if (!game) {
+      return this.respondWithBadRequest('Game is not started')
+    }
+
     const { player } = currentUser
 
-    if (!game || !player) {
-      return this.respondWithBadRequest('Game is not started')
+    if (!player) {
+      return this.respondWithBadRequest('Cannot play cards while spectating')
     }
 
     const validationResult = inputSchema.safeParse(input)

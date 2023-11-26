@@ -13,6 +13,10 @@ export class RoomGameTakeSixPlayer {
     public readonly player: PlayerInterface,
   ) {}
 
+  public get id(): string {
+    return this.user.id
+  }
+
   public get isActive(): boolean {
     return this.player.isActive
   }

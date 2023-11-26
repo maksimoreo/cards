@@ -10,7 +10,7 @@
     "start": "ts-node ./src/index.ts",
     "typecheck": "tsc --noEmit",
     "test:unit": "yarn jest --selectProjects 'Unit tests' --runInBand",
-    "test:system": "NODE_OPTIONS=\"--experimental-vm-modules --unhandled-rejections=warn-with-error-code\" yarn jest --selectProjects 'System tests' --runInBand",
+    "test:system": "NODE_OPTIONS=\"--inspect --experimental-vm-modules --unhandled-rejections=warn-with-error-code\" yarn jest --selectProjects 'System tests' --runInBand",
     "test": "yarn typecheck && yarn lint && yarn format:check && yarn test:unit && yarn test:system",
     "format": "prettier --write './src/**/*.{js,ts,md,json}' --config ../.prettierrc",
     "format:check": "prettier --check './src/**/*.{js,ts,md,json}' --config ../.prettierrc",

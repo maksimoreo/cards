@@ -11,7 +11,7 @@ export async function createRoom(client: Socket, name: string, password?: string
 
 export async function joinRoom(
   client: Socket,
-  { name, password, otherClients }: { name: string; password?: string; otherClients: readonly Socket[] }
+  { name, password, otherClients }: { name: string; password?: string; otherClients: readonly Socket[] },
 ): Promise<void> {
   const otherClientPromises = otherClients.map((client) => waitForEvent(client, 'notifyUserJoined'))
 
@@ -25,7 +25,7 @@ export async function joinRoom(
   })
 
   await expect(Promise.all(otherClientPromises)).resolves.toMatchObject(
-    otherClients.map(() => ({ user: { id: client.id } }))
+    otherClients.map(() => ({ user: { id: client.id } })),
   )
 }
 
@@ -44,11 +44,11 @@ export async function startGame(client: Socket, cardsPool?: number[]): Promise<u
 
 export async function playCard(
   client: Socket,
-  { cardValue, otherClients }: { cardValue: number; otherClients: readonly Socket[] }
+  { cardValue, otherClients }: { cardValue: number; otherClients: readonly Socket[] },
 ): Promise<void> {
   const otherClientPromises = otherClients.map((client) => waitForEvent(client, 'notifyUserPlayedCard'))
 
-  await expect(emitEvent(client, 'playCard', { card: cardValue })).resolves.toMatchObject({ code: 'SUCCESS' })
+  await expect(emitEvent(client, 'playCard', { card: cardValue })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
   await expect(Promise.all(otherClientPromises)).resolves.toEqual(otherClients.map(() => ({ userId: client.id })))
 }

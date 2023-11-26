@@ -1,4 +1,5 @@
 import { maxBy, random, sample } from 'lodash'
+import { decorateRoom } from '../../decorators/RoomDecorator'
 import Room from '../../models/Room'
 import User, { UserIdentity } from '../../models/User'
 import * as TakeSix from '../TakeSix'
@@ -112,7 +113,7 @@ export default class RoomGameTakeSix {
   // Assumes that game is not waiting for player to select row
   public finalizeStep(): void {
     if (this.isEnded()) {
-      this.cleanupRoom()
+      this.stopGame({ reason: 'Completed' })
     } else {
       this.startStepTimer()
     }
@@ -176,41 +177,155 @@ export default class RoomGameTakeSix {
   }
 
   private handleStepTimerDone(): void {
-    // Note: In test environment, always select the highest value card, to make tests deterministic
-    const isTestEnv = process.env.NODE_ENV === 'test'
+    const inactivePlayers = this.getActivePlayersWithoutSelectedCard()
 
-    this.game.getPlayersWithoutSelectedCard().forEach((player) => {
-      const playerCards = player.cards
-      const cardToSelect = isTestEnv ? maxBy(playerCards, (card) => card.value) : sample(playerCards)
+    if (!inactivePlayers) {
+      return
+    }
 
-      if (cardToSelect === undefined) {
-        throw Error(`Could not select card from ${playerCards}. This error should never be thrown.`)
+    const { playerInactivityStrategy } = this.room.gameOptions
+
+    if (playerInactivityStrategy === 'moveToSpectators') {
+      if (this.game.activePlayers.length <= 2) {
+        this.notifyAboutPlayerMoveToSpectators({ inactivePlayers, includeNewGameState: false })
+        this.stopGame({ reason: 'Player inactivity' })
+        return
       }
 
-      player.selectCard(cardToSelect.value)
-    })
+      inactivePlayers.forEach((inactivePlayer) => {
+        this.deactivatePlayer(inactivePlayer.id)
+      })
 
-    this.makeStep()
+      this.notifyAboutPlayerMoveToSpectators({ inactivePlayers, includeNewGameState: true })
+    } else if (playerInactivityStrategy === 'forcePlay') {
+      // Note: In test environment, always select the highest value card, to make tests deterministic
+      const isTestEnv = process.env.NODE_ENV === 'test'
+
+      this.getActivePlayersWithoutSelectedCard().forEach((inactivePlayer) => {
+        const playerCards = inactivePlayer.cards
+        const cardToSelect = isTestEnv ? maxBy(playerCards, (card) => card.value) : sample(playerCards)
+
+        if (cardToSelect === undefined) {
+          throw Error(`Could not select card from ${playerCards}. This error should never be thrown.`)
+        }
+
+        inactivePlayer.player.selectCard(cardToSelect.value)
+      })
+
+      this.makeStep()
+    } else {
+      throw new Error('not implemented')
+    }
   }
 
   private handleSelectRowTimerDone(): void {
+    this.clearSelectRowTimer()
+
+    const { playerInactivityStrategy } = this.room.gameOptions
+
+    if (!('waitingPlayer' in this.game.lastSerializedStep)) {
+      throw new Error('Invalid state: not waiting for row selection')
+    }
+
+    if (playerInactivityStrategy === 'forcePlay') {
+      this.forceSelectRow()
+      this.notifyGameStep()
+      this.finalizeStep()
+      return
+    }
+
+    const waitingForPlayerId = this.game.lastSerializedStep.waitingPlayer
+    const waitingForPlayer = this.players.find((player) => player.id === waitingForPlayerId)
+
+    if (!waitingForPlayer) {
+      throw new Error('Invalid state: cannot find player that is waiting for row selection')
+    }
+
+    if (playerInactivityStrategy === 'moveToSpectators') {
+      if (this.game.activePlayers.length <= 2) {
+        this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer], includeNewGameState: false })
+        this.stopGame({ reason: 'Player inactivity' })
+        return
+      }
+
+      this.forceSelectRow()
+      this.justDeactivatePlayer(waitingForPlayerId)
+      this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer], includeNewGameState: true })
+      this.notifyGameStep()
+      this.finalizeStep()
+      return
+    }
+
+    if (playerInactivityStrategy === 'kick') {
+      if (this.game.activePlayers.length <= 2) {
+        // stop game unconditionally, but also kick player
+        return
+      }
+
+      // force select row
+      // kick player
+      return
+    }
+  }
+
+  private forceSelectRow() {
     // Note: In test environment, always select the first row, to make tests deterministic
     const randomRowIndex = process.env.NODE_ENV === 'test' ? 0 : random(0, this.game.rowsLength - 1)
 
     this.game.selectRowAndContinue(randomRowIndex)
+  }
 
-    this.notifyGameStep()
-    this.finalizeStep()
+  private notifyAboutPlayerMoveToSpectators({
+    inactivePlayers,
+    includeNewGameState,
+  }: {
+    readonly inactivePlayers: readonly RoomGameTakeSixPlayer[]
+    readonly includeNewGameState: boolean
+  }) {
+    // Notify inactive players
+    const eventData = {
+      reason: 'inactivity',
+      newRoomState: decorateRoom(this.room),
+      game: includeNewGameState ? this.generateSerializedState() : null,
+    } as const
+
+    inactivePlayers.forEach((inactivePlayer) => {
+      inactivePlayer.user.socket.emit('youHaveBeenMovedToSpectators', eventData)
+    })
+
+    // Notify all other users
+    const usersToSendEventTo = this.room.allUsers.filter(
+      (user) => !inactivePlayers.find((inactivePlayer) => inactivePlayer.id === user.id),
+    )
+
+    if (usersToSendEventTo.length > 0) {
+      const eventData = {
+        reason: 'inactivity',
+        userIds: inactivePlayers.map((player) => player.id),
+        newRoomState: decorateRoom(this.room),
+        game: includeNewGameState ? this.generateSerializedState() : null,
+      } as const
+
+      usersToSendEventTo.forEach((user) => {
+        user.socket.emit('usersMovedToSpectators', eventData)
+      })
+    }
+  }
+
+  private getActivePlayersWithoutSelectedCard(): RoomGameTakeSixPlayer[] {
+    return this.players.filter((player) => player.isActive && !player.player.selectedCard)
   }
 
   public isEnded(): boolean {
     return this.game.isEnded()
   }
 
-  public stopGame(): void {
+  public stopGame({ reason }: { reason: string }): void {
     this.clearStepTimer()
     this.clearSelectRowTimer()
     this.cleanupRoom()
+
+    this.room.allUsers.forEach((user) => user.socket.emit('notifyGameStopped', { reason }))
   }
 
   private cleanupRoom(): void {
@@ -225,22 +340,24 @@ export default class RoomGameTakeSix {
     })
   }
 
-  public deactivatePlayer(userId: string): void {
-    const playerIndex = this.players.findIndex((player) => player.user.id === userId)
+  public justDeactivatePlayer(playerId: string): void {
+    const player = this.players.find((player) => player.id === playerId)
 
-    if (playerIndex === -1) {
-      throw new Error(`Unknown user/player: ${userId}`)
+    if (!player) {
+      throw new Error(`Cannot find player: '${playerId}'`)
     }
-
-    const player = this.players[playerIndex]
 
     player.lastRecordedUserIdentity = player.user.identity
     player.user.player = undefined
 
+    this.game.deactivatePlayer(playerId)
+  }
+
+  public deactivatePlayer(playerId: string): void {
     const stateBefore = this.game.getStateDescription()
     const stepsLeftBefore = this.game.stepsLeft
 
-    this.game.deactivatePlayer(player.user.id)
+    this.justDeactivatePlayer(playerId)
 
     const stateAfter = this.game.getStateDescription()
     const stepsLeftAfter = this.game.stepsLeft
@@ -248,7 +365,7 @@ export default class RoomGameTakeSix {
     const stepsDelta = stepsLeftBefore - stepsLeftAfter
 
     if (!this.game.isEnoughPlayers()) {
-      this.stopGame()
+      this.stopGame({ reason: '???' })
     } else if (stateBefore === 'selectCard' && stateAfter === 'selectRow') {
       this.clearStepTimer()
       this.notifyGameStep()

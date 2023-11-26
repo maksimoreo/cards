@@ -42,7 +42,7 @@ export function emitEvent<RequestDataT = any, ResponseDataT = any>(
   client: Socket,
   event: string,
   data: RequestDataT,
-  timeout = 1000
+  timeout = 1000,
 ): Promise<ResponseDataT> {
   return withTimeout(timeout, (resolve) => {
     client.emit(event, data, (response: ResponseDataT) => {
@@ -55,7 +55,7 @@ export function emitEvent<RequestDataT = any, ResponseDataT = any>(
 export function waitForEvent<ResponseDataT = any>(
   client: Socket,
   message: string,
-  timeout = 1000
+  timeout = 1000,
 ): Promise<ResponseDataT> {
   const clientId = client.id
 
@@ -93,6 +93,37 @@ export function waitForNoEvents(client: Socket, message: string, timeout = 1000)
     }, timeout)
 
     client.on(message, handleMessage)
+  })
+}
+
+export function waitClientsForNoEvents(
+  clients: readonly Socket[],
+  { timeout }: { readonly timeout: number },
+): Promise<void> {
+  let timer: NodeJS.Timeout | null = null
+
+  return new Promise((resolve, reject) => {
+    const handlers = clients.map((client) => (eventName: string) => {
+      timer && clearTimeout(timer)
+
+      clients.forEach((client, index) => {
+        client.offAny(handlers[index])
+      })
+
+      reject(new Error(`Expected '${client.id}' not to receive any events, but it received '${eventName}'`))
+    })
+
+    timer = setTimeout(() => {
+      clients.forEach((client, index) => {
+        client.offAny(handlers[index])
+      })
+
+      resolve()
+    }, timeout)
+
+    clients.forEach((client, index) => {
+      client.onAny(handlers[index])
+    })
   })
 }
 

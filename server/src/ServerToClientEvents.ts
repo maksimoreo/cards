@@ -61,6 +61,28 @@ export interface EventData_GameOptionsUpdated {
   readonly gameOptions: GameOptions
 }
 
+type UserMovedToSpectatorsReason = 'inactivity' | 'ownerAction' | 'selfAction'
+
+export interface EventData_UserMovedToSpectators {
+  readonly reason: UserMovedToSpectatorsReason
+  readonly userId: string
+  readonly newRoomState: DecoratedRoom
+  readonly game: SerializedState | null
+}
+
+export interface EventData_UsersMovedToSpectators {
+  readonly reason: UserMovedToSpectatorsReason
+  readonly userIds: string[]
+  readonly newRoomState: DecoratedRoom
+  readonly game: SerializedState | null
+}
+
+export interface EventData_YouHaveBeenMovedToSpectators {
+  readonly reason: UserMovedToSpectatorsReason
+  readonly newRoomState: DecoratedRoom
+  readonly game: SerializedState | null
+}
+
 // All events type
 
 type ServerToClientEventCallback<DataT> = (data: DataT) => void
@@ -77,4 +99,7 @@ export interface ServerToClientEvents {
   notifyUserMessage: ServerToClientEventCallback<NotifyUserMessageData>
   rooms: ServerToClientEventCallback<EventData_Rooms>
   gameOptionsUpdated: ServerToClientEventCallback<EventData_GameOptionsUpdated>
+  userMovedToSpectators: ServerToClientEventCallback<EventData_UserMovedToSpectators>
+  usersMovedToSpectators: ServerToClientEventCallback<EventData_UsersMovedToSpectators>
+  youHaveBeenMovedToSpectators: ServerToClientEventCallback<EventData_YouHaveBeenMovedToSpectators>
 }

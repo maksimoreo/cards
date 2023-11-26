@@ -19,10 +19,6 @@ export default class StopGameHandler extends VoidMessageHandler {
       return { badRequest: 'Game is not running' }
     }
 
-    room.users.forEach((user) => {
-      user.socket.emit('notifyGameStopped', { reason: 'Game stopped by room owner' })
-    })
-
-    game.stopGame()
+    game.stopGame({ reason: 'Room owner action' })
   }
 }
