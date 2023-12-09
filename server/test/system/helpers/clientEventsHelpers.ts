@@ -1,21 +1,34 @@
 import { Socket } from 'socket.io-client'
-import { emitEvent, waitForEvent } from './testHelpers'
+import { TestClient } from './TestClient'
+import { emitEvent } from './testHelpers'
 
 export function sendMessage(client: Socket, message: string): Promise<void> {
   return expect(emitEvent(client, 'sendMessage', message)).resolves.toBe('ok')
 }
 
-export async function createRoom(client: Socket, name: string, password?: string): Promise<void> {
-  await expect(emitEvent(client, 'createRoom', { name, password })).resolves.toMatchObject({ code: 'SUCCESS' })
+export async function createRoom(
+  client: TestClient,
+  { name, password }: { readonly name: string; readonly password?: string },
+  { globalClients }: { readonly globalClients: readonly TestClient[] },
+): Promise<void> {
+  const globalClientsPromises = globalClients.map((client) => client.waitForEvent('rooms'))
+
+  await expect(emitEvent(client.socket, 'createRoom', { name, password })).resolves.toMatchObject({ code: 'SUCCESS' })
+
+  await expect(Promise.all(globalClientsPromises)).resolves.toMatchObject(
+    globalClients.map(() => ({ rooms: [{ name }] })),
+  )
 }
 
 export async function joinRoom(
-  client: Socket,
-  { name, password, otherClients }: { name: string; password?: string; otherClients: readonly Socket[] },
+  client: TestClient,
+  { name, password }: { name: string; password?: string },
+  { roomClients, globalClients }: { roomClients: readonly TestClient[]; globalClients?: readonly TestClient[] },
 ): Promise<void> {
-  const otherClientPromises = otherClients.map((client) => waitForEvent(client, 'notifyUserJoined'))
+  const roomClientsPromises = roomClients.map((client) => client.waitForEvent('notifyUserJoined'))
+  const globalClientsPromises = (globalClients || []).map((client) => client.waitForEvent('rooms'))
 
-  await expect(emitEvent(client, 'joinRoom', { name, password })).resolves.toMatchObject({
+  await expect(client.emitEvent('joinRoom', { name, password })).resolves.toMatchObject({
     code: 'SUCCESS',
     data: {
       room: {
@@ -24,13 +37,31 @@ export async function joinRoom(
     },
   })
 
-  await expect(Promise.all(otherClientPromises)).resolves.toMatchObject(
-    otherClients.map(() => ({ user: { id: client.id } })),
+  await expect(Promise.all(roomClientsPromises)).resolves.toMatchObject(
+    roomClients.map(() => ({ user: { id: client.id } })),
   )
+
+  await expect(Promise.all(globalClientsPromises)).toResolve()
 }
 
-export async function leaveCurrentRoom(client: Socket): Promise<void> {
-  await expect(emitEvent(client, 'leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+export async function leaveCurrentRoom(
+  client: TestClient,
+  { asOwner }: { asOwner: boolean },
+  {
+    roomClients,
+    globalClients,
+  }: { readonly roomClients: readonly TestClient[]; readonly globalClients: readonly TestClient[] },
+): Promise<void> {
+  const expectedEventForRoomClients = asOwner ? 'notifyOwnerLeft' : 'notifyUserLeft'
+  const roomClientsPromises = roomClients.map((client) => client.waitForEvent(expectedEventForRoomClients))
+
+  // Note: client that leaves the room also received 'rooms' event
+  const globalClientsPromises = [...globalClients, client].map((client) => client.waitForEvent('rooms'))
+
+  await expect(client.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+  await expect(Promise.all(roomClientsPromises)).toResolve()
+  await expect(Promise.all(globalClientsPromises)).toResolve()
 }
 
 export async function startGame(client: Socket, cardsPool?: number[]): Promise<unknown> {
@@ -43,12 +74,12 @@ export async function startGame(client: Socket, cardsPool?: number[]): Promise<u
 }
 
 export async function playCard(
-  client: Socket,
-  { cardValue, otherClients }: { cardValue: number; otherClients: readonly Socket[] },
+  client: TestClient,
+  { cardValue, otherClients }: { cardValue: number; otherClients: readonly TestClient[] },
 ): Promise<void> {
-  const otherClientPromises = otherClients.map((client) => waitForEvent(client, 'notifyUserPlayedCard'))
+  const otherClientPromises = otherClients.map((client) => client.waitForEvent('notifyUserPlayedCard'))
 
-  await expect(emitEvent(client, 'playCard', { card: cardValue })).resolves.toStrictEqual({ code: 'SUCCESS' })
+  await expect(client.emitEvent('playCard', { card: cardValue })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
   await expect(Promise.all(otherClientPromises)).resolves.toEqual(otherClients.map(() => ({ userId: client.id })))
 }

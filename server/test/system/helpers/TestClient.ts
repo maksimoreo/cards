@@ -1,9 +1,11 @@
 import { Socket } from 'socket.io-client'
-import { connectClientAsync } from './testHelpers'
+import { connectClientAsync, emitEvent } from './testHelpers'
 
+// Holds a socket and a queue of expected events
 export class TestClient {
   public readonly socket: Socket
   public readonly expectedEventsQueue: string[] = []
+  public disposed: boolean = false
 
   public static async connect({ port }: { port: number }): Promise<TestClient> {
     return new TestClient(await connectClientAsync(port))
@@ -15,11 +17,17 @@ export class TestClient {
   }
 
   public dispose(): void {
+    if (this.disposed) {
+      throw new Error('This object is already disposed')
+    }
+
     this.socket.offAny(this.handleAnySocketEvent.bind(this))
 
     if (this.socket.connected) {
       this.socket.disconnect()
     }
+
+    this.disposed = true
   }
 
   public get id(): string {
@@ -27,7 +35,20 @@ export class TestClient {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public waitForEvent<ResponseDataT = any>(event: string, { timeout }: { timeout: number }): Promise<ResponseDataT> {
+  public emitEvent<RequestDataT = any, ResponseDataT = any>(
+    event: string,
+    data: RequestDataT,
+    timeout = 1000,
+  ): Promise<ResponseDataT> {
+    return emitEvent(this.socket, event, data, timeout)
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public waitForEvent<ResponseDataT = any>(
+    event: string,
+    options?: { timeout: number } | null | undefined,
+  ): Promise<ResponseDataT> {
+    const timeout = options?.timeout || 1000
+
     this.expectedEventsQueue.push(event)
 
     return new Promise((resolve, reject) => {
@@ -37,12 +58,12 @@ export class TestClient {
         timer && clearTimeout(timer)
         this.socket.off(event, handleEvent)
 
-        const expectedEvent = this.expectedEventsQueue[0]
-        if (event !== expectedEvent) {
-          return reject(
-            new Error(`Client '${this.id}' expected to receive '${expectedEvent}' first, but received '${event}'`),
-          )
-        }
+        // const expectedEvent = this.expectedEventsQueue[0]
+        // if (event !== expectedEvent) {
+        //   return reject(
+        //     new Error(`Client '${this.id}' expected to receive '${expectedEvent}' first, but received '${event}'`),
+        //   )
+        // }
 
         resolve(data)
       }

@@ -1,5 +1,5 @@
 import { createRoom, joinRoom } from '../helpers/clientEventsHelpers'
-import { emitEvent } from '../helpers/testHelpers'
+import { expectClientsExpectedEventsQueuesClean } from '../helpers/testHelpers'
 import { useApp, useClients } from '../helpers/testHooks'
 
 describe('Game without card pool', () => {
@@ -9,22 +9,72 @@ describe('Game without card pool', () => {
   test('Game without card pool', async () => {
     const [client1, client2] = getClients()
 
-    await createRoom(client1, 'game_room')
+    console.log('client1 creates room')
 
-    await expect(emitEvent(client1, 'startGame', undefined)).resolves.toMatchObject({
+    await expect(createRoom(client1, { name: 'gamerooooom' }, { globalClients: [client2] })).resolves.toBeUndefined()
+
+    await expect(client1.emitEvent('startGame', undefined)).resolves.toMatchObject({
       code: 'BAD_REQUEST',
       message: 'Not enough players',
     })
 
-    await joinRoom(client2, { name: 'game_room', otherClients: [client1] })
+    await expect(joinRoom(client2, { name: 'gamerooooom' }, { roomClients: [client1] })).resolves.toBeUndefined()
 
-    await expect(emitEvent(client2, 'startGame', undefined)).resolves.toMatchObject({
+    console.log('client1 starts game')
+
+    await expect(client2.emitEvent('startGame', undefined)).resolves.toMatchObject({
       code: 'BAD_REQUEST',
       message: 'Not room owner',
     })
 
-    await expect(emitEvent(client1, 'startGame', undefined)).resolves.toMatchObject({ code: 'SUCCESS' })
+    {
+      const client2Promise_notifyGameStarted = client2.waitForEvent('notifyGameStarted')
 
-    await expect(emitEvent(client1, 'stopGame', undefined)).resolves.toStrictEqual({ code: 'SUCCESS' })
+      // objects are unfilled bc they r randomized
+      const gameData = {
+        gameState: {
+          players: [
+            {
+              id: client1.id,
+              hasSelectedCard: false,
+              penaltyPoints: 0,
+              isActive: true,
+              user: { id: client1.id, color: 'D1D5DB', name: client1.id },
+            },
+            {
+              id: client2.id,
+              hasSelectedCard: false,
+              penaltyPoints: 0,
+              isActive: true,
+              user: { id: client2.id, color: 'D1D5DB', name: client2.id },
+            },
+          ],
+          rows: [[{}], [{}], [{}], [{}]],
+          stepsLeft: 10,
+        },
+        playerCards: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+      }
+
+      await expect(client1.emitEvent('startGame', undefined)).resolves.toMatchObject({
+        code: 'SUCCESS',
+        data: gameData,
+      })
+
+      await expect(client2Promise_notifyGameStarted).resolves.toMatchObject(gameData)
+    }
+
+    console.log('client1 stops game')
+
+    {
+      const client1Promise_notifyGameStopped = client1.waitForEvent('notifyGameStopped')
+      const client2Promise_notifyGameStopped = client2.waitForEvent('notifyGameStopped')
+
+      await expect(client1.emitEvent('stopGame', undefined)).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client1Promise_notifyGameStopped).resolves.toStrictEqual({ reason: 'Room owner action' })
+      await expect(client2Promise_notifyGameStopped).resolves.toStrictEqual({ reason: 'Room owner action' })
+    }
+
+    expectClientsExpectedEventsQueuesClean(getClients())
   })
 })

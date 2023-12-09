@@ -1,6 +1,7 @@
 import { c } from '../../../src/lib/TakeSix/__test__/testHelpers'
+import { sleep } from '../../../src/utils'
 import { createRoom, joinRoom, playCard } from '../helpers/clientEventsHelpers'
-import { emitEvent, waitClientsForNoEvents, waitForEvent } from '../helpers/testHelpers'
+import { expectClientsExpectedEventsQueuesClean } from '../helpers/testHelpers'
 import { useApp, useClients } from '../helpers/testHooks'
 
 describe('Player Inactivity Strategy: Move To Spectators', () => {
@@ -12,15 +13,20 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
   test('Player Inactivity Strategy: Move To Spectators', async () => {
     const [client1, client2, client3] = getClients()
 
-    await expect(createRoom(client3, 'theroom')).resolves.toBeUndefined()
-    await expect(joinRoom(client1, { name: 'theroom', otherClients: [client3] })).resolves.toBeUndefined()
+    await expect(
+      createRoom(client3, { name: 'theroom' }, { globalClients: [client1, client2] }),
+    ).resolves.toBeUndefined()
+    await expect(
+      joinRoom(client1, { name: 'theroom' }, { roomClients: [client3], globalClients: [client2] }),
+    ).resolves.toBeUndefined()
 
-    // Change options
+    console.log('client3 changes game options')
+
     {
-      const client1Promise = waitForEvent(client1, 'gameOptionsUpdated')
+      const client1Promise = client1.waitForEvent('gameOptionsUpdated')
 
       await expect(
-        emitEvent(client3, 'updateGameOptions', {
+        client3.emitEvent('updateGameOptions', {
           type: 'takeSix',
           stepTimeout: 5000,
           playerInactivityStrategy: 'kick',
@@ -40,15 +46,16 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
     }
 
     // client2 joins
-    await expect(joinRoom(client2, { name: 'theroom', otherClients: [client3, client1] })).resolves.toBeUndefined()
+    await expect(joinRoom(client2, { name: 'theroom' }, { roomClients: [client3, client1] })).resolves.toBeUndefined()
 
-    // Change options
+    console.log('client3 changes game options again')
+
     {
-      const client1Promise = waitForEvent(client1, 'gameOptionsUpdated')
-      const client2Promise = waitForEvent(client2, 'gameOptionsUpdated')
+      const client1Promise = client1.waitForEvent('gameOptionsUpdated')
+      const client2Promise = client2.waitForEvent('gameOptionsUpdated')
 
       await expect(
-        emitEvent(client3, 'updateGameOptions', {
+        client3.emitEvent('updateGameOptions', {
           type: 'takeSix',
           mode: 'normal',
           stepTimeout: 5000,
@@ -85,8 +92,8 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
     ]
 
     {
-      const client1Promise = waitForEvent(client1, 'notifyGameStarted')
-      const client2Promise = waitForEvent(client2, 'notifyGameStarted')
+      const client1Promise = client1.waitForEvent('notifyGameStarted')
+      const client2Promise = client2.waitForEvent('notifyGameStarted')
 
       const gameState = {
         players: [
@@ -116,7 +123,7 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
         stepsLeft: 10,
       }
 
-      await expect(emitEvent(client3, 'startGame', { cardsPool })).resolves.toStrictEqual({
+      await expect(client3.emitEvent('startGame', { cardsPool })).resolves.toStrictEqual({
         code: 'SUCCESS',
         data: {
           gameState,
@@ -142,11 +149,16 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
     await expect(playCard(client2, { cardValue: 7, otherClients: [client1, client3] })).resolves.toBeUndefined()
 
     {
-      const client1Promise = waitForEvent(client1, 'notifyGameStep')
-      const client2Promise = waitForEvent(client2, 'notifyGameStep')
-      const client3Promise = waitForEvent(client3, 'notifyGameStep')
+      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
+      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
+      const client1Promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
+      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
+      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
 
-      await expect(playCard(client3, { cardValue: 8, otherClients: [client1, client2] })).resolves.toBeUndefined()
+      await expect(client3.emitEvent('playCard', { card: 8 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client3.id })
+      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client3.id })
 
       const sharedData = {
         step: {
@@ -195,17 +207,17 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
         },
       }
 
-      await expect(client1Promise).resolves.toStrictEqual({
+      await expect(client1Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([1, 5, 19, 21, 23, 25, 30, 31, 34]),
       })
 
-      await expect(client2Promise).resolves.toStrictEqual({
+      await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([2, 4, 11, 12, 13, 16, 22, 28, 33]),
       })
 
-      await expect(client3Promise).resolves.toStrictEqual({
+      await expect(client3Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([10, 14, 15, 17, 20, 24, 27, 29, 32]),
       })
@@ -217,17 +229,17 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
 
     await expect(playCard(client3, { cardValue: 10, otherClients: [client1, client2] })).resolves.toBeUndefined()
 
-    await expect(waitClientsForNoEvents([client1, client2, client3], { timeout: 4500 })).resolves.toBeUndefined()
+    await sleep(4500)
 
     {
-      const client1Promise_notifyGameStep = waitForEvent(client1, 'notifyGameStep')
-      const client1Promise_usersMovedToSpectators = waitForEvent(client1, 'usersMovedToSpectators')
+      const client1Promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
+      const client1Promise_usersMovedToSpectators = client1.waitForEvent('usersMovedToSpectators')
 
-      const client2Promise_notifyGameStep = waitForEvent(client2, 'notifyGameStep')
-      const client2Promise_youHaveBeenMovedToSpectators = waitForEvent(client2, 'youHaveBeenMovedToSpectators')
+      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
+      const client2Promise_youHaveBeenMovedToSpectators = client2.waitForEvent('youHaveBeenMovedToSpectators')
 
-      const client3Promise_notifyGameStep = waitForEvent(client3, 'notifyGameStep')
-      const client3Promise_usersMovedToSpectators = waitForEvent(client3, 'usersMovedToSpectators')
+      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
+      const client3Promise_usersMovedToSpectators = client3.waitForEvent('usersMovedToSpectators')
 
       // client1, client3, receive 'usersMovedToSpectators' event
       await expect(client1Promise_usersMovedToSpectators).resolves.toMatchObject({
@@ -326,45 +338,46 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
 
     await expect(playCard(client1, { cardValue: 1, otherClients: [client2, client3] })).resolves.toBeUndefined()
 
-    await expect(emitEvent(client2, 'playCard', { card: 33 })).resolves.toStrictEqual({
+    await expect(client2.emitEvent('playCard', { card: 33 })).resolves.toStrictEqual({
       code: 'BAD_REQUEST',
       message: 'Cannot play cards while spectating',
       validationErrors: [],
     })
 
-    await expect(playCard(client3, { cardValue: 14, otherClients: [client1, client2] })).resolves.toBeUndefined()
-
-    await expect(waitClientsForNoEvents([client1, client2, client3], { timeout: 4500 })).resolves.toBeUndefined()
+    await sleep(4500)
 
     {
-      const client1Promise_notifyGameStopped = waitForEvent(client1, 'notifyGameStopped')
-      const client1Promise_youHaveBeenMovedToSpectators = waitForEvent(client1, 'youHaveBeenMovedToSpectators')
+      const client1Promise_usersMovedToSpectators = client1.waitForEvent('usersMovedToSpectators')
+      const client1Promise_notifyGameStopped = client1.waitForEvent('notifyGameStopped')
 
-      const client2Promise_notifyGameStopped = waitForEvent(client2, 'notifyGameStopped')
-      const client2Promise_usersMovedToSpectators = waitForEvent(client2, 'usersMovedToSpectators')
+      const client2Promise_usersMovedToSpectators = client2.waitForEvent('usersMovedToSpectators')
+      const client2Promise_notifyGameStopped = client2.waitForEvent('notifyGameStopped')
 
-      const client3Promise_notifyGameStopped = waitForEvent(client3, 'notifyGameStopped')
-      const client3Promise_usersMovedToSpectators = waitForEvent(client3, 'usersMovedToSpectators')
+      const client3Promise_youHaveBeenMovedToSpectators = client3.waitForEvent('youHaveBeenMovedToSpectators')
+      const client3Promise_notifyGameStopped = client3.waitForEvent('notifyGameStopped')
 
-      // client2, client3, receive 'usersMovedToSpectators' event
-      await expect(client2Promise_usersMovedToSpectators).resolves.toStrictEqual({
-        userIds: [client1.id],
+      // client1, client2 receive 'usersMovedToSpectators' event
+      await expect(client1Promise_usersMovedToSpectators).resolves.toMatchObject({
+        userIds: [client3.id],
+        game: null,
         newRoomState: {
           owner: { id: client3.id },
           users: [{ id: client1.id }, { id: client2.id }],
         },
       })
 
-      await expect(client3Promise_usersMovedToSpectators).resolves.toStrictEqual({
-        userIds: [client1.id],
+      await expect(client2Promise_usersMovedToSpectators).resolves.toMatchObject({
+        userIds: [client3.id],
+        game: null,
         newRoomState: {
           owner: { id: client3.id },
           users: [{ id: client1.id }, { id: client2.id }],
         },
       })
 
-      // client1 receives 'youHaveBeenMovedToSpectators' event
-      await expect(client1Promise_youHaveBeenMovedToSpectators).resolves.toStrictEqual({
+      // client3 receives 'youHaveBeenMovedToSpectators' event
+      await expect(client3Promise_youHaveBeenMovedToSpectators).resolves.toMatchObject({
+        game: null,
         newRoomState: {
           owner: { id: client3.id },
           users: [{ id: client1.id }, { id: client2.id }],
@@ -373,14 +386,16 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
 
       // All clients receive 'notifyGameStopped' event
       await expect(client1Promise_notifyGameStopped).resolves.toStrictEqual({
-        reason: 'Inactive players',
+        reason: 'Player inactivity',
       })
       await expect(client2Promise_notifyGameStopped).resolves.toStrictEqual({
-        reason: 'Inactive players',
+        reason: 'Player inactivity',
       })
       await expect(client3Promise_notifyGameStopped).resolves.toStrictEqual({
-        reason: 'Inactive players',
+        reason: 'Player inactivity',
       })
     }
+
+    expectClientsExpectedEventsQueuesClean(getClients())
   })
 })

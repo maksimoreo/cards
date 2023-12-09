@@ -1,6 +1,6 @@
 import { c } from '../../../src/lib/TakeSix/__test__/testHelpers'
-import { createRoom, joinRoom, leaveCurrentRoom, playCard } from '../helpers/clientEventsHelpers'
-import { emitEvent, waitForEvent } from '../helpers/testHelpers'
+import { createRoom, joinRoom, playCard } from '../helpers/clientEventsHelpers'
+import { expectClientsExpectedEventsQueuesClean } from '../helpers/testHelpers'
 import { useApp, useClients } from '../helpers/testHooks'
 
 describe('Game spectating', () => {
@@ -11,9 +11,23 @@ describe('Game spectating', () => {
     const app = getApp()
     const [client1, client2, client3, client4, client5, client6] = getClients()
 
-    await expect(createRoom(client1, 'gamers')).resolves.toBeUndefined()
-    await expect(joinRoom(client2, { name: 'gamers', otherClients: [client1] })).resolves.toBeUndefined()
-    await expect(joinRoom(client3, { name: 'gamers', otherClients: [client1, client2] })).resolves.toBeUndefined()
+    await expect(
+      createRoom(client1, { name: 'gamers' }, { globalClients: [client2, client3, client4, client5, client6] }),
+    ).resolves.toBeUndefined()
+    await expect(
+      joinRoom(
+        client2,
+        { name: 'gamers' },
+        { roomClients: [client1], globalClients: [client3, client4, client5, client6] },
+      ),
+    ).resolves.toBeUndefined()
+    await expect(
+      joinRoom(
+        client3,
+        { name: 'gamers' },
+        { roomClients: [client1, client2], globalClients: [client4, client5, client6] },
+      ),
+    ).resolves.toBeUndefined()
 
     const room = app.rooms[0]
 
@@ -24,8 +38,8 @@ describe('Game spectating', () => {
     ]
 
     {
-      const client2Promise = waitForEvent(client2, 'notifyGameStarted')
-      const client3Promise = waitForEvent(client3, 'notifyGameStarted')
+      const client2Promise_notifyGameStarted = client2.waitForEvent('notifyGameStarted')
+      const client3Promise_notifyGameStarted = client3.waitForEvent('notifyGameStarted')
 
       const gameState = {
         players: [
@@ -56,7 +70,7 @@ describe('Game spectating', () => {
       }
 
       await expect(
-        emitEvent(client1, 'startGame', { cardsPool, stepTimeout: 3000, selectRowTimeout: 3000 }),
+        client1.emitEvent('startGame', { cardsPool, stepTimeout: 3000, selectRowTimeout: 3000 }),
       ).resolves.toStrictEqual({
         code: 'SUCCESS',
         data: {
@@ -65,12 +79,12 @@ describe('Game spectating', () => {
         },
       })
 
-      await expect(client2Promise).resolves.toStrictEqual({
+      await expect(client2Promise_notifyGameStarted).resolves.toStrictEqual({
         gameState,
         playerCards: c([1, 3, 5, 12, 16, 17, 22, 26, 27, 28]),
       })
 
-      await expect(client3Promise).resolves.toStrictEqual({
+      await expect(client3Promise_notifyGameStarted).resolves.toStrictEqual({
         gameState,
         playerCards: c([2, 4, 9, 20, 21, 23, 29, 30, 31, 33]),
       })
@@ -78,11 +92,14 @@ describe('Game spectating', () => {
 
     // Client4 joins before any player selected cards
     {
-      const client1Promise = waitForEvent(client1, 'notifyUserJoined')
-      const client2Promise = waitForEvent(client2, 'notifyUserJoined')
-      const client3Promise = waitForEvent(client3, 'notifyUserJoined')
+      const client1Promise_notifyUserJoined = client1.waitForEvent('notifyUserJoined')
+      const client2Promise_notifyUserJoined = client2.waitForEvent('notifyUserJoined')
+      const client3Promise_notifyUserJoined = client3.waitForEvent('notifyUserJoined')
 
-      await expect(emitEvent(client4, 'joinRoom', { name: 'gamers' })).resolves.toStrictEqual({
+      const client5Promise_rooms = client5.waitForEvent('rooms')
+      const client6Promise_rooms = client6.waitForEvent('rooms')
+
+      await expect(client4.emitEvent('joinRoom', { name: 'gamers' })).resolves.toStrictEqual({
         code: 'SUCCESS',
         data: {
           room: {
@@ -134,12 +151,15 @@ describe('Game spectating', () => {
         },
       })
 
-      await expect(client1Promise).resolves.toMatchObject({ user: { id: client4.id } })
-      await expect(client2Promise).resolves.toMatchObject({ user: { id: client4.id } })
-      await expect(client3Promise).resolves.toMatchObject({ user: { id: client4.id } })
+      await expect(client5Promise_rooms).toResolve()
+      await expect(client6Promise_rooms).toResolve()
+
+      await expect(client1Promise_notifyUserJoined).resolves.toMatchObject({ user: { id: client4.id } })
+      await expect(client2Promise_notifyUserJoined).resolves.toMatchObject({ user: { id: client4.id } })
+      await expect(client3Promise_notifyUserJoined).resolves.toMatchObject({ user: { id: client4.id } })
     }
 
-    // STEP 1
+    console.log('STEP 1')
 
     await expect(
       playCard(client3, { cardValue: 20, otherClients: [client1, client2, client4] }),
@@ -151,12 +171,14 @@ describe('Game spectating', () => {
 
     // client5 joins when some players have selected their cards
     {
-      const client1Promise = waitForEvent(client1, 'notifyUserJoined')
-      const client2Promise = waitForEvent(client2, 'notifyUserJoined')
-      const client3Promise = waitForEvent(client3, 'notifyUserJoined')
-      const client4Promise = waitForEvent(client4, 'notifyUserJoined')
+      const client1Promise_notifyUserJoined = client1.waitForEvent('notifyUserJoined')
+      const client2Promise_notifyUserJoined = client2.waitForEvent('notifyUserJoined')
+      const client3Promise_notifyUserJoined = client3.waitForEvent('notifyUserJoined')
+      const client4Promise_notifyUserJoined = client4.waitForEvent('notifyUserJoined')
 
-      await expect(emitEvent(client5, 'joinRoom', { name: 'gamers' })).resolves.toStrictEqual({
+      const client6Promise_rooms = client6.waitForEvent('rooms')
+
+      await expect(client5.emitEvent('joinRoom', { name: 'gamers' })).resolves.toStrictEqual({
         code: 'SUCCESS',
         data: {
           room: {
@@ -209,22 +231,32 @@ describe('Game spectating', () => {
         },
       })
 
-      await expect(client1Promise).resolves.toMatchObject({ user: { id: client5.id } })
-      await expect(client2Promise).resolves.toMatchObject({ user: { id: client5.id } })
-      await expect(client3Promise).resolves.toMatchObject({ user: { id: client5.id } })
-      await expect(client4Promise).resolves.toMatchObject({ user: { id: client5.id } })
+      await expect(client6Promise_rooms).toResolve()
+
+      await expect(client1Promise_notifyUserJoined).resolves.toMatchObject({ user: { id: client5.id } })
+      await expect(client2Promise_notifyUserJoined).resolves.toMatchObject({ user: { id: client5.id } })
+      await expect(client3Promise_notifyUserJoined).resolves.toMatchObject({ user: { id: client5.id } })
+      await expect(client4Promise_notifyUserJoined).resolves.toMatchObject({ user: { id: client5.id } })
     }
 
     {
-      const client1Promise = waitForEvent(client1, 'notifyGameStep')
-      const client2Promise = waitForEvent(client2, 'notifyGameStep')
-      const client3Promise = waitForEvent(client3, 'notifyGameStep')
-      const client4Promise = waitForEvent(client4, 'notifyGameStep')
-      const client5Promise = waitForEvent(client5, 'notifyGameStep')
+      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
+      const client3Promise_notifyUserPlayedCard = client3.waitForEvent('notifyUserPlayedCard')
+      const client4Promise_notifyUserPlayedCard = client4.waitForEvent('notifyUserPlayedCard')
+      const client5Promise_notifyUserPlayedCard = client5.waitForEvent('notifyUserPlayedCard')
 
-      await expect(
-        playCard(client1, { cardValue: 13, otherClients: [client2, client3, client4, client5] }),
-      ).resolves.toBeUndefined()
+      const client1Promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
+      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
+      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
+      const client4Promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
+      const client5Promise_notifyGameStep = client5.waitForEvent('notifyGameStep')
+
+      await expect(client1.emitEvent('playCard', { card: 13 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
+      await expect(client3Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
+      await expect(client4Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
+      await expect(client5Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
 
       const sharedData = {
         step: {
@@ -273,46 +305,54 @@ describe('Game spectating', () => {
         },
       }
 
-      await expect(client1Promise).resolves.toStrictEqual({
+      await expect(client1Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([6, 7, 8, 14, 15, 19, 24, 25, 32]),
       })
 
-      await expect(client2Promise).resolves.toStrictEqual({
+      await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([1, 3, 5, 16, 17, 22, 26, 27, 28]),
       })
 
-      await expect(client3Promise).resolves.toStrictEqual({
+      await expect(client3Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([2, 4, 9, 21, 23, 29, 30, 31, 33]),
       })
 
-      await expect(client4Promise).resolves.toStrictEqual(sharedData)
+      await expect(client4Promise_notifyGameStep).resolves.toStrictEqual(sharedData)
 
-      await expect(client5Promise).resolves.toStrictEqual(sharedData)
+      await expect(client5Promise_notifyGameStep).resolves.toStrictEqual(sharedData)
     }
 
     // STEP 2
 
     await expect(
-      playCard(client1, { cardValue: 8, otherClients: [client2, client3, client4] }),
+      playCard(client1, { cardValue: 8, otherClients: [client2, client3, client4, client5] }),
     ).resolves.toBeUndefined()
 
     await expect(
-      playCard(client2, { cardValue: 16, otherClients: [client1, client3, client4] }),
+      playCard(client2, { cardValue: 16, otherClients: [client1, client3, client4, client5] }),
     ).resolves.toBeUndefined()
 
     {
-      const client1Promise = waitForEvent(client1, 'notifyGameStep')
-      const client2Promise = waitForEvent(client2, 'notifyGameStep')
-      const client3Promise = waitForEvent(client3, 'notifyGameStep')
-      const client4Promise = waitForEvent(client4, 'notifyGameStep')
-      const client5Promise = waitForEvent(client5, 'notifyGameStep')
+      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
+      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
+      const client4Promise_notifyUserPlayedCard = client4.waitForEvent('notifyUserPlayedCard')
+      const client5Promise_notifyUserPlayedCard = client5.waitForEvent('notifyUserPlayedCard')
 
-      await expect(
-        playCard(client3, { cardValue: 21, otherClients: [client1, client2, client4] }),
-      ).resolves.toBeUndefined()
+      const client1Promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
+      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
+      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
+      const client4Promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
+      const client5Promise_notifyGameStep = client5.waitForEvent('notifyGameStep')
+
+      await expect(client3.emitEvent('playCard', { card: 21 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client3.id })
+      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client3.id })
+      await expect(client4Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client3.id })
+      await expect(client5Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client3.id })
 
       const sharedData = {
         step: {
@@ -357,37 +397,37 @@ describe('Game spectating', () => {
         },
       }
 
-      await expect(client1Promise).resolves.toStrictEqual({
+      await expect(client1Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([6, 7, 8, 14, 15, 19, 24, 25, 32]),
       })
 
-      await expect(client2Promise).resolves.toStrictEqual({
+      await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([1, 3, 5, 16, 17, 22, 26, 27, 28]),
       })
 
-      await expect(client3Promise).resolves.toStrictEqual({
+      await expect(client3Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([2, 4, 9, 21, 23, 29, 30, 31, 33]),
       })
 
-      await expect(client4Promise).resolves.toStrictEqual(sharedData)
+      await expect(client4Promise_notifyGameStep).resolves.toStrictEqual(sharedData)
 
-      await expect(client5Promise).resolves.toStrictEqual(sharedData)
+      await expect(client5Promise_notifyGameStep).resolves.toStrictEqual(sharedData)
     }
 
-    // STEP 2.1
+    console.log('STEP 2.1')
 
     // client6 joins while some player selects row
     {
-      const client1Promise = waitForEvent(client1, 'notifyUserJoined')
-      const client2Promise = waitForEvent(client2, 'notifyUserJoined')
-      const client3Promise = waitForEvent(client3, 'notifyUserJoined')
-      const client4Promise = waitForEvent(client4, 'notifyUserJoined')
-      const client5Promise = waitForEvent(client5, 'notifyUserJoined')
+      const client1Promise = client1.waitForEvent('notifyUserJoined')
+      const client2Promise = client2.waitForEvent('notifyUserJoined')
+      const client3Promise = client3.waitForEvent('notifyUserJoined')
+      const client4Promise = client4.waitForEvent('notifyUserJoined')
+      const client5Promise = client5.waitForEvent('notifyUserJoined')
 
-      await expect(emitEvent(client6, 'joinRoom', { name: 'gamers' })).resolves.toStrictEqual({
+      await expect(client6.emitEvent('joinRoom', { name: 'gamers' })).resolves.toStrictEqual({
         code: 'SUCCESS',
         data: {
           room: {
@@ -461,12 +501,136 @@ describe('Game spectating', () => {
       await expect(client5Promise).resolves.toMatchObject({ user: { id: client6.id } })
     }
 
-    // Everyone leaves, starting from players
-    await expect(leaveCurrentRoom(client2)).resolves.toBeUndefined()
-    await expect(leaveCurrentRoom(client3)).resolves.toBeUndefined()
-    await expect(leaveCurrentRoom(client4)).resolves.toBeUndefined()
-    await expect(leaveCurrentRoom(client1)).resolves.toBeUndefined()
-    await expect(leaveCurrentRoom(client5)).resolves.toBeUndefined()
-    await expect(leaveCurrentRoom(client6)).resolves.toBeUndefined()
+    console.log('client2 leaves')
+
+    {
+      const client2Promise_rooms = client2.waitForEvent('rooms')
+      const client1Promise_notifyUserLeft = client1.waitForEvent('notifyUserLeft')
+      const client3Promise_notifyUserLeft = client3.waitForEvent('notifyUserLeft')
+      const client4Promise_notifyUserLeft = client4.waitForEvent('notifyUserLeft')
+      const client5Promise_notifyUserLeft = client5.waitForEvent('notifyUserLeft')
+      const client6Promise_notifyUserLeft = client6.waitForEvent('notifyUserLeft')
+
+      await expect(client2.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client2Promise_rooms).toResolve()
+      await expect(client1Promise_notifyUserLeft).resolves.toMatchObject({ userId: client2.id })
+      await expect(client3Promise_notifyUserLeft).resolves.toMatchObject({ userId: client2.id })
+      await expect(client4Promise_notifyUserLeft).resolves.toMatchObject({ userId: client2.id })
+      await expect(client5Promise_notifyUserLeft).resolves.toMatchObject({ userId: client2.id })
+      await expect(client6Promise_notifyUserLeft).resolves.toMatchObject({ userId: client2.id })
+    }
+
+    console.log('client3 leaves')
+
+    {
+      const client2Promise_rooms = client2.waitForEvent('rooms')
+      const client3Promise_rooms = client3.waitForEvent('rooms')
+      const client1Promise_notifyGameStopped = client1.waitForEvent('notifyGameStopped')
+      const client1Promise_notifyUserLeft = client1.waitForEvent('notifyUserLeft')
+      const client4Promise_notifyGameStopped = client4.waitForEvent('notifyGameStopped')
+      const client4Promise_notifyUserLeft = client4.waitForEvent('notifyUserLeft')
+      const client5Promise_notifyGameStopped = client5.waitForEvent('notifyGameStopped')
+      const client5Promise_notifyUserLeft = client5.waitForEvent('notifyUserLeft')
+      const client6Promise_notifyGameStopped = client6.waitForEvent('notifyGameStopped')
+      const client6Promise_notifyUserLeft = client6.waitForEvent('notifyUserLeft')
+
+      await expect(client3.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client2Promise_rooms).toResolve()
+      await expect(client3Promise_rooms).toResolve()
+
+      await expect(client1Promise_notifyGameStopped).toResolve()
+      await expect(client4Promise_notifyGameStopped).toResolve()
+      await expect(client5Promise_notifyGameStopped).toResolve()
+      await expect(client6Promise_notifyGameStopped).toResolve()
+
+      await expect(client1Promise_notifyUserLeft).resolves.toMatchObject({ userId: client3.id })
+      await expect(client4Promise_notifyUserLeft).resolves.toMatchObject({ userId: client3.id })
+      await expect(client5Promise_notifyUserLeft).resolves.toMatchObject({ userId: client3.id })
+      await expect(client6Promise_notifyUserLeft).resolves.toMatchObject({ userId: client3.id })
+    }
+
+    console.log('client4 leaves')
+
+    {
+      const client2Promise_rooms = client2.waitForEvent('rooms')
+      const client3Promise_rooms = client3.waitForEvent('rooms')
+      const client4Promise_rooms = client4.waitForEvent('rooms')
+      const client1Promise_notifyUserLeft = client1.waitForEvent('notifyUserLeft')
+      const client5Promise_notifyUserLeft = client5.waitForEvent('notifyUserLeft')
+      const client6Promise_notifyUserLeft = client6.waitForEvent('notifyUserLeft')
+
+      await expect(client4.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client2Promise_rooms).toResolve()
+      await expect(client3Promise_rooms).toResolve()
+      await expect(client4Promise_rooms).toResolve()
+      await expect(client1Promise_notifyUserLeft).resolves.toMatchObject({ userId: client4.id })
+      await expect(client5Promise_notifyUserLeft).resolves.toMatchObject({ userId: client4.id })
+      await expect(client6Promise_notifyUserLeft).resolves.toMatchObject({ userId: client4.id })
+    }
+
+    console.log('client1 leaves')
+
+    {
+      const client1Promise_rooms = client1.waitForEvent('rooms')
+      const client2Promise_rooms = client2.waitForEvent('rooms')
+      const client3Promise_rooms = client3.waitForEvent('rooms')
+      const client4Promise_rooms = client4.waitForEvent('rooms')
+      const client5Promise_notifyOwnerLeft = client5.waitForEvent('notifyOwnerLeft')
+      const client6Promise_notifyOwnerLeft = client6.waitForEvent('notifyOwnerLeft')
+
+      await expect(client1.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client1Promise_rooms).toResolve()
+      await expect(client2Promise_rooms).toResolve()
+      await expect(client3Promise_rooms).toResolve()
+      await expect(client4Promise_rooms).toResolve()
+      await expect(client5Promise_notifyOwnerLeft).resolves.toMatchObject({ newOwner: { id: client5.id } })
+      await expect(client6Promise_notifyOwnerLeft).resolves.toMatchObject({ newOwner: { id: client5.id } })
+    }
+
+    console.log('client5 leaves')
+
+    {
+      const client1Promise_rooms = client1.waitForEvent('rooms')
+      const client2Promise_rooms = client2.waitForEvent('rooms')
+      const client3Promise_rooms = client3.waitForEvent('rooms')
+      const client4Promise_rooms = client4.waitForEvent('rooms')
+      const client5Promise_rooms = client5.waitForEvent('rooms')
+      const client6Promise_notifyOwnerLeft = client6.waitForEvent('notifyOwnerLeft')
+
+      await expect(client5.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client1Promise_rooms).toResolve()
+      await expect(client2Promise_rooms).toResolve()
+      await expect(client3Promise_rooms).toResolve()
+      await expect(client4Promise_rooms).toResolve()
+      await expect(client5Promise_rooms).toResolve()
+      await expect(client6Promise_notifyOwnerLeft).resolves.toMatchObject({ newOwner: { id: client6.id } })
+    }
+
+    console.log('client6 leaves')
+
+    {
+      const client1Promise_rooms = client1.waitForEvent('rooms')
+      const client2Promise_rooms = client2.waitForEvent('rooms')
+      const client3Promise_rooms = client3.waitForEvent('rooms')
+      const client4Promise_rooms = client4.waitForEvent('rooms')
+      const client5Promise_rooms = client5.waitForEvent('rooms')
+      const client6Promise_rooms = client6.waitForEvent('rooms')
+
+      await expect(client6.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client1Promise_rooms).toResolve()
+      await expect(client2Promise_rooms).toResolve()
+      await expect(client3Promise_rooms).toResolve()
+      await expect(client4Promise_rooms).toResolve()
+      await expect(client5Promise_rooms).toResolve()
+      await expect(client6Promise_rooms).toResolve()
+    }
+
+    expectClientsExpectedEventsQueuesClean(getClients())
   })
 })

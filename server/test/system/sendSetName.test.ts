@@ -1,6 +1,5 @@
 import 'jest-extended'
 
-import { emitEvent } from './helpers/testHelpers'
 import { useApp, useClient, useClients } from './helpers/testHooks'
 
 describe('Send setName message', () => {
@@ -12,7 +11,7 @@ describe('Send setName message', () => {
     it('changes user name to specified value', async () => {
       const app = getApp()
 
-      const response: string = await emitEvent(getClient(), 'setName', { name: 'newname' })
+      const response: string = await getClient().emitEvent('setName', { name: 'newname' })
 
       expect(response).toStrictEqual({ code: 'SUCCESS' })
       expect(app.users.all[0].name).toBe('newname')
@@ -26,10 +25,10 @@ describe('Send setName message', () => {
       const app = getApp()
       const [clientA, clientB] = getClients()
 
-      expect(await emitEvent(clientA, 'setName', { name: 'Turtle' })).toStrictEqual({ code: 'SUCCESS' })
+      expect(await clientA.emitEvent('setName', { name: 'Turtle' })).toStrictEqual({ code: 'SUCCESS' })
       expect(app.users.all[0].name).toBe('Turtle')
 
-      expect(await emitEvent(clientB, 'setName', { name: 'Turtle' })).toStrictEqual({
+      expect(await clientB.emitEvent('setName', { name: 'Turtle' })).toStrictEqual({
         code: 'BAD_REQUEST',
         message: 'Invalid data',
         validationErrors: [
@@ -42,7 +41,7 @@ describe('Send setName message', () => {
       })
       expect(app.users.all[1].name).not.toBe('Turtle')
 
-      expect(await emitEvent(clientB, 'setName', { name: 'Snail' })).toStrictEqual({ code: 'SUCCESS' })
+      expect(await clientB.emitEvent('setName', { name: 'Snail' })).toStrictEqual({ code: 'SUCCESS' })
       expect(app.users.all[1].name).toBe('Snail')
     })
   })

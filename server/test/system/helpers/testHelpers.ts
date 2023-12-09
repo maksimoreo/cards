@@ -3,6 +3,7 @@ import Client, { Socket } from 'socket.io-client'
 import App from '../../../src/App'
 import { createTestLogger } from '../../../src/Logger'
 import { withTimeout } from '../../../src/utils'
+import { TestClient } from './TestClient'
 
 export async function startApp(port: number): Promise<App> {
   const app = new App({ port, logger: createTestLogger() })
@@ -134,5 +135,11 @@ export function expectClientListenersClean(client: Socket, event: string): void 
 export function expectClientsListenersClean(clients: Socket[], event: string): void {
   clients.forEach((client) => {
     expect(client.listeners(event).length).toBe(0)
+  })
+}
+
+export function expectClientsExpectedEventsQueuesClean(clients: readonly TestClient[]): void {
+  clients.forEach((client) => {
+    expect(client.expectedEventsQueue).toBeEmpty()
   })
 }

@@ -1,6 +1,7 @@
 import { c } from '../../../src/lib/TakeSix/__test__/testHelpers'
+import { sleep } from '../../../src/utils'
 import { createRoom, joinRoom, playCard } from '../helpers/clientEventsHelpers'
-import { emitEvent, waitForEvent, waitForNoEvents } from '../helpers/testHelpers'
+import { expectClientsExpectedEventsQueuesClean } from '../helpers/testHelpers'
 import { useApp, useClients } from '../helpers/testHooks'
 
 describe('Game #1', () => {
@@ -14,25 +15,25 @@ describe('Game #1', () => {
 
     const cardsPool = [13, 4, 17, 11, 20, 16, 9, 15, 21, 18, 5, 8, 22, 24, 12, 7, 2, 14, 19, 6, 10, 3, 23, 1]
 
-    await createRoom(client1, 'game_room')
+    await createRoom(client1, { name: 'gameroom' }, { globalClients: [client2] })
 
-    await expect(emitEvent(client1, 'startGame', null)).resolves.toMatchObject({
+    await expect(client1.emitEvent('startGame', null)).resolves.toMatchObject({
       code: 'BAD_REQUEST',
       message: 'Not enough players',
     })
 
-    await joinRoom(client2, { name: 'game_room', otherClients: [client1] })
+    await joinRoom(client2, { name: 'gameroom' }, { roomClients: [client1] })
 
-    await expect(emitEvent(client2, 'startGame', null)).resolves.toMatchObject({
+    await expect(client2.emitEvent('startGame', null)).resolves.toMatchObject({
       code: 'BAD_REQUEST',
       message: 'Not room owner',
     })
 
     {
-      const client2Waiter = waitForEvent(client2, 'notifyGameStarted')
+      const client2Waiter = client2.waitForEvent('notifyGameStarted')
 
       await expect(
-        emitEvent(client1, 'startGame', { cardsPool, stepTimeout: 5000, selectRowTimeout: 5000 }),
+        client1.emitEvent('startGame', { cardsPool, stepTimeout: 5000, selectRowTimeout: 5000 }),
       ).resolves.toStrictEqual({
         code: 'SUCCESS',
         data: {
@@ -96,29 +97,24 @@ describe('Game #1', () => {
     }
 
     // Random tests
-    await expect(emitEvent(client1, 'selectRow', { rowIndex: 4 })).resolves.toMatchObject({
+    await expect(client1.emitEvent('selectRow', { rowIndex: 4 })).resolves.toMatchObject({
       code: 'BAD_REQUEST',
       message: 'Not waiting for row input',
     })
 
     // STEP 1
     // client1 plays a card
-    const client1Waiter = waitForNoEvents(client1, 'notifyUserPlayedCard')
-
-    await expect(playCard(client1, { cardValue: 4, otherClients: [client2] }))
-
-    await expect(client1Waiter).resolves.toBeUndefined()
+    await expect(playCard(client1, { cardValue: 4, otherClients: [client2] })).resolves.toBeUndefined()
 
     // client2 plays a card
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      const client2Waiter = waitForNoEvents(client2, 'notifyUserPlayedCard')
+      await expect(client2.emitEvent('playCard', { card: 2 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(playCard(client2, { cardValue: 2, otherClients: [client1] }))
-
-      await expect(client2Waiter).resolves.toBeUndefined()
+      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -171,24 +167,17 @@ describe('Game #1', () => {
 
     // STEP 2
     // client1 plays a card
-    {
-      const client1Promise = waitForNoEvents(client1, 'notifyUserPlayedCard')
-
-      await expect(playCard(client1, { cardValue: 11, otherClients: [client2] }))
-
-      await expect(client1Promise).resolves.not.toThrow()
-    }
+    await expect(playCard(client1, { cardValue: 11, otherClients: [client2] })).resolves.toBeUndefined()
 
     // client2 plays a card
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      const client2Waiter = waitForNoEvents(client2, 'notifyUserPlayedCard')
+      await expect(client2.emitEvent('playCard', { card: 12 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(playCard(client2, { cardValue: 12, otherClients: [client1] }))
-
-      await expect(client2Waiter).resolves.not.toThrow()
+      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -242,14 +231,17 @@ describe('Game #1', () => {
 
     // STEP 3
     // client2 plays a card
-    await expect(playCard(client2, { cardValue: 5, otherClients: [client1] }))
+    await expect(playCard(client2, { cardValue: 5, otherClients: [client1] })).resolves.toBeUndefined()
 
     // client1 plays a card
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      await expect(playCard(client1, { cardValue: 9, otherClients: [client2] }))
+      await expect(client1.emitEvent('playCard', { card: 9 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
 
       const sharedData = {
         step: {
@@ -303,17 +295,20 @@ describe('Game #1', () => {
 
     // STEP 4
     // client2 plays a card
-    await expect(playCard(client2, { cardValue: 8, otherClients: [client1] }))
+    await expect(playCard(client2, { cardValue: 8, otherClients: [client1] })).resolves.toBeUndefined()
 
     // client2 changes played card
-    await expect(playCard(client2, { cardValue: 14, otherClients: [client1] }))
+    await expect(playCard(client2, { cardValue: 14, otherClients: [client1] })).resolves.toBeUndefined()
 
     // client1 plays a card
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      await expect(playCard(client1, { cardValue: 15, otherClients: [client2] }))
+      await expect(client1.emitEvent('playCard', { card: 15 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
 
       const sharedData = {
         step: {
@@ -366,50 +361,32 @@ describe('Game #1', () => {
 
     // STEP 5
     // client1 plays invalid card
-    {
-      const client1Promise = waitForNoEvents(client1, 'notifyUserPlayedCard')
-      const client2Promise = waitForNoEvents(client2, 'notifyUserPlayedCard')
-
-      await expect(emitEvent(client1, 'playCard', { card: 6 })).resolves.toStrictEqual({
-        code: 'BAD_REQUEST',
-        message: 'Invalid data',
-        validationErrors: [{ code: 'custom', message: 'Invalid card', path: ['card'] }],
-      })
-
-      await expect(client1Promise).resolves.toBeUndefined()
-      await expect(client2Promise).resolves.toBeUndefined()
-    }
+    await expect(client1.emitEvent('playCard', { card: 6 })).resolves.toStrictEqual({
+      code: 'BAD_REQUEST',
+      message: 'Invalid data',
+      validationErrors: [{ code: 'custom', message: 'Invalid card', path: ['card'] }],
+    })
 
     // client1 plays valid card
     await expect(playCard(client1, { cardValue: 16, otherClients: [client2] })).toResolve()
 
     // client2 plays invalid card
-    {
-      const client1Promise = waitForNoEvents(client1, 'notifyUserPlayedCard')
-      const client2Promise = waitForNoEvents(client2, 'notifyUserPlayedCard')
 
-      await expect(emitEvent(client2, 'playCard', { card: 99 })).resolves.toStrictEqual({
-        code: 'BAD_REQUEST',
-        message: 'Invalid data',
-        validationErrors: [{ code: 'custom', message: 'Invalid card', path: ['card'] }],
-      })
-
-      await expect(client1Promise).resolves.toBeUndefined()
-      await expect(client2Promise).resolves.toBeUndefined()
-    }
+    await expect(client2.emitEvent('playCard', { card: 99 })).resolves.toStrictEqual({
+      code: 'BAD_REQUEST',
+      message: 'Invalid data',
+      validationErrors: [{ code: 'custom', message: 'Invalid card', path: ['card'] }],
+    })
 
     // client2 plays valid card
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      const client1Promise = waitForEvent(client1, 'notifyUserPlayedCard')
-      const client2Promise = waitForNoEvents(client2, 'notifyUserPlayedCard')
+      await expect(client2.emitEvent('playCard', { card: 24 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(playCard(client2, { cardValue: 24, otherClients: [client1] })).toResolve()
-
-      await expect(client1Promise).resolves.toStrictEqual({ userId: client2.id })
-      await expect(client2Promise).resolves.toBeUndefined()
+      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -467,14 +444,10 @@ describe('Game #1', () => {
     // client2 did not select a card in time
     // Note: Should select automatically the highest number if no input is provided from this client
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep', 6000)
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep', 6000)
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep', { timeout: 6000 })
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep', { timeout: 6000 })
 
-      const client1Promise = waitForNoEvents(client1, 'notifyUserPlayedCard', 3000)
-      const client2Promise = waitForNoEvents(client2, 'notifyUserPlayedCard', 3000)
-
-      await expect(client1Promise).resolves.toBeUndefined()
-      await expect(client2Promise).resolves.toBeUndefined()
+      await sleep(3000)
 
       const sharedData = {
         step: {
@@ -531,10 +504,13 @@ describe('Game #1', () => {
 
     // client1 plays a card
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      await expect(playCard(client1, { cardValue: 21, otherClients: [client2] })).toResolve()
+      await expect(client1.emitEvent('playCard', { card: 21 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
 
       const sharedData = {
         step: {
@@ -591,10 +567,13 @@ describe('Game #1', () => {
 
     // client2 plays a card
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      await expect(playCard(client2, { cardValue: 7, otherClients: [client1] })).toResolve()
+      await expect(client2.emitEvent('playCard', { card: 7 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -644,40 +623,24 @@ describe('Game #1', () => {
 
     // Step 8.1
     // client1 selects row
-    {
-      const client1GameStepPromise = waitForNoEvents(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForNoEvents(client2, 'notifyGameStep')
-
-      await expect(emitEvent(client1, 'selectRow', { rowIndex: 1 })).resolves.toMatchObject({
-        code: 'BAD_REQUEST',
-        message: 'Not waiting for row input',
-      })
-
-      await expect(client1GameStepPromise).resolves.toBeUndefined()
-      await expect(client2GameStepPromise).resolves.toBeUndefined()
-    }
+    await expect(client1.emitEvent('selectRow', { rowIndex: 1 })).resolves.toMatchObject({
+      code: 'BAD_REQUEST',
+      message: 'Not waiting for row input',
+    })
 
     // client2 selects invalid row
-    {
-      const client1GameStepPromise = waitForNoEvents(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForNoEvents(client2, 'notifyGameStep')
-
-      await expect(emitEvent(client2, 'selectRow', { rowIndex: 4 })).resolves.toStrictEqual({
-        code: 'BAD_REQUEST',
-        message: 'Invalid data',
-        validationErrors: [{ code: 'custom', message: 'Invalid row', path: ['rowIndex'] }],
-      })
-
-      await expect(client1GameStepPromise).resolves.toBeUndefined()
-      await expect(client2GameStepPromise).resolves.toBeUndefined()
-    }
+    await expect(client2.emitEvent('selectRow', { rowIndex: 4 })).resolves.toStrictEqual({
+      code: 'BAD_REQUEST',
+      message: 'Invalid data',
+      validationErrors: [{ code: 'custom', message: 'Invalid row', path: ['rowIndex'] }],
+    })
 
     // client2 selects valid row
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      await expect(emitEvent(client2, 'selectRow', { rowIndex: 1 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+      await expect(client2.emitEvent('selectRow', { rowIndex: 1 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       const sharedData = {
         step: {
@@ -733,10 +696,13 @@ describe('Game #1', () => {
 
     // client2 plays a card
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      await expect(playCard(client2, { cardValue: 19, otherClients: [client1] })).toResolve()
+      await expect(client2.emitEvent('playCard', { card: 19 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -792,10 +758,13 @@ describe('Game #1', () => {
 
     // client2 plays a card
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep')
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep')
+      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
 
-      await expect(playCard(client2, { cardValue: 6, otherClients: [client1] })).toResolve()
+      await expect(client2.emitEvent('playCard', { card: 6 })).resolves.toStrictEqual({ code: 'SUCCESS' })
+
+      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -846,12 +815,14 @@ describe('Game #1', () => {
     // Step 10.1
     // client2 selects row
     {
-      const client1GameStepPromise = waitForEvent(client1, 'notifyGameStep', 6000)
-      const client2GameStepPromise = waitForEvent(client2, 'notifyGameStep', 6000)
+      const client1GameStepPromise = client1.waitForEvent('notifyGameStep', { timeout: 6000 })
+      const client1Promise_notifyGameStopped = client1.waitForEvent('notifyGameStopped', { timeout: 6000 })
+      const client2GameStepPromise = client2.waitForEvent('notifyGameStep', { timeout: 6000 })
+      const client2Promise_notifyGameStopped = client2.waitForEvent('notifyGameStopped', { timeout: 6000 })
 
       // client2 does not select row in time, game automatically selects first row
 
-      // await expect(emitEvent(client2, 'selectRow', { rowIndex: 2 })).resolves.toStrictEqual({ success: true })
+      // await expect(client2.emitEvent('selectRow', { rowIndex: 2 })).resolves.toStrictEqual({ success: true })
 
       const sharedData = {
         step: {
@@ -900,17 +871,28 @@ describe('Game #1', () => {
         ...sharedData,
         playerCards: [],
       })
+
+      await expect(client1Promise_notifyGameStopped).resolves.toStrictEqual({
+        reason: 'Completed',
+      })
+
+      await expect(client2Promise_notifyGameStopped).resolves.toStrictEqual({
+        reason: 'Completed',
+      })
     }
 
     // Game. Ends. Now. (ensure room cleanup is correct)
-    await expect(emitEvent(client1, 'selectRow', { rowIndex: 4 })).resolves.toMatchObject({
+    await expect(client1.emitEvent('selectRow', { rowIndex: 4 })).resolves.toMatchObject({
       code: 'BAD_REQUEST',
       message: 'Game is not started',
     })
 
-    await expect(emitEvent(client2, 'playCard', { card: 99 })).resolves.toMatchObject({
+    await expect(client2.emitEvent('playCard', { card: 99 })).resolves.toMatchObject({
       code: 'BAD_REQUEST',
       message: 'Game is not started',
     })
+
+    await sleep(1000) // Ensure no unexpected events
+    expectClientsExpectedEventsQueuesClean(getClients())
   })
 })

@@ -1,7 +1,6 @@
-import { Socket } from 'socket.io-client'
-
 import App from '../../../src/App'
-import { closeApp, connectClientAsync, startApp } from './testHelpers'
+import { TestClient } from './TestClient'
+import { closeApp, startApp } from './testHelpers'
 
 // Common setup/teardown for system tests
 type AppGetter = () => App
@@ -19,37 +18,37 @@ export function useApp(): AppGetter {
   return () => app
 }
 
-type ClientGetter = () => Socket
+type ClientGetter = () => TestClient
 export function useClient(getApp: AppGetter): ClientGetter {
-  let client: Socket
+  let client: TestClient
 
   beforeAll(async () => {
-    client = await connectClientAsync(getApp().port)
+    client = await TestClient.connect({ port: getApp().port })
   })
 
   afterAll(() => {
-    client.disconnect()
+    client.dispose()
   })
 
   return () => client
 }
 
-type ClientsGetter = () => readonly Socket[]
+type ClientsGetter = () => readonly TestClient[]
 export function useClients(getApp: AppGetter, count: number): ClientsGetter {
-  let clients: readonly Socket[]
+  let clients: readonly TestClient[]
 
   beforeAll(async () => {
     const port = getApp().port
 
     // TODO: Maybe connect each client synchronously one by one?
-    clients = await Promise.all([...Array(count)].map(() => connectClientAsync(port)))
+    clients = await Promise.all([...Array(count)].map(() => TestClient.connect({ port })))
 
     // Easier to debug test
     console.log(clients.map((client, index) => `client${index + 1}: ${client.id}`).join(', '))
   })
 
   afterAll(() => {
-    clients.forEach((client) => client.disconnect())
+    clients.forEach((client) => client.dispose())
   })
 
   return () => clients
