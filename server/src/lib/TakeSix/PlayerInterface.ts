@@ -58,8 +58,8 @@ export default class PlayerInterface {
     return this.game.lastSerializedStep
   }
 
-  public leaveGame(): void {
-    this.game.deactivatePlayer(this.id)
+  public deactivate(): void {
+    this.player.deactivate()
   }
 
   private get game(): TakeSix {

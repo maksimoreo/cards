@@ -232,14 +232,13 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
     await sleep(4500)
 
     {
-      const client1Promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
       const client1Promise_usersMovedToSpectators = client1.waitForEvent('usersMovedToSpectators')
-
-      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
       const client2Promise_youHaveBeenMovedToSpectators = client2.waitForEvent('youHaveBeenMovedToSpectators')
-
-      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
       const client3Promise_usersMovedToSpectators = client3.waitForEvent('usersMovedToSpectators')
+
+      const client1Promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
+      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
+      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
 
       // client1, client3, receive 'usersMovedToSpectators' event
       await expect(client1Promise_usersMovedToSpectators).resolves.toMatchObject({

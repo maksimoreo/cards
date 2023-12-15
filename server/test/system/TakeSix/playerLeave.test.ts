@@ -259,12 +259,12 @@ describe('Player leaving behavior', () => {
 
     {
       const client1Promise_rooms = client1.waitForEvent('rooms')
-      const client2promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
-      const client3promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
-      const client4promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
       const client2Promise_notifyOwnerLeft = client2.waitForEvent('notifyOwnerLeft')
       const client3Promise_notifyOwnerLeft = client3.waitForEvent('notifyOwnerLeft')
       const client4Promise_notifyOwnerLeft = client4.waitForEvent('notifyOwnerLeft')
+      const client2promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
+      const client3promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
+      const client4promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
 
       await expect(client1.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
@@ -343,17 +343,17 @@ describe('Player leaving behavior', () => {
     {
       const client1Promise_rooms = client1.waitForEvent('rooms')
       const client2Promise_rooms = client2.waitForEvent('rooms')
-      const client3Promise_notifyGameStopped = client3.waitForEvent('notifyGameStopped')
-      const client4Promise_notifyGameStopped = client4.waitForEvent('notifyGameStopped')
       const client3Promise_notifyOwnerLeft = client3.waitForEvent('notifyOwnerLeft')
       const client4Promise_notifyOwnerLeft = client4.waitForEvent('notifyOwnerLeft')
+      const client3Promise_notifyGameStopped = client3.waitForEvent('notifyGameStopped')
+      const client4Promise_notifyGameStopped = client4.waitForEvent('notifyGameStopped')
 
       await expect(client2.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client3Promise_notifyOwnerLeft).resolves.toMatchObject({ newOwner: { id: client4.id } })
       await expect(client4Promise_notifyOwnerLeft).resolves.toMatchObject({ newOwner: { id: client4.id } })
-      await expect(client3Promise_notifyGameStopped).resolves.toStrictEqual({ reason: '???' })
-      await expect(client4Promise_notifyGameStopped).resolves.toStrictEqual({ reason: '???' })
+      await expect(client3Promise_notifyGameStopped).resolves.toStrictEqual({ reason: 'Player left' })
+      await expect(client4Promise_notifyGameStopped).resolves.toStrictEqual({ reason: 'Player left' })
       await expect(client1Promise_rooms).toResolve()
       await expect(client2Promise_rooms).toResolve()
     }

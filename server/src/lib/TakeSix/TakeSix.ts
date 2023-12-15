@@ -295,48 +295,18 @@ export default class TakeSix {
     return this.activePlayers.filter((player) => player.selectedCard === undefined)
   }
 
-  // Removes player, and if possible continues the game
+  /**
+   * Removes player, but does not continue game, even if possible. Searches player by ID, so if possible, use `deactivate()` method on PlayerInterface instance.
+   * @param playerId Player ID
+   */
   public deactivatePlayer(playerId: string): void {
-    const index = this.players.findIndex((player) => player.id === playerId)
+    const player = this.players.find((player) => player.id === playerId)
 
-    if (index === -1) {
+    if (!player) {
       throw Error(`Cannot find player with id: ${playerId}`)
     }
 
-    this.players[index].deactivate()
-
-    if (!this.isEnoughPlayers()) {
-      return
-    }
-
-    const { gameStep } = this
-
-    if (gameStep && 'waitingPlayer' in gameStep.step) {
-      if (gameStep.step.waitingPlayer === playerId) {
-        const leastPenaltyPointsRowIndex =
-          this.rows.reduce<{ penaltyPoints: number; index: number } | undefined>((obj, row, index) => {
-            const penaltyPoints = sumBy(row.cards, (card) => card.penaltyPoints)
-
-            if (!obj || penaltyPoints < obj.penaltyPoints) {
-              return { penaltyPoints, index }
-            }
-
-            return obj
-          }, undefined)?.index ?? 0
-
-        this.selectRowAndContinueNoValidation(leastPenaltyPointsRowIndex, gameStep)
-      } else {
-        // Still waiting for some player, but remove this player from queue
-        const indexInLastStepPlayers = gameStep.playersQueue.findIndex((entry) => entry.player.id === playerId)
-
-        gameStep.playersQueue.splice(indexInLastStepPlayers)
-      }
-    } else {
-      // Not waiting for row selection
-      if (this.didAllPlayersSelectCard()) {
-        this.step()
-      }
-    }
+    player.deactivate()
   }
 
   public isEnoughPlayers(): boolean {

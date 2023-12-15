@@ -526,14 +526,14 @@ describe('Game spectating', () => {
     {
       const client2Promise_rooms = client2.waitForEvent('rooms')
       const client3Promise_rooms = client3.waitForEvent('rooms')
-      const client1Promise_notifyGameStopped = client1.waitForEvent('notifyGameStopped')
       const client1Promise_notifyUserLeft = client1.waitForEvent('notifyUserLeft')
-      const client4Promise_notifyGameStopped = client4.waitForEvent('notifyGameStopped')
       const client4Promise_notifyUserLeft = client4.waitForEvent('notifyUserLeft')
-      const client5Promise_notifyGameStopped = client5.waitForEvent('notifyGameStopped')
       const client5Promise_notifyUserLeft = client5.waitForEvent('notifyUserLeft')
-      const client6Promise_notifyGameStopped = client6.waitForEvent('notifyGameStopped')
       const client6Promise_notifyUserLeft = client6.waitForEvent('notifyUserLeft')
+      const client1Promise_notifyGameStopped = client1.waitForEvent('notifyGameStopped')
+      const client4Promise_notifyGameStopped = client4.waitForEvent('notifyGameStopped')
+      const client5Promise_notifyGameStopped = client5.waitForEvent('notifyGameStopped')
+      const client6Promise_notifyGameStopped = client6.waitForEvent('notifyGameStopped')
 
       await expect(client3.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 

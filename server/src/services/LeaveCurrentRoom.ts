@@ -39,8 +39,12 @@ export default class LeaveCurrentRoom {
     user.room = null
 
     this.removeFromRoom()
-    this.removeFromGame()
-    this.notifyMembers()
+
+    if (room.game) {
+      this.removeFromGame()
+    } else {
+      this.notifyMembers()
+    }
 
     ScheduleRoomsEventToLobbyUsers.call({ app })
   }
@@ -54,7 +58,12 @@ export default class LeaveCurrentRoom {
       return
     }
 
-    game.deactivatePlayer(player.player.id)
+    game.handlePlayerLeave({
+      playerId: player.id,
+      notifyAboutPlayerLeave: () => {
+        this.notifyMembers()
+      },
+    })
   }
 
   private removeFromRoom(): void {
@@ -100,7 +109,7 @@ export default class LeaveCurrentRoom {
     if (this.isOwner) {
       app.io.in(room.name).emit('notifyOwnerLeft', {
         newOwner: decorateUser(room.owner),
-        game: room.game ? room.game.generateSerializedState() : null,
+        game: this.getGameStateForNotifyMemberLeftMessage(),
         newRoomState: decorateRoom(room),
       })
 
@@ -109,8 +118,12 @@ export default class LeaveCurrentRoom {
 
     app.io.in(room.name).emit('notifyUserLeft', {
       userId: this.props.user.id,
-      game: room.game ? room.game.generateSerializedState() : null,
+      game: this.getGameStateForNotifyMemberLeftMessage(),
       newRoomState: decorateRoom(room),
     })
+  }
+
+  private getGameStateForNotifyMemberLeftMessage() {
+    return this.props.room.game?.generateSerializedState() ?? null
   }
 }

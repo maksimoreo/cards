@@ -48,4 +48,10 @@ export class RoomGameTakeSixPlayer {
   public isValidCard(cardValue: number): boolean {
     return this.player.cards.some((card) => card.value === cardValue)
   }
+
+  public deactivate(): void {
+    this.lastRecordedUserIdentity = this.user.identity
+    this.user.player = undefined
+    this.player.deactivate()
+  }
 }

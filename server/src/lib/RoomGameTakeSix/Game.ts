@@ -119,6 +119,30 @@ export default class RoomGameTakeSix {
     }
   }
 
+  public finalizeSelectCard(): void {
+    this.clearStepTimer()
+
+    if (this.game.isWaitingForPlayer()) {
+      return this.startSelectRowTimer()
+    }
+
+    if (this.isEnded()) {
+      return this.stopGame({ reason: 'Completed' })
+    }
+
+    this.startStepTimer()
+  }
+
+  public finalizeSelectRow(): void {
+    this.clearSelectRowTimer()
+
+    if (this.isEnded()) {
+      return this.stopGame({ reason: 'Completed' })
+    }
+
+    this.startStepTimer()
+  }
+
   public getDataForJoinedUser(): {
     state: SerializedState
     playersWithSelectedCard: string[]
@@ -176,6 +200,11 @@ export default class RoomGameTakeSix {
     clearTimeout(this.selectRowTimer)
   }
 
+  private clearAllTimers(): void {
+    this.clearStepTimer()
+    this.clearSelectRowTimer()
+  }
+
   private handleStepTimerDone(): void {
     const inactivePlayers = this.getActivePlayersWithoutSelectedCard()
 
@@ -193,10 +222,11 @@ export default class RoomGameTakeSix {
       }
 
       inactivePlayers.forEach((inactivePlayer) => {
-        this.deactivatePlayer(inactivePlayer.id)
+        this.justDeactivatePlayer(inactivePlayer.id)
       })
 
       this.notifyAboutPlayerMoveToSpectators({ inactivePlayers, includeNewGameState: true })
+      this.makeStep()
     } else if (playerInactivityStrategy === 'forcePlay') {
       // Note: In test environment, always select the highest value card, to make tests deterministic
       const isTestEnv = process.env.NODE_ENV === 'test'
@@ -268,6 +298,9 @@ export default class RoomGameTakeSix {
     }
   }
 
+  /**
+   * Selects row for player that has to select row. Continues game if possible.
+   */
   private forceSelectRow() {
     // Note: In test environment, always select the first row, to make tests deterministic
     const randomRowIndex = process.env.NODE_ENV === 'test' ? 0 : random(0, this.game.rowsLength - 1)
@@ -321,69 +354,77 @@ export default class RoomGameTakeSix {
   }
 
   public stopGame({ reason }: { reason: string }): void {
-    this.clearStepTimer()
-    this.clearSelectRowTimer()
-    this.cleanupRoom()
+    this.clearAllTimers()
+    this.unassignReferencesFromRoomAndRoomMembers()
 
     this.room.allUsers.forEach((user) => user.socket.emit('notifyGameStopped', { reason }))
   }
 
-  private cleanupRoom(): void {
+  private unassignReferencesFromRoomAndRoomMembers(): void {
     this.room.game = undefined
 
     this.players.forEach((player) => {
-      if (!player.isActive) {
-        return
+      if (player.user.player) {
+        player.user.player = undefined
       }
-
-      player.user.player = undefined
     })
   }
 
+  // TODO: Rename to `deactivatePlayer` after real `deactivatePlayer` method is removed
   public justDeactivatePlayer(playerId: string): void {
+    this.findPlayer(playerId).deactivate()
+  }
+
+  public handlePlayerLeave({
+    playerId,
+    notifyAboutPlayerLeave,
+  }: {
+    playerId: string
+    notifyAboutPlayerLeave: () => void
+  }): void {
+    const player = this.findPlayer(playerId)
+
+    if (this.game.activePlayers.length <= 2) {
+      player.deactivate()
+      notifyAboutPlayerLeave()
+      this.stopGame({ reason: 'Player left' })
+      return
+    }
+
+    const currentState = this.game.getStateDescription()
+
+    if (currentState === 'selectCard') {
+      player.deactivate()
+
+      if (this.game.didAllPlayersSelectCard()) {
+        this.game.step()
+        notifyAboutPlayerLeave()
+        this.notifyGameStep()
+        this.finalizeSelectCard()
+      } else {
+        notifyAboutPlayerLeave()
+      }
+    } else if ('waitingPlayer' in this.game.lastSerializedStep) {
+      if (player.id === this.game.lastSerializedStep.waitingPlayer) {
+        this.forceSelectRow()
+        player.deactivate()
+        notifyAboutPlayerLeave()
+        this.notifyGameStep()
+        this.finalizeSelectRow()
+      } else {
+        player.deactivate()
+        notifyAboutPlayerLeave()
+      }
+    }
+  }
+
+  private findPlayer(playerId: string): RoomGameTakeSixPlayer {
     const player = this.players.find((player) => player.id === playerId)
 
     if (!player) {
       throw new Error(`Cannot find player: '${playerId}'`)
     }
 
-    player.lastRecordedUserIdentity = player.user.identity
-    player.user.player = undefined
-
-    this.game.deactivatePlayer(playerId)
-  }
-
-  public deactivatePlayer(playerId: string): void {
-    const stateBefore = this.game.getStateDescription()
-    const stepsLeftBefore = this.game.stepsLeft
-
-    this.justDeactivatePlayer(playerId)
-
-    const stateAfter = this.game.getStateDescription()
-    const stepsLeftAfter = this.game.stepsLeft
-
-    const stepsDelta = stepsLeftBefore - stepsLeftAfter
-
-    if (!this.game.isEnoughPlayers()) {
-      this.stopGame({ reason: '???' })
-    } else if (stateBefore === 'selectCard' && stateAfter === 'selectRow') {
-      this.clearStepTimer()
-      this.notifyGameStep()
-      this.startSelectRowTimer()
-    } else if (stateBefore === 'selectCard' && stateAfter === 'selectCard' && stepsDelta === 1) {
-      this.clearStepTimer()
-      this.notifyGameStep()
-      this.startStepTimer()
-    } else if (stateBefore === 'selectCard' && stateAfter === 'selectCard' && stepsDelta === 0) {
-      // Do nothing
-    } else if (stateBefore === 'selectRow' && stateAfter === 'selectRow') {
-      // Do nothing
-    } else if (stateBefore === 'selectRow' && stateAfter === 'selectCard') {
-      this.clearSelectRowTimer()
-      this.notifyGameStep()
-      this.startStepTimer()
-    } else {
-      throw Error('Invalid state')
-    }
+    return player
   }
 }
