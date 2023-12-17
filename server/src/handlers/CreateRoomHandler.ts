@@ -49,7 +49,7 @@ export default class CreateRoomHandler extends ResponseReturningMessageHandler<O
       return { validationErrors: [{ code: 'custom', path: ['name'], message: 'This name is currently unavailable' }] }
     }
 
-    const room = new Room({ name, owner: currentUser, password })
+    const room = new Room({ app, name, owner: currentUser, password })
 
     app.rooms.push(room)
 

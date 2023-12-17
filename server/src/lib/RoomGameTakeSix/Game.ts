@@ -2,6 +2,7 @@ import { maxBy, random, sample } from 'lodash'
 import { decorateRoom } from '../../decorators/RoomDecorator'
 import Room from '../../models/Room'
 import User, { UserIdentity } from '../../models/User'
+import RemoveUsersFromRoom from '../../services/RemoveUsersFromRoom'
 import * as TakeSix from '../TakeSix'
 import Card from '../TakeSix/Card'
 import { SerializedStep } from '../TakeSix/TakeSix'
@@ -80,11 +81,15 @@ export default class RoomGameTakeSix {
   }
 
   public handleCardPlayed(): void {
-    if (this.game.getPlayersWithoutSelectedCard().length === 0) {
+    if (this.didAllPlayersSelectCard()) {
       this.clearStepTimer()
 
       this.makeStep()
     }
+  }
+
+  public didAllPlayersSelectCard(): boolean {
+    return this.game.didAllPlayersSelectCard()
   }
 
   public isValidRow(rowIndex: number): boolean {
@@ -206,6 +211,7 @@ export default class RoomGameTakeSix {
   }
 
   private handleStepTimerDone(): void {
+    this.clearStepTimer()
     const inactivePlayers = this.getActivePlayersWithoutSelectedCard()
 
     if (!inactivePlayers) {
@@ -213,20 +219,24 @@ export default class RoomGameTakeSix {
     }
 
     const { playerInactivityStrategy } = this.room.gameOptions
+    const leftActivePlayersCount = this.game.activePlayers.length - inactivePlayers.length
 
     if (playerInactivityStrategy === 'moveToSpectators') {
-      if (this.game.activePlayers.length <= 2) {
-        this.notifyAboutPlayerMoveToSpectators({ inactivePlayers, includeNewGameState: false })
-        this.stopGame({ reason: 'Player inactivity' })
+      if (leftActivePlayersCount <= 1) {
+        this.unassignReferencesFromRoomAndRoomMembers()
+        this.notifyAboutPlayerMoveToSpectators({ inactivePlayers })
+        this.emitNotifyGameStopped({ reason: 'Player inactivity' })
         return
       }
 
       inactivePlayers.forEach((inactivePlayer) => {
-        this.justDeactivatePlayer(inactivePlayer.id)
+        inactivePlayer.deactivate()
       })
 
-      this.notifyAboutPlayerMoveToSpectators({ inactivePlayers, includeNewGameState: true })
-      this.makeStep()
+      this.game.step()
+      this.notifyAboutPlayerMoveToSpectators({ inactivePlayers })
+      this.notifyGameStep()
+      this.finalizeSelectCard()
     } else if (playerInactivityStrategy === 'forcePlay') {
       // Note: In test environment, always select the highest value card, to make tests deterministic
       const isTestEnv = process.env.NODE_ENV === 'test'
@@ -243,8 +253,26 @@ export default class RoomGameTakeSix {
       })
 
       this.makeStep()
-    } else {
-      throw new Error('not implemented')
+    } else if (playerInactivityStrategy === 'kick') {
+      if (leftActivePlayersCount <= 1) {
+        this.unassignReferencesFromRoomAndRoomMembers()
+        this.removePlayersFromRoom(inactivePlayers)
+        this.notifyAboutKickedPlayers({ inactivePlayers })
+        if (!this.room.isDestroyed) {
+          this.emitNotifyGameStopped({ reason: 'Player inactivity' })
+        }
+        return
+      }
+
+      inactivePlayers.forEach((inactivePlayer) => {
+        inactivePlayer.deactivate()
+      })
+
+      this.removePlayersFromRoom(inactivePlayers)
+      this.game.step()
+      this.notifyAboutKickedPlayers({ inactivePlayers })
+      this.notifyGameStep()
+      this.finalizeSelectCard()
     }
   }
 
@@ -273,27 +301,36 @@ export default class RoomGameTakeSix {
 
     if (playerInactivityStrategy === 'moveToSpectators') {
       if (this.game.activePlayers.length <= 2) {
-        this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer], includeNewGameState: false })
-        this.stopGame({ reason: 'Player inactivity' })
+        this.unassignReferencesFromRoomAndRoomMembers()
+        this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer] })
+        this.emitNotifyGameStopped({ reason: 'Player inactivity' })
         return
       }
 
       this.forceSelectRow()
-      this.justDeactivatePlayer(waitingForPlayerId)
-      this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer], includeNewGameState: true })
+      waitingForPlayer.deactivate()
+      this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer] })
       this.notifyGameStep()
-      this.finalizeStep()
+      this.finalizeSelectRow()
       return
     }
 
     if (playerInactivityStrategy === 'kick') {
       if (this.game.activePlayers.length <= 2) {
-        // stop game unconditionally, but also kick player
+        this.removePlayersFromRoom([waitingForPlayer])
+        this.unassignReferencesFromRoomAndRoomMembers()
+        this.notifyAboutKickedPlayers({ inactivePlayers: [waitingForPlayer] })
+        this.emitNotifyGameStopped({ reason: 'Player inactivity' })
         return
       }
 
       // force select row
-      // kick player
+      this.forceSelectRow()
+      waitingForPlayer.deactivate()
+      this.removePlayersFromRoom([waitingForPlayer])
+      this.notifyAboutKickedPlayers({ inactivePlayers: [waitingForPlayer] })
+      this.notifyGameStep()
+      this.finalizeSelectRow()
       return
     }
   }
@@ -310,16 +347,18 @@ export default class RoomGameTakeSix {
 
   private notifyAboutPlayerMoveToSpectators({
     inactivePlayers,
-    includeNewGameState,
   }: {
     readonly inactivePlayers: readonly RoomGameTakeSixPlayer[]
-    readonly includeNewGameState: boolean
   }) {
+    if (inactivePlayers.length === 0) {
+      return
+    }
+
     // Notify inactive players
     const eventData = {
       reason: 'inactivity',
       newRoomState: decorateRoom(this.room),
-      game: includeNewGameState ? this.generateSerializedState() : null,
+      game: this.room.game?.generateSerializedState() ?? null,
     } as const
 
     inactivePlayers.forEach((inactivePlayer) => {
@@ -336,11 +375,48 @@ export default class RoomGameTakeSix {
         reason: 'inactivity',
         userIds: inactivePlayers.map((player) => player.id),
         newRoomState: decorateRoom(this.room),
-        game: includeNewGameState ? this.generateSerializedState() : null,
+        game: this.room.game?.generateSerializedState() ?? null,
       } as const
 
       usersToSendEventTo.forEach((user) => {
         user.socket.emit('usersMovedToSpectators', eventData)
+      })
+    }
+  }
+
+  private notifyAboutKickedPlayers({
+    inactivePlayers,
+  }: {
+    readonly inactivePlayers: readonly RoomGameTakeSixPlayer[]
+  }) {
+    if (inactivePlayers.length === 0) {
+      return
+    }
+
+    // Notify inactive players
+    inactivePlayers.forEach((inactivePlayer) => {
+      inactivePlayer.user.socket.emit('youHaveBeenKicked', { reason: 'inactivity' })
+    })
+
+    if (this.room.isDestroyed) {
+      return
+    }
+
+    // Notify all other users
+    const usersToSendEventTo = this.room.allUsers.filter(
+      (user) => !inactivePlayers.find((inactivePlayer) => inactivePlayer.id === user.id),
+    )
+
+    if (usersToSendEventTo.length > 0) {
+      const eventData = {
+        reason: 'kickedForInactivity',
+        userIds: inactivePlayers.map((player) => player.id),
+        newRoomState: decorateRoom(this.room),
+        game: this.room.game?.generateSerializedState() ?? null,
+      } as const
+
+      usersToSendEventTo.forEach((user) => {
+        user.socket.emit('usersLeft', eventData)
       })
     }
   }
@@ -356,7 +432,10 @@ export default class RoomGameTakeSix {
   public stopGame({ reason }: { reason: string }): void {
     this.clearAllTimers()
     this.unassignReferencesFromRoomAndRoomMembers()
+    this.emitNotifyGameStopped({ reason })
+  }
 
+  private emitNotifyGameStopped({ reason }: { reason: string }): void {
     this.room.allUsers.forEach((user) => user.socket.emit('notifyGameStopped', { reason }))
   }
 
@@ -416,6 +495,14 @@ export default class RoomGameTakeSix {
         notifyAboutPlayerLeave()
       }
     }
+  }
+
+  private removePlayersFromRoom(players: readonly RoomGameTakeSixPlayer[]) {
+    RemoveUsersFromRoom.call({
+      app: this.room.app,
+      users: players.map((player) => player.user),
+      room: this.room,
+    })
   }
 
   private findPlayer(playerId: string): RoomGameTakeSixPlayer {

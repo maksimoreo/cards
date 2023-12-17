@@ -14,6 +14,16 @@ export function removeSingleByPropertyOrThrow<ValueT, K extends PropertyKey, T e
   items.splice(itemIndex, 1)
 }
 
+export function findSingleByIdOrThrow<T extends { id: string }>(items: readonly T[], id: string): T {
+  const item = items.find((item) => item.id === id)
+
+  if (!item) {
+    throw new Error(`Cannot find item by id: "${id}"`)
+  }
+
+  return item
+}
+
 export function removeSingleByIdOrThrow(items: { id: string }[], id: string): void {
   removeSingleByPropertyOrThrow(items, 'id', id)
 }
@@ -79,4 +89,34 @@ export type ValueOf<T> = T[keyof T]
 
 export function decide(probability: number): boolean {
   return _.random(true) > probability
+}
+
+/**
+ * Returns a formatted string which includes size of array and sample array elements (5 by default). Sort of matches
+ * Chrome DevTools console style.
+ *
+ * Example:
+ *
+ * ```
+ * toPrintableList([1, 2, 3, 4, 5, 6, 7])
+ * // (7) [1, 2, 3, 4, 5, ...]
+ * ```
+ *
+ * @param items Items to print
+ * @param options Options
+ * @returns Formatted printable list of items
+ */
+export function toPrintableList<T>(
+  items: readonly T[],
+  options?: { sampleItemsLimit?: number | null | undefined },
+): string {
+  const sampleItemsLimit = options?.sampleItemsLimit ?? 5
+  const { length } = items
+  const sampleItems = items
+    .slice(0, sampleItemsLimit)
+    .map((item) => `"${item}"`)
+    .join(', ')
+  const ellipsis = length > sampleItemsLimit ? ', ...' : ''
+
+  return `(${length}) [${sampleItems}${ellipsis}]`
 }

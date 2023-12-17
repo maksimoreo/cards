@@ -117,6 +117,7 @@ export default class LeaveCurrentRoom {
     }
 
     app.io.in(room.name).emit('notifyUserLeft', {
+      reason: 'selfAction',
       userId: this.props.user.id,
       game: this.getGameStateForNotifyMemberLeftMessage(),
       newRoomState: decorateRoom(room),

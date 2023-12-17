@@ -5,9 +5,19 @@ import Card from './lib/TakeSix/Card'
 import { SerializedStep } from './lib/TakeSix/TakeSix'
 import { GameOptions } from './models/Room'
 
+export type UserLeftReason = 'selfAction' | 'kickedForInactivity' | 'kickedByOwner' | 'kickedByVote' | 'disconnected'
+
 // Events data types
 export interface NotifyUserLeftData {
   userId: string
+  reason: UserLeftReason
+  newRoomState: DecoratedRoom
+  game: SerializedState | null
+}
+
+export interface EventData_usersLeft {
+  userIds: string[]
+  reason: UserLeftReason
   newRoomState: DecoratedRoom
   game: SerializedState | null
 }
@@ -63,13 +73,6 @@ export interface EventData_GameOptionsUpdated {
 
 type UserMovedToSpectatorsReason = 'inactivity' | 'ownerAction' | 'selfAction'
 
-export interface EventData_UserMovedToSpectators {
-  readonly reason: UserMovedToSpectatorsReason
-  readonly userId: string
-  readonly newRoomState: DecoratedRoom
-  readonly game: SerializedState | null
-}
-
 export interface EventData_UsersMovedToSpectators {
   readonly reason: UserMovedToSpectatorsReason
   readonly userIds: string[]
@@ -83,12 +86,19 @@ export interface EventData_YouHaveBeenMovedToSpectators {
   readonly game: SerializedState | null
 }
 
+type UserKickedReason = 'inactivity' | 'ownerAction' | 'roomClosed'
+
+export interface EventData_youHaveBeenKicked {
+  readonly reason: UserKickedReason
+}
+
 // All events type
 
 type ServerToClientEventCallback<DataT> = (data: DataT) => void
 
 export interface ServerToClientEvents {
   notifyUserLeft: ServerToClientEventCallback<NotifyUserLeftData>
+  usersLeft: ServerToClientEventCallback<EventData_usersLeft>
   notifyOwnerLeft: ServerToClientEventCallback<NotifyOwnerLeftData>
   notifyUserJoined: ServerToClientEventCallback<NotifyUserJoinedData>
   notifyUserPlayedCard: ServerToClientEventCallback<NotifyUserPlayedCardData>
@@ -99,7 +109,7 @@ export interface ServerToClientEvents {
   notifyUserMessage: ServerToClientEventCallback<NotifyUserMessageData>
   rooms: ServerToClientEventCallback<EventData_Rooms>
   gameOptionsUpdated: ServerToClientEventCallback<EventData_GameOptionsUpdated>
-  userMovedToSpectators: ServerToClientEventCallback<EventData_UserMovedToSpectators>
   usersMovedToSpectators: ServerToClientEventCallback<EventData_UsersMovedToSpectators>
   youHaveBeenMovedToSpectators: ServerToClientEventCallback<EventData_YouHaveBeenMovedToSpectators>
+  youHaveBeenKicked: ServerToClientEventCallback<EventData_youHaveBeenKicked>
 }

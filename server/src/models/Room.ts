@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 
+import App from '../App'
 import RoomGameTakeSix from '../lib/RoomGameTakeSix/Game'
 import User from './User'
 
@@ -11,6 +12,7 @@ export type GameOptions = {
 }
 
 export default class Room {
+  public readonly app: App
   public name: string
   public readonly users: User[]
   public readonly id: string
@@ -18,8 +20,10 @@ export default class Room {
   public password: string
   public game?: RoomGameTakeSix
   public gameOptions: GameOptions
+  public isDestroyed: boolean = false
 
-  constructor(options: { id?: string; name: string; owner: User; password?: string }) {
+  constructor(options: { app: App; id?: string; name: string; owner: User; password?: string }) {
+    this.app = options.app
     this.users = []
     this.name = options.name
     this.id = options.id ?? uuidv4()

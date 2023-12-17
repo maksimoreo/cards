@@ -16,6 +16,9 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
     await expect(
       createRoom(client3, { name: 'theroom' }, { globalClients: [client1, client2] }),
     ).resolves.toBeUndefined()
+
+    const roomId = getApp().rooms[0].id
+
     await expect(
       joinRoom(client1, { name: 'theroom' }, { roomClients: [client3], globalClients: [client2] }),
     ).resolves.toBeUndefined()
@@ -240,40 +243,79 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
       const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
       const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
 
-      // client1, client3, receive 'usersMovedToSpectators' event
-      await expect(client1Promise_usersMovedToSpectators).resolves.toMatchObject({
-        userIds: [client2.id],
-        newRoomState: {
-          owner: { id: client3.id },
-          users: [{ id: client1.id }, { id: client2.id }],
+      const sharedData_gameState = {
+        rows: [
+          c([26]), //
+          c([6, 7, 8, 9, 10]),
+          c([3]),
+          c([18, 19]),
+        ],
+        players: [
+          {
+            id: client3.id,
+            hasSelectedCard: false,
+            penaltyPoints: 0,
+            isActive: true,
+            user: { id: client3.id, color: 'D1D5DB', name: client3.id },
+          },
+          {
+            id: client1.id,
+            hasSelectedCard: false,
+            penaltyPoints: 0,
+            isActive: true,
+            user: { id: client1.id, color: 'D1D5DB', name: client1.id },
+          },
+          {
+            id: client2.id,
+            hasSelectedCard: false,
+            penaltyPoints: 0,
+            isActive: false,
+            user: { id: client2.id, color: 'D1D5DB', name: client2.id },
+          },
+        ],
+        stepsLeft: 8,
+      }
+
+      const sharedData_newRoomState = {
+        id: roomId,
+        name: 'theroom',
+        owner: { id: client3.id, color: 'D1D5DB', name: client3.id },
+        users: [
+          { id: client1.id, color: 'D1D5DB', name: client1.id },
+          { id: client2.id, color: 'D1D5DB', name: client2.id },
+        ],
+        gameOptions: {
+          mode: 'normal',
+          playerInactivityStrategy: 'moveToSpectators',
+          stepTimeout: 5000,
+          type: 'takeSix',
         },
+      }
+
+      // client1, client3, receive 'usersMovedToSpectators' event
+      await expect(client1Promise_usersMovedToSpectators).resolves.toStrictEqual({
+        reason: 'inactivity',
+        game: sharedData_gameState,
+        userIds: [client2.id],
+        newRoomState: sharedData_newRoomState,
       })
 
-      await expect(client3Promise_usersMovedToSpectators).resolves.toMatchObject({
+      await expect(client3Promise_usersMovedToSpectators).resolves.toStrictEqual({
+        reason: 'inactivity',
+        game: sharedData_gameState,
         userIds: [client2.id],
-        newRoomState: {
-          owner: { id: client3.id },
-          users: [{ id: client1.id }, { id: client2.id }],
-        },
+        newRoomState: sharedData_newRoomState,
       })
 
       // client2 receives 'youHaveBeenMovedToSpectators' event
-      await expect(client2Promise_youHaveBeenMovedToSpectators).resolves.toMatchObject({
-        newRoomState: {
-          owner: { id: client3.id },
-          users: [{ id: client1.id }, { id: client2.id }],
-        },
-        game: {
-          players: [
-            { id: client3.id, isActive: true },
-            { id: client1.id, isActive: true },
-            { id: client2.id, isActive: false },
-          ],
-        },
+      await expect(client2Promise_youHaveBeenMovedToSpectators).resolves.toStrictEqual({
+        reason: 'inactivity',
+        game: sharedData_gameState,
+        newRoomState: sharedData_newRoomState,
       })
 
       // Everyone receive 'notifyGameStep' event
-      const sharedData = {
+      const sharedData_gameStep = {
         step: {
           selectedCards: [
             { playerId: client3.id, card: c(10) },
@@ -284,51 +326,20 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
             { playerId: client1.id, card: c(19), rowIndex: 3, takesRow: false },
           ],
         },
-        gameState: {
-          rows: [
-            c([26]), //
-            c([6, 7, 8, 9, 10]),
-            c([3]),
-            c([18, 19]),
-          ],
-          players: [
-            {
-              id: client3.id,
-              hasSelectedCard: false,
-              penaltyPoints: 0,
-              isActive: true,
-              user: { id: client3.id, color: 'D1D5DB', name: client3.id },
-            },
-            {
-              id: client1.id,
-              hasSelectedCard: false,
-              penaltyPoints: 0,
-              isActive: true,
-              user: { id: client1.id, color: 'D1D5DB', name: client1.id },
-            },
-            {
-              id: client2.id,
-              hasSelectedCard: false,
-              penaltyPoints: 0,
-              isActive: false,
-              user: { id: client2.id, color: 'D1D5DB', name: client2.id },
-            },
-          ],
-          stepsLeft: 8,
-        },
+        gameState: sharedData_gameState,
       }
 
       await expect(client1Promise_notifyGameStep).resolves.toStrictEqual({
-        ...sharedData,
+        ...sharedData_gameStep,
         playerCards: c([1, 5, 21, 23, 25, 30, 31, 34]),
       })
 
       await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
-        ...sharedData,
+        ...sharedData_gameStep,
       })
 
       await expect(client3Promise_notifyGameStep).resolves.toStrictEqual({
-        ...sharedData,
+        ...sharedData_gameStep,
         playerCards: c([14, 15, 17, 20, 24, 27, 29, 32]),
       })
     }
@@ -355,32 +366,42 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
       const client3Promise_youHaveBeenMovedToSpectators = client3.waitForEvent('youHaveBeenMovedToSpectators')
       const client3Promise_notifyGameStopped = client3.waitForEvent('notifyGameStopped')
 
+      const sharedData_newRoomState = {
+        id: roomId,
+        name: 'theroom',
+        owner: { id: client3.id, color: 'D1D5DB', name: client3.id },
+        users: [
+          { id: client1.id, color: 'D1D5DB', name: client1.id },
+          { id: client2.id, color: 'D1D5DB', name: client2.id },
+        ],
+        gameOptions: {
+          mode: 'normal',
+          playerInactivityStrategy: 'moveToSpectators',
+          stepTimeout: 5000,
+          type: 'takeSix',
+        },
+      }
+
       // client1, client2 receive 'usersMovedToSpectators' event
-      await expect(client1Promise_usersMovedToSpectators).resolves.toMatchObject({
+      await expect(client1Promise_usersMovedToSpectators).resolves.toStrictEqual({
+        reason: 'inactivity',
         userIds: [client3.id],
         game: null,
-        newRoomState: {
-          owner: { id: client3.id },
-          users: [{ id: client1.id }, { id: client2.id }],
-        },
+        newRoomState: sharedData_newRoomState,
       })
 
-      await expect(client2Promise_usersMovedToSpectators).resolves.toMatchObject({
+      await expect(client2Promise_usersMovedToSpectators).resolves.toStrictEqual({
+        reason: 'inactivity',
         userIds: [client3.id],
         game: null,
-        newRoomState: {
-          owner: { id: client3.id },
-          users: [{ id: client1.id }, { id: client2.id }],
-        },
+        newRoomState: sharedData_newRoomState,
       })
 
       // client3 receives 'youHaveBeenMovedToSpectators' event
-      await expect(client3Promise_youHaveBeenMovedToSpectators).resolves.toMatchObject({
+      await expect(client3Promise_youHaveBeenMovedToSpectators).resolves.toStrictEqual({
+        reason: 'inactivity',
         game: null,
-        newRoomState: {
-          owner: { id: client3.id },
-          users: [{ id: client1.id }, { id: client2.id }],
-        },
+        newRoomState: sharedData_newRoomState,
       })
 
       // All clients receive 'notifyGameStopped' event
