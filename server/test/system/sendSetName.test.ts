@@ -2,7 +2,7 @@ import 'jest-extended'
 
 import { useApp, useClient, useClients } from './helpers/testHooks'
 
-describe('Send setName message', () => {
+describe('Send setName event', () => {
   const getApp = useApp()
 
   describe('with single client', () => {

@@ -63,7 +63,7 @@ describe('Player leaving behavior', () => {
 
     room.game.startGame()
 
-    console.log('STEP 5')
+    console.log('Step 5')
 
     await expect(
       playCard(client1, { cardValue: 7, otherClients: [client2, client3, client4] }),
@@ -78,9 +78,9 @@ describe('Player leaving behavior', () => {
     {
       const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
       const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
-      const client1promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
-      const client2promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
-      const client4promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
+      const client1Promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
+      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
+      const client4Promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
 
       await expect(client4.emitEvent('playCard', { card: 25 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
@@ -141,23 +141,23 @@ describe('Player leaving behavior', () => {
         },
       }
 
-      await expect(client1promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client1Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([8, 14, 22, 24, 41]),
       })
 
-      await expect(client2promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([4, 31, 33, 35, 39]),
       })
 
-      await expect(client4promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client4Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([17, 30, 32, 43, 44]),
       })
     }
 
-    console.log('STEP 6')
+    console.log('Step 6')
 
     await expect(playCard(client4, { cardValue: 32, otherClients: [client1, client2] })).resolves.toBeUndefined()
 
@@ -166,9 +166,9 @@ describe('Player leaving behavior', () => {
     {
       const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
       const client4Promise_notifyUserPlayedCard = client4.waitForEvent('notifyUserPlayedCard')
-      const client1promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
-      const client2promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
-      const client4promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
+      const client1Promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
+      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
+      const client4Promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
 
       await expect(client2.emitEvent('playCard', { card: 31 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
@@ -229,23 +229,23 @@ describe('Player leaving behavior', () => {
         },
       }
 
-      await expect(client1promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client1Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([8, 14, 22, 41]),
       })
 
-      await expect(client2promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([4, 33, 35, 39]),
       })
 
-      await expect(client4promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client4Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([17, 30, 43, 44]),
       })
     }
 
-    console.log('STEP 7')
+    console.log('Step 7')
 
     await expect(playCard(client4, { cardValue: 43, otherClients: [client1, client2] })).resolves.toBeUndefined()
 
@@ -262,9 +262,9 @@ describe('Player leaving behavior', () => {
       const client2Promise_notifyOwnerLeft = client2.waitForEvent('notifyOwnerLeft')
       const client3Promise_notifyOwnerLeft = client3.waitForEvent('notifyOwnerLeft')
       const client4Promise_notifyOwnerLeft = client4.waitForEvent('notifyOwnerLeft')
-      const client2promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
-      const client3promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
-      const client4promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
+      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
+      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
+      const client4Promise_notifyGameStep = client4.waitForEvent('notifyGameStep')
 
       await expect(client1.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
@@ -325,14 +325,14 @@ describe('Player leaving behavior', () => {
         },
       }
 
-      await expect(client2promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([4, 35, 39]),
       })
 
-      await expect(client3promise_notifyGameStep).resolves.toStrictEqual(sharedData)
+      await expect(client3Promise_notifyGameStep).resolves.toStrictEqual(sharedData)
 
-      await expect(client4promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client4Promise_notifyGameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([17, 30, 44]),
       })

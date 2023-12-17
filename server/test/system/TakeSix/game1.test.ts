@@ -30,7 +30,7 @@ describe('Game #1', () => {
     })
 
     {
-      const client2Waiter = client2.waitForEvent('notifyGameStarted')
+      const client2Promise_notifyGameStarted = client2.waitForEvent('notifyGameStarted')
 
       await expect(
         client1.emitEvent('startGame', { cardsPool, stepTimeout: 5000, selectRowTimeout: 5000 }),
@@ -66,7 +66,7 @@ describe('Game #1', () => {
         },
       })
 
-      await expect(client2Waiter).resolves.toStrictEqual({
+      await expect(client2Promise_notifyGameStarted).resolves.toStrictEqual({
         gameState: {
           players: [
             {
@@ -102,7 +102,8 @@ describe('Game #1', () => {
       message: 'Not waiting for row input',
     })
 
-    // STEP 1
+    console.log('Step 1')
+
     // client1 plays a card
     await expect(playCard(client1, { cardValue: 4, otherClients: [client2] })).resolves.toBeUndefined()
 
@@ -165,7 +166,8 @@ describe('Game #1', () => {
       })
     }
 
-    // STEP 2
+    console.log('Step 2')
+
     // client1 plays a card
     await expect(playCard(client1, { cardValue: 11, otherClients: [client2] })).resolves.toBeUndefined()
 
@@ -229,7 +231,8 @@ describe('Game #1', () => {
       })
     }
 
-    // STEP 3
+    console.log('Step 3')
+
     // client2 plays a card
     await expect(playCard(client2, { cardValue: 5, otherClients: [client1] })).resolves.toBeUndefined()
 
@@ -293,7 +296,8 @@ describe('Game #1', () => {
       })
     }
 
-    // STEP 4
+    console.log('Step 4')
+
     // client2 plays a card
     await expect(playCard(client2, { cardValue: 8, otherClients: [client1] })).resolves.toBeUndefined()
 
@@ -359,7 +363,8 @@ describe('Game #1', () => {
       })
     }
 
-    // STEP 5
+    console.log('Step 5')
+
     // client1 plays invalid card
     await expect(client1.emitEvent('playCard', { card: 6 })).resolves.toStrictEqual({
       code: 'BAD_REQUEST',
@@ -437,7 +442,8 @@ describe('Game #1', () => {
       })
     }
 
-    // STEP 6
+    console.log('Step 6')
+
     // client1 plays a card
     await expect(playCard(client1, { cardValue: 13, otherClients: [client2] })).toResolve()
 
@@ -498,7 +504,8 @@ describe('Game #1', () => {
       })
     }
 
-    // STEP 7
+    console.log('Step 7')
+
     // client2 plays a card
     await expect(playCard(client2, { cardValue: 8, otherClients: [client1] })).toResolve()
 
@@ -561,7 +568,8 @@ describe('Game #1', () => {
       })
     }
 
-    // STEP 8
+    console.log('Step 8.1')
+
     // client1 plays a card
     await expect(playCard(client1, { cardValue: 20, otherClients: [client2] })).toResolve()
 
@@ -621,7 +629,8 @@ describe('Game #1', () => {
       })
     }
 
-    // Step 8.1
+    console.log('Step 8.2')
+
     // client1 selects row
     await expect(client1.emitEvent('selectRow', { rowIndex: 1 })).resolves.toMatchObject({
       code: 'BAD_REQUEST',
@@ -691,7 +700,8 @@ describe('Game #1', () => {
       })
     }
 
-    // Step 9
+    console.log('Step 9')
+
     await expect(playCard(client1, { cardValue: 18, otherClients: [client2] })).toResolve()
 
     // client2 plays a card
@@ -753,7 +763,8 @@ describe('Game #1', () => {
       })
     }
 
-    // Step 10
+    console.log('Step 10')
+
     await expect(playCard(client1, { cardValue: 17, otherClients: [client2] })).toResolve()
 
     // client2 plays a card
@@ -812,7 +823,8 @@ describe('Game #1', () => {
       })
     }
 
-    // Step 10.1
+    console.log('Step 10.1')
+
     // client2 selects row
     {
       const client1GameStepPromise = client1.waitForEvent('notifyGameStep', { timeout: 6000 })

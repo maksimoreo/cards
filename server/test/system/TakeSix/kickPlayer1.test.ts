@@ -118,7 +118,7 @@ describe('Player Inactivity Strategy: Kick', () => {
       })
     }
 
-    console.log('Step 1')
+    console.log('Step 1.1')
 
     await expect(playCard(client2, { cardValue: 15, otherClients: [client1, client3] })).resolves.toBeUndefined()
     await expect(playCard(client3, { cardValue: 34, otherClients: [client1, client2] })).resolves.toBeUndefined()
@@ -194,7 +194,7 @@ describe('Player Inactivity Strategy: Kick', () => {
       })
     }
 
-    console.log('Step 1.1')
+    console.log('Step 1.2')
 
     await sleep(4500)
 

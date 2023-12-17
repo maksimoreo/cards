@@ -28,11 +28,11 @@ describe('Send chat messages to other clients', () => {
     })
 
     {
-      const client2Waiter = client2.waitForEvent('notifyUserMessage')
+      const client2Promise_notifyUserMessage = client2.waitForEvent('notifyUserMessage')
 
       await expect(client1.emitEvent('sendMessage', { message: 'hi' })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client2Waiter).resolves.toStrictEqual({
+      await expect(client2Promise_notifyUserMessage).resolves.toStrictEqual({
         message: 'hi',
         user: { id: client1.id, name: client1.id, color: 'D1D5DB' },
       })
@@ -43,16 +43,16 @@ describe('Send chat messages to other clients', () => {
     ).resolves.toBeUndefined()
 
     {
-      const client2Waiter = client2.waitForEvent('notifyUserMessage')
-      const client3Waiter = client3.waitForEvent('notifyUserMessage')
+      const client2Promise_notifyUserMessage = client2.waitForEvent('notifyUserMessage')
+      const client3Promise_notifyUserMessage = client3.waitForEvent('notifyUserMessage')
 
       await expect(client1.emitEvent('sendMessage', { message: 'hi' })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client2Waiter).resolves.toStrictEqual({
+      await expect(client2Promise_notifyUserMessage).resolves.toStrictEqual({
         message: 'hi',
         user: { id: client1.id, name: client1.id, color: 'D1D5DB' },
       })
-      await expect(client3Waiter).resolves.toStrictEqual({
+      await expect(client3Promise_notifyUserMessage).resolves.toStrictEqual({
         message: 'hi',
         user: { id: client1.id, name: client1.id, color: 'D1D5DB' },
       })
@@ -63,11 +63,11 @@ describe('Send chat messages to other clients', () => {
     ).resolves.toBeUndefined()
 
     {
-      const client3Waiter = client3.waitForEvent('notifyUserMessage')
+      const client3Promise_notifyUserMessage = client3.waitForEvent('notifyUserMessage')
 
       await expect(client2.emitEvent('sendMessage', { message: 'hi' })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client3Waiter).resolves.toStrictEqual({
+      await expect(client3Promise_notifyUserMessage).resolves.toStrictEqual({
         message: 'hi',
         user: { id: client2.id, name: client2.id, color: 'D1D5DB' },
       })

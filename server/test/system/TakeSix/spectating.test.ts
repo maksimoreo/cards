@@ -159,7 +159,7 @@ describe('Game spectating', () => {
       await expect(client3Promise_notifyUserJoined).resolves.toMatchObject({ user: { id: client4.id } })
     }
 
-    console.log('STEP 1')
+    console.log('Step 1')
 
     await expect(
       playCard(client3, { cardValue: 20, otherClients: [client1, client2, client4] }),
@@ -325,7 +325,7 @@ describe('Game spectating', () => {
       await expect(client5Promise_notifyGameStep).resolves.toStrictEqual(sharedData)
     }
 
-    // STEP 2
+    console.log('Step 2.1')
 
     await expect(
       playCard(client1, { cardValue: 8, otherClients: [client2, client3, client4, client5] }),
@@ -417,7 +417,7 @@ describe('Game spectating', () => {
       await expect(client5Promise_notifyGameStep).resolves.toStrictEqual(sharedData)
     }
 
-    console.log('STEP 2.1')
+    console.log('Step 2.2')
 
     // client6 joins while some player selects row
     {

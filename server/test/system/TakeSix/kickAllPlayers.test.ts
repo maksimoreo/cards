@@ -8,7 +8,7 @@ describe('Player Inactivity Strategy: Kick', () => {
   const getApp = useApp()
   const getClients = useClients(getApp, 4)
 
-  jest.setTimeout(30000)
+  jest.setTimeout(20000)
 
   test('Kick all players from room and close room', async () => {
     const app = getApp()

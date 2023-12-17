@@ -2,10 +2,6 @@ import { Socket } from 'socket.io-client'
 import { TestClient } from './TestClient'
 import { emitEvent } from './testHelpers'
 
-export function sendMessage(client: Socket, message: string): Promise<void> {
-  return expect(emitEvent(client, 'sendMessage', message)).resolves.toBe('ok')
-}
-
 export async function createRoom(
   client: TestClient,
   { name, password }: { readonly name: string; readonly password?: string },
@@ -89,7 +85,6 @@ export function selectRow(client: Socket, { rowIndex }: { rowIndex: number }): P
 }
 
 export default {
-  sendMessage,
   createRoom,
   joinRoom,
 }
