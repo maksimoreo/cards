@@ -107,7 +107,7 @@ export default class LeaveCurrentRoom {
     const { app, room } = this.props
 
     if (this.isOwner) {
-      app.io.in(room.name).emit('notifyOwnerLeft', {
+      app.io.in(room.name).emit('s2c_ownerLeft', {
         newOwner: decorateUser(room.owner),
         game: this.getGameStateForNotifyMemberLeftMessage(),
         newRoomState: decorateRoom(room),
@@ -116,7 +116,7 @@ export default class LeaveCurrentRoom {
       return
     }
 
-    app.io.in(room.name).emit('notifyUserLeft', {
+    app.io.in(room.name).emit('s2c_userLeft', {
       reason: 'selfAction',
       userId: this.props.user.id,
       game: this.getGameStateForNotifyMemberLeftMessage(),

@@ -40,7 +40,7 @@ export default function RoomView(): JSX.Element {
     dispatch(addMessage({ type: 'gameEnded', reason: 'win', sortedPlayers }))
   }
 
-  useSocketEventListener('notifyUserJoined', (data) => {
+  useSocketEventListener('s2c_userJoined', (data) => {
     dispatch(setRoom({ ...room, users: data.newRoomState.users }))
 
     dispatch(
@@ -52,7 +52,7 @@ export default function RoomView(): JSX.Element {
     )
   })
 
-  useSocketEventListener('notifyUserLeft', (data) => {
+  useSocketEventListener('s2c_userLeft', (data) => {
     dispatch(setRoom({ ...room, users: data.newRoomState.users }))
 
     tryFindById(room.users, data.userId, (user) =>
@@ -64,7 +64,7 @@ export default function RoomView(): JSX.Element {
     }
   })
 
-  useSocketEventListener('notifyOwnerLeft', (data) => {
+  useSocketEventListener('s2c_ownerLeft', (data) => {
     const { owner: previousOwner } = room
 
     dispatch(
@@ -89,10 +89,10 @@ export default function RoomView(): JSX.Element {
     }
   })
 
-  useSocketEventListener('notifyGameStarted', (notifyGameStartedData) => {
-    dispatch(setGame({ ...notifyGameStartedData, type: 'takesix', playersWithSelectedCard: [] }))
+  useSocketEventListener('s2c_gameStarted', (s2c_gameStartedData) => {
+    dispatch(setGame({ ...s2c_gameStartedData, type: 'takesix', playersWithSelectedCard: [] }))
 
-    const participants = notifyGameStartedData.gameState.players.map(({ id }) =>
+    const participants = s2c_gameStartedData.gameState.players.map(({ id }) =>
       createUserIdentity(findByIdOrThrow(allRoomUsers, id)),
     )
 

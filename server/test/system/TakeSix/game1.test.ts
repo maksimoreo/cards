@@ -30,7 +30,7 @@ describe('Game #1', () => {
     })
 
     {
-      const client2Promise_notifyGameStarted = client2.waitForEvent('notifyGameStarted')
+      const client2Promise_s2c_gameStarted = client2.waitForEvent('s2c_gameStarted')
 
       await expect(
         client1.emitEvent('startGame', { cardsPool, stepTimeout: 5000, selectRowTimeout: 5000 }),
@@ -66,7 +66,7 @@ describe('Game #1', () => {
         },
       })
 
-      await expect(client2Promise_notifyGameStarted).resolves.toStrictEqual({
+      await expect(client2Promise_s2c_gameStarted).resolves.toStrictEqual({
         gameState: {
           players: [
             {
@@ -109,13 +109,13 @@ describe('Game #1', () => {
 
     // client2 plays a card
     {
-      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1Promise_s2c_userPlayedCard = client1.waitForEvent('s2c_userPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client2.emitEvent('playCard', { card: 2 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
+      await expect(client1Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -173,13 +173,13 @@ describe('Game #1', () => {
 
     // client2 plays a card
     {
-      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1Promise_s2c_userPlayedCard = client1.waitForEvent('s2c_userPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client2.emitEvent('playCard', { card: 12 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
+      await expect(client1Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -238,13 +238,13 @@ describe('Game #1', () => {
 
     // client1 plays a card
     {
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2Promise_s2c_userPlayedCard = client2.waitForEvent('s2c_userPlayedCard')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client1.emitEvent('playCard', { card: 9 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
+      await expect(client2Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client1.id })
 
       const sharedData = {
         step: {
@@ -306,13 +306,13 @@ describe('Game #1', () => {
 
     // client1 plays a card
     {
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2Promise_s2c_userPlayedCard = client2.waitForEvent('s2c_userPlayedCard')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client1.emitEvent('playCard', { card: 15 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
+      await expect(client2Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client1.id })
 
       const sharedData = {
         step: {
@@ -385,13 +385,13 @@ describe('Game #1', () => {
 
     // client2 plays valid card
     {
-      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1Promise_s2c_userPlayedCard = client1.waitForEvent('s2c_userPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client2.emitEvent('playCard', { card: 24 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
+      await expect(client1Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -450,8 +450,8 @@ describe('Game #1', () => {
     // client2 did not select a card in time
     // Note: Should select automatically the highest number if no input is provided from this client
     {
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep', { timeout: 6000 })
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep', { timeout: 6000 })
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep', { timeout: 6000 })
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep', { timeout: 6000 })
 
       await sleep(3000)
 
@@ -511,13 +511,13 @@ describe('Game #1', () => {
 
     // client1 plays a card
     {
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2Promise_s2c_userPlayedCard = client2.waitForEvent('s2c_userPlayedCard')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client1.emitEvent('playCard', { card: 21 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
+      await expect(client2Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client1.id })
 
       const sharedData = {
         step: {
@@ -575,13 +575,13 @@ describe('Game #1', () => {
 
     // client2 plays a card
     {
-      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1Promise_s2c_userPlayedCard = client1.waitForEvent('s2c_userPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client2.emitEvent('playCard', { card: 7 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
+      await expect(client1Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -646,8 +646,8 @@ describe('Game #1', () => {
 
     // client2 selects valid row
     {
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client2.emitEvent('selectRow', { rowIndex: 1 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
@@ -706,13 +706,13 @@ describe('Game #1', () => {
 
     // client2 plays a card
     {
-      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1Promise_s2c_userPlayedCard = client1.waitForEvent('s2c_userPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client2.emitEvent('playCard', { card: 19 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
+      await expect(client1Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -769,13 +769,13 @@ describe('Game #1', () => {
 
     // client2 plays a card
     {
-      const client1Promise_notifyUserPlayedCard = client1.waitForEvent('notifyUserPlayedCard')
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep')
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep')
+      const client1Promise_s2c_userPlayedCard = client1.waitForEvent('s2c_userPlayedCard')
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep')
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep')
 
       await expect(client2.emitEvent('playCard', { card: 6 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client1Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client2.id })
+      await expect(client1Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client2.id })
 
       const sharedData = {
         step: {
@@ -827,10 +827,10 @@ describe('Game #1', () => {
 
     // client2 selects row
     {
-      const client1GameStepPromise = client1.waitForEvent('notifyGameStep', { timeout: 6000 })
-      const client1Promise_notifyGameStopped = client1.waitForEvent('notifyGameStopped', { timeout: 6000 })
-      const client2GameStepPromise = client2.waitForEvent('notifyGameStep', { timeout: 6000 })
-      const client2Promise_notifyGameStopped = client2.waitForEvent('notifyGameStopped', { timeout: 6000 })
+      const client1GameStepPromise = client1.waitForEvent('s2c_gameStep', { timeout: 6000 })
+      const client1Promise_s2c_gameStopped = client1.waitForEvent('s2c_gameStopped', { timeout: 6000 })
+      const client2GameStepPromise = client2.waitForEvent('s2c_gameStep', { timeout: 6000 })
+      const client2Promise_s2c_gameStopped = client2.waitForEvent('s2c_gameStopped', { timeout: 6000 })
 
       // client2 does not select row in time, game automatically selects first row
 
@@ -884,11 +884,11 @@ describe('Game #1', () => {
         playerCards: [],
       })
 
-      await expect(client1Promise_notifyGameStopped).resolves.toStrictEqual({
+      await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'Completed',
       })
 
-      await expect(client2Promise_notifyGameStopped).resolves.toStrictEqual({
+      await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'Completed',
       })
     }

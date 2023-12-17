@@ -21,7 +21,7 @@ export async function joinRoom(
   { name, password }: { name: string; password?: string },
   { roomClients, globalClients }: { roomClients: readonly TestClient[]; globalClients?: readonly TestClient[] },
 ): Promise<void> {
-  const roomClientsPromises = roomClients.map((client) => client.waitForEvent('notifyUserJoined'))
+  const roomClientsPromises = roomClients.map((client) => client.waitForEvent('s2c_userJoined'))
   const globalClientsPromises = (globalClients || []).map((client) => client.waitForEvent('rooms'))
 
   await expect(client.emitEvent('joinRoom', { name, password })).resolves.toMatchObject({
@@ -48,7 +48,7 @@ export async function leaveCurrentRoom(
     globalClients,
   }: { readonly roomClients: readonly TestClient[]; readonly globalClients: readonly TestClient[] },
 ): Promise<void> {
-  const expectedEventForRoomClients = asOwner ? 'notifyOwnerLeft' : 'notifyUserLeft'
+  const expectedEventForRoomClients = asOwner ? 's2c_ownerLeft' : 's2c_userLeft'
   const roomClientsPromises = roomClients.map((client) => client.waitForEvent(expectedEventForRoomClients))
 
   // Note: client that leaves the room also received 'rooms' event
@@ -73,7 +73,7 @@ export async function playCard(
   client: TestClient,
   { cardValue, otherClients }: { cardValue: number; otherClients: readonly TestClient[] },
 ): Promise<void> {
-  const otherClientPromises = otherClients.map((client) => client.waitForEvent('notifyUserPlayedCard'))
+  const otherClientPromises = otherClients.map((client) => client.waitForEvent('s2c_userPlayedCard'))
 
   await expect(client.emitEvent('playCard', { card: cardValue })).resolves.toStrictEqual({ code: 'SUCCESS' })
 

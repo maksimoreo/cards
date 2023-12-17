@@ -67,7 +67,7 @@ export default class JoinRoomHandler extends ResponseReturningMessageHandler<IJo
 
     room.allUsers.forEach((user) => {
       if (user !== currentUser) {
-        user.socket.emit('notifyUserJoined', {
+        user.socket.emit('s2c_userJoined', {
           user: decorateUser(currentUser),
           newRoomState: decorateRoom(room),
         })

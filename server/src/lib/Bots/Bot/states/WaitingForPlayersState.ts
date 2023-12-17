@@ -28,11 +28,11 @@ export default class WaitingForPlayersState {
     if (event.type === 'serverEvent') {
       const { serverEvent } = event.props
 
-      if (serverEvent.type === 'notifyUserLeft') {
+      if (serverEvent.type === 's2c_userLeft') {
         return new WaitingForPlayersState({ ...props, room: serverEvent.data.newRoomState })
       }
 
-      if (serverEvent.type === 'notifyUserJoined' || serverEvent.type === 'notifyOwnerLeft') {
+      if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_ownerLeft') {
         const newState = new WaitingForPlayersState({ ...props, room: serverEvent.data.newRoomState })
 
         if (canStartGame(newState.props)) {
@@ -42,11 +42,11 @@ export default class WaitingForPlayersState {
         return newState
       }
 
-      if (serverEvent.type === 'notifyUserMessage') {
+      if (serverEvent.type === 's2c_userMessage') {
         return this
       }
 
-      if (serverEvent.type === 'notifyGameStarted') {
+      if (serverEvent.type === 's2c_gameStarted') {
         const { data } = serverEvent
 
         if (!data.playerCards) {

@@ -28,7 +28,7 @@ export default class SendMessageHandler extends VoidMessageHandler {
     const { message } = input
 
     // Notify all users about the message
-    socket.in(room.name).emit('notifyUserMessage', {
+    socket.in(room.name).emit('s2c_userMessage', {
       message,
       user: decorateUser(currentUser),
     })

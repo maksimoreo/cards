@@ -41,7 +41,7 @@ export default class PlayCardHandler extends BasicMessageHandler<void> {
 
     room.allUsers
       .filter((user) => user.id !== currentUser.id)
-      .forEach((user) => user.socket.emit('notifyUserPlayedCard', { userId: currentUser.id }))
+      .forEach((user) => user.socket.emit('s2c_userPlayedCard', { userId: currentUser.id }))
 
     this.respondWithSuccess()
 

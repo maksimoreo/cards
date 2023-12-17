@@ -60,7 +60,7 @@ export default function GameForm() {
     })
   }
 
-  useSocketEventListener('gameOptionsUpdated', (data) => {
+  useSocketEventListener('s2c_gameOptionsUpdated', (data) => {
     setGameMode(data.gameOptions.mode)
     setStepTimeout(
       STEP_TIMEOUT_NUMBER_TO_STEP_TIMEOUT_VALUE_MAP[data.gameOptions.stepTimeout] ||
@@ -69,7 +69,7 @@ export default function GameForm() {
     setPlayerInactivityStrategy(data.gameOptions.playerInactivityStrategy)
   })
 
-  useSocketEventListener('notifyGameStarted', () => {
+  useSocketEventListener('s2c_gameStarted', () => {
     saveGameOptionsToGlobalState()
   })
 

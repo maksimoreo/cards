@@ -110,7 +110,7 @@ export default function Game(props: Props): JSX.Element {
   const [stepTimeoutIndicatorKey, setStepTimeoutIndicatorKey] = useState(false)
   const resetStepTimeoutIndicator = () => setStepTimeoutIndicatorKey((currentValue) => !currentValue)
 
-  useSocketEventListener('notifyUserPlayedCard', ({ userId }) => {
+  useSocketEventListener('s2c_userPlayedCard', ({ userId }) => {
     if (animationStep) {
       // Other player skipped animation and sent their card before current player's animation is finished.
       // Postpone handling of this notification until animation is done
@@ -136,13 +136,13 @@ export default function Game(props: Props): JSX.Element {
     )
   }
 
-  useSocketEventListener('notifyUserLeft', ({ game }) => {
+  useSocketEventListener('s2c_userLeft', ({ game }) => {
     if (game) {
       updatePlayerListOnUserLeave(game)
     }
   })
 
-  useSocketEventListener('notifyOwnerLeft', ({ game }) => {
+  useSocketEventListener('s2c_ownerLeft', ({ game }) => {
     if (game) {
       updatePlayerListOnUserLeave(game)
     }
@@ -237,7 +237,7 @@ export default function Game(props: Props): JSX.Element {
               })),
             )
 
-            // Wait for 'notifyGameStep' message
+            // Wait for 's2c_gameStep' message
           } else {
             setAnimationStep({
               type: 'playingCard',
@@ -432,7 +432,7 @@ export default function Game(props: Props): JSX.Element {
     }
   }, [animationStep])
 
-  useSocketEventListener('notifyGameStep', (data): void => {
+  useSocketEventListener('s2c_gameStep', (data): void => {
     // Players will see animations for up to ~ 5-10 seconds, but server is already counting step timeout
     resetStepTimeoutIndicator()
 
@@ -460,7 +460,7 @@ export default function Game(props: Props): JSX.Element {
       if (response.code === 'SUCCESS') {
         setAllowSelectRow(false)
 
-        // Continue when 'notifyGameStep' message comes in
+        // Continue when 's2c_gameStep' message comes in
       }
     })
   }

@@ -38,14 +38,14 @@ export default class WaitingBeforePlayingCardState {
     if (event.type === 'serverEvent') {
       const { serverEvent } = event.props
 
-      if (serverEvent.type === 'notifyUserPlayedCard' || serverEvent.type === 'notifyUserMessage') {
+      if (serverEvent.type === 's2c_userPlayedCard' || serverEvent.type === 's2c_userMessage') {
         return this
       }
 
       if (
-        serverEvent.type === 'notifyUserJoined' ||
-        serverEvent.type === 'notifyUserLeft' ||
-        serverEvent.type === 'notifyOwnerLeft'
+        serverEvent.type === 's2c_userJoined' ||
+        serverEvent.type === 's2c_userLeft' ||
+        serverEvent.type === 's2c_ownerLeft'
       ) {
         return new WaitingBeforePlayingCardState({ ...props, room: serverEvent.data.newRoomState })
       }

@@ -31,9 +31,9 @@ describe('Player Inactivity Strategy: Kick', () => {
     console.log('client4 changes game options')
 
     {
-      const client1Promise_gameOptionsUpdated = client1.waitForEvent('gameOptionsUpdated')
-      const client2Promise_gameOptionsUpdated = client2.waitForEvent('gameOptionsUpdated')
-      const client3Promise_gameOptionsUpdated = client3.waitForEvent('gameOptionsUpdated')
+      const client1Promise_s2c_gameOptionsUpdated = client1.waitForEvent('s2c_gameOptionsUpdated')
+      const client2Promise_s2c_gameOptionsUpdated = client2.waitForEvent('s2c_gameOptionsUpdated')
+      const client3Promise_s2c_gameOptionsUpdated = client3.waitForEvent('s2c_gameOptionsUpdated')
 
       await expect(
         client4.emitEvent('updateGameOptions', {
@@ -52,17 +52,17 @@ describe('Player Inactivity Strategy: Kick', () => {
         },
       }
 
-      await expect(client1Promise_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
-      await expect(client2Promise_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
-      await expect(client3Promise_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
+      await expect(client1Promise_s2c_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
+      await expect(client2Promise_s2c_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
+      await expect(client3Promise_s2c_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
     }
 
     console.log('Starting the game')
 
     {
-      const client1Promise_notifyGameStarted = client1.waitForEvent('notifyGameStarted')
-      const client2Promise_notifyGameStarted = client2.waitForEvent('notifyGameStarted')
-      const client3Promise_notifyGameStarted = client3.waitForEvent('notifyGameStarted')
+      const client1Promise_s2c_gameStarted = client1.waitForEvent('s2c_gameStarted')
+      const client2Promise_s2c_gameStarted = client2.waitForEvent('s2c_gameStarted')
+      const client3Promise_s2c_gameStarted = client3.waitForEvent('s2c_gameStarted')
 
       const gameState = {
         players: [
@@ -122,17 +122,17 @@ describe('Player Inactivity Strategy: Kick', () => {
         },
       })
 
-      await expect(client3Promise_notifyGameStarted).resolves.toStrictEqual({
+      await expect(client3Promise_s2c_gameStarted).resolves.toStrictEqual({
         gameState,
         playerCards: c([3, 5, 10, 17, 21, 25, 28, 29, 35, 40]),
       })
 
-      await expect(client2Promise_notifyGameStarted).resolves.toStrictEqual({
+      await expect(client2Promise_s2c_gameStarted).resolves.toStrictEqual({
         gameState,
         playerCards: c([2, 4, 6, 11, 12, 16, 20, 23, 26, 33]),
       })
 
-      await expect(client1Promise_notifyGameStarted).resolves.toStrictEqual({
+      await expect(client1Promise_s2c_gameStarted).resolves.toStrictEqual({
         gameState,
         playerCards: c([1, 9, 22, 32, 36, 37, 38, 42, 43, 44]),
       })
@@ -143,15 +143,15 @@ describe('Player Inactivity Strategy: Kick', () => {
     await sleep(2500)
 
     {
-      const client1Promise_youHaveBeenKicked = client1.waitForEvent('youHaveBeenKicked')
-      const client2Promise_youHaveBeenKicked = client2.waitForEvent('youHaveBeenKicked')
-      const client3Promise_youHaveBeenKicked = client3.waitForEvent('youHaveBeenKicked')
-      const client4Promise_youHaveBeenKicked = client4.waitForEvent('youHaveBeenKicked')
+      const client1Promise_s2c_youHaveBeenKicked = client1.waitForEvent('s2c_youHaveBeenKicked')
+      const client2Promise_s2c_youHaveBeenKicked = client2.waitForEvent('s2c_youHaveBeenKicked')
+      const client3Promise_s2c_youHaveBeenKicked = client3.waitForEvent('s2c_youHaveBeenKicked')
+      const client4Promise_s2c_youHaveBeenKicked = client4.waitForEvent('s2c_youHaveBeenKicked')
 
-      await expect(client1Promise_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
-      await expect(client2Promise_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
-      await expect(client3Promise_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
-      await expect(client4Promise_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
+      await expect(client1Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
+      await expect(client2Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
+      await expect(client3Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
+      await expect(client4Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
     }
 
     expect(app.rooms).toBeEmpty()

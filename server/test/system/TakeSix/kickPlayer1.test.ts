@@ -27,8 +27,8 @@ describe('Player Inactivity Strategy: Kick', () => {
     console.log('client2 changes game options')
 
     {
-      const client1Promise_gameOptionsUpdated = client1.waitForEvent('gameOptionsUpdated')
-      const client3Promise_gameOptionsUpdated = client3.waitForEvent('gameOptionsUpdated')
+      const client1Promise_s2c_gameOptionsUpdated = client1.waitForEvent('s2c_gameOptionsUpdated')
+      const client3Promise_s2c_gameOptionsUpdated = client3.waitForEvent('s2c_gameOptionsUpdated')
 
       await expect(
         client2.emitEvent('updateGameOptions', {
@@ -47,15 +47,15 @@ describe('Player Inactivity Strategy: Kick', () => {
         },
       }
 
-      await expect(client1Promise_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
-      await expect(client3Promise_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
+      await expect(client1Promise_s2c_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
+      await expect(client3Promise_s2c_gameOptionsUpdated).resolves.toStrictEqual(expectedEventData)
     }
 
     console.log('Starting the game')
 
     {
-      const client1Promise_notifyGameStarted = client1.waitForEvent('notifyGameStarted')
-      const client3Promise_notifyGameStarted = client3.waitForEvent('notifyGameStarted')
+      const client1Promise_s2c_gameStarted = client1.waitForEvent('s2c_gameStarted')
+      const client3Promise_s2c_gameStarted = client3.waitForEvent('s2c_gameStarted')
 
       const gameState = {
         players: [
@@ -107,12 +107,12 @@ describe('Player Inactivity Strategy: Kick', () => {
         },
       })
 
-      await expect(client1Promise_notifyGameStarted).resolves.toStrictEqual({
+      await expect(client1Promise_s2c_gameStarted).resolves.toStrictEqual({
         gameState,
         playerCards: c([2, 5, 6, 8, 9, 12, 17, 18, 27, 30]),
       })
 
-      await expect(client3Promise_notifyGameStarted).resolves.toStrictEqual({
+      await expect(client3Promise_s2c_gameStarted).resolves.toStrictEqual({
         gameState,
         playerCards: c([4, 11, 14, 16, 22, 25, 26, 29, 33, 34]),
       })
@@ -124,16 +124,16 @@ describe('Player Inactivity Strategy: Kick', () => {
     await expect(playCard(client3, { cardValue: 34, otherClients: [client1, client2] })).resolves.toBeUndefined()
 
     {
-      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
-      const client3Promise_notifyUserPlayedCard = client3.waitForEvent('notifyUserPlayedCard')
-      const client1Promise_notifyGameStep = client1.waitForEvent('notifyGameStep')
-      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
-      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
+      const client2Promise_s2c_userPlayedCard = client2.waitForEvent('s2c_userPlayedCard')
+      const client3Promise_s2c_userPlayedCard = client3.waitForEvent('s2c_userPlayedCard')
+      const client1Promise_s2c_gameStep = client1.waitForEvent('s2c_gameStep')
+      const client2Promise_s2c_gameStep = client2.waitForEvent('s2c_gameStep')
+      const client3Promise_s2c_gameStep = client3.waitForEvent('s2c_gameStep')
 
       await expect(client1.emitEvent('playCard', { card: 2 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
-      await expect(client3Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client1.id })
+      await expect(client2Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client1.id })
+      await expect(client3Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client1.id })
 
       const sharedData = {
         step: {
@@ -178,17 +178,17 @@ describe('Player Inactivity Strategy: Kick', () => {
         },
       }
 
-      await expect(client1Promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client1Promise_s2c_gameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([2, 5, 6, 8, 9, 12, 17, 18, 27, 30]),
       })
 
-      await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client2Promise_s2c_gameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([1, 3, 10, 15, 19, 21, 24, 28, 31, 32]),
       })
 
-      await expect(client3Promise_notifyGameStep).resolves.toStrictEqual({
+      await expect(client3Promise_s2c_gameStep).resolves.toStrictEqual({
         ...sharedData,
         playerCards: c([4, 11, 14, 16, 22, 25, 26, 29, 33, 34]),
       })
@@ -199,14 +199,14 @@ describe('Player Inactivity Strategy: Kick', () => {
     await sleep(4500)
 
     {
-      const client1Promise_youHaveBeenKicked = client1.waitForEvent('youHaveBeenKicked')
-      const client2Promise_usersLeft = client2.waitForEvent('usersLeft')
-      const client3Promise_usersLeft = client3.waitForEvent('usersLeft')
-      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
-      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
+      const client1Promise_s2c_youHaveBeenKicked = client1.waitForEvent('s2c_youHaveBeenKicked')
+      const client2Promise_s2c_usersLeft = client2.waitForEvent('s2c_usersLeft')
+      const client3Promise_s2c_usersLeft = client3.waitForEvent('s2c_usersLeft')
+      const client2Promise_s2c_gameStep = client2.waitForEvent('s2c_gameStep')
+      const client3Promise_s2c_gameStep = client3.waitForEvent('s2c_gameStep')
 
-      // client1 receives 'youHaveBeenKicked' event
-      await expect(client1Promise_youHaveBeenKicked).resolves.toStrictEqual({
+      // client1 receives 's2c_youHaveBeenKicked' event
+      await expect(client1Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({
         reason: 'inactivity',
       })
 
@@ -256,19 +256,19 @@ describe('Player Inactivity Strategy: Kick', () => {
         },
       }
 
-      const sharedData_usersLeft = {
+      const sharedData_s2c_usersLeft = {
         userIds: [client1.id],
         reason: 'kickedForInactivity',
         game: sharedData_gameState,
         newRoomState: sharedData_newRoomState,
       }
 
-      // client2, client3 receive 'usersLeft' event
-      await expect(client2Promise_usersLeft).resolves.toStrictEqual(sharedData_usersLeft)
-      await expect(client3Promise_usersLeft).resolves.toStrictEqual(sharedData_usersLeft)
+      // client2, client3 receive 's2c_usersLeft' event
+      await expect(client2Promise_s2c_usersLeft).resolves.toStrictEqual(sharedData_s2c_usersLeft)
+      await expect(client3Promise_s2c_usersLeft).resolves.toStrictEqual(sharedData_s2c_usersLeft)
 
-      // all clients receive 'notifyGameStep' event
-      const sharedData_notifyGameStep = {
+      // all clients receive 's2c_gameStep' event
+      const sharedData_s2c_gameStep = {
         step: {
           selectedCards: [
             { playerId: client2.id, card: c(15) },
@@ -284,13 +284,13 @@ describe('Player Inactivity Strategy: Kick', () => {
         gameState: sharedData_gameState,
       }
 
-      await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
-        ...sharedData_notifyGameStep,
+      await expect(client2Promise_s2c_gameStep).resolves.toStrictEqual({
+        ...sharedData_s2c_gameStep,
         playerCards: c([1, 3, 10, 19, 21, 24, 28, 31, 32]),
       })
 
-      await expect(client3Promise_notifyGameStep).resolves.toStrictEqual({
-        ...sharedData_notifyGameStep,
+      await expect(client3Promise_s2c_gameStep).resolves.toStrictEqual({
+        ...sharedData_s2c_gameStep,
         playerCards: c([4, 11, 14, 16, 22, 25, 26, 29, 33]),
       })
     }
@@ -300,15 +300,15 @@ describe('Player Inactivity Strategy: Kick', () => {
     await expect(playCard(client2, { cardValue: 10, otherClients: [client3] })).resolves.toBeUndefined()
 
     {
-      const client2Promise_notifyUserPlayedCard = client2.waitForEvent('notifyUserPlayedCard')
-      const client2Promise_notifyGameStep = client2.waitForEvent('notifyGameStep')
-      const client3Promise_notifyGameStep = client3.waitForEvent('notifyGameStep')
+      const client2Promise_s2c_userPlayedCard = client2.waitForEvent('s2c_userPlayedCard')
+      const client2Promise_s2c_gameStep = client2.waitForEvent('s2c_gameStep')
+      const client3Promise_s2c_gameStep = client3.waitForEvent('s2c_gameStep')
 
       await expect(client3.emitEvent('playCard', { card: 11 })).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client2Promise_notifyUserPlayedCard).resolves.toStrictEqual({ userId: client3.id })
+      await expect(client2Promise_s2c_userPlayedCard).resolves.toStrictEqual({ userId: client3.id })
 
-      const sharedData_notifyGameStep = {
+      const sharedData_s2c_gameStep = {
         step: {
           selectedCards: [
             { playerId: client2.id, card: c(10) },
@@ -353,13 +353,13 @@ describe('Player Inactivity Strategy: Kick', () => {
         },
       }
 
-      await expect(client2Promise_notifyGameStep).resolves.toStrictEqual({
-        ...sharedData_notifyGameStep,
+      await expect(client2Promise_s2c_gameStep).resolves.toStrictEqual({
+        ...sharedData_s2c_gameStep,
         playerCards: c([1, 3, 19, 21, 24, 28, 31, 32]),
       })
 
-      await expect(client3Promise_notifyGameStep).resolves.toStrictEqual({
-        ...sharedData_notifyGameStep,
+      await expect(client3Promise_s2c_gameStep).resolves.toStrictEqual({
+        ...sharedData_s2c_gameStep,
         playerCards: c([4, 14, 16, 22, 25, 26, 29, 33]),
       })
     }
@@ -371,15 +371,15 @@ describe('Player Inactivity Strategy: Kick', () => {
     await sleep(4500)
 
     {
-      const client2Promise_youHaveBeenKicked = client2.waitForEvent('youHaveBeenKicked')
-      const client3Promise_usersLeft = client3.waitForEvent('usersLeft')
-      const client3Promise_notifyGameStopped = client3.waitForEvent('notifyGameStopped')
+      const client2Promise_s2c_youHaveBeenKicked = client2.waitForEvent('s2c_youHaveBeenKicked')
+      const client3Promise_s2c_usersLeft = client3.waitForEvent('s2c_usersLeft')
+      const client3Promise_s2c_gameStopped = client3.waitForEvent('s2c_gameStopped')
 
-      await expect(client2Promise_youHaveBeenKicked).resolves.toStrictEqual({
+      await expect(client2Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({
         reason: 'inactivity',
       })
 
-      await expect(client3Promise_usersLeft).resolves.toStrictEqual({
+      await expect(client3Promise_s2c_usersLeft).resolves.toStrictEqual({
         userIds: [client2.id],
         reason: 'kickedForInactivity',
         game: null,
@@ -397,7 +397,7 @@ describe('Player Inactivity Strategy: Kick', () => {
         },
       })
 
-      await expect(client3Promise_notifyGameStopped).resolves.toStrictEqual({
+      await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'Player inactivity',
       })
     }

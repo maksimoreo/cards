@@ -28,7 +28,7 @@ describe('Game without card pool', () => {
     })
 
     {
-      const client2Promise_notifyGameStarted = client2.waitForEvent('notifyGameStarted')
+      const client2Promise_s2c_gameStarted = client2.waitForEvent('s2c_gameStarted')
 
       // objects are unfilled bc they r randomized
       const gameData = {
@@ -60,19 +60,19 @@ describe('Game without card pool', () => {
         data: gameData,
       })
 
-      await expect(client2Promise_notifyGameStarted).resolves.toMatchObject(gameData)
+      await expect(client2Promise_s2c_gameStarted).resolves.toMatchObject(gameData)
     }
 
     console.log('client1 stops game')
 
     {
-      const client1Promise_notifyGameStopped = client1.waitForEvent('notifyGameStopped')
-      const client2Promise_notifyGameStopped = client2.waitForEvent('notifyGameStopped')
+      const client1Promise_s2c_gameStopped = client1.waitForEvent('s2c_gameStopped')
+      const client2Promise_s2c_gameStopped = client2.waitForEvent('s2c_gameStopped')
 
       await expect(client1.emitEvent('stopGame', undefined)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client1Promise_notifyGameStopped).resolves.toStrictEqual({ reason: 'Room owner action' })
-      await expect(client2Promise_notifyGameStopped).resolves.toStrictEqual({ reason: 'Room owner action' })
+      await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'Room owner action' })
+      await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'Room owner action' })
     }
 
     expectClientsExpectedEventsQueuesClean(getClients())

@@ -86,7 +86,7 @@ export default class RoomGameTakeSix {
     }
 
     this.game.step()
-    this.notifyGameStep()
+    this.s2c_gameStep()
     this.finalizeSelectCard()
   }
 
@@ -99,7 +99,7 @@ export default class RoomGameTakeSix {
   }
 
   public handleRowSelected(): void {
-    this.notifyGameStep()
+    this.s2c_gameStep()
     this.finalizeSelectRow()
   }
 
@@ -139,7 +139,7 @@ export default class RoomGameTakeSix {
     }
   }
 
-  private notifyGameStep(): void {
+  private s2c_gameStep(): void {
     const gameState = this.generateSerializedState()
 
     this.room.allUsers.forEach((user) => {
@@ -151,7 +151,7 @@ export default class RoomGameTakeSix {
         ...(!!player && { playerCards: player.cards }),
       }
 
-      user.socket.emit('notifyGameStep', messageData)
+      user.socket.emit('s2c_gameStep', messageData)
     })
   }
 
@@ -204,7 +204,7 @@ export default class RoomGameTakeSix {
       if (leftActivePlayersCount <= 1) {
         this.unassignReferencesFromRoomAndRoomMembers()
         this.notifyAboutPlayerMoveToSpectators({ inactivePlayers })
-        this.emitNotifyGameStopped({ reason: 'Player inactivity' })
+        this.emits2c_gameStopped({ reason: 'Player inactivity' })
         return
       }
 
@@ -214,7 +214,7 @@ export default class RoomGameTakeSix {
 
       this.game.step()
       this.notifyAboutPlayerMoveToSpectators({ inactivePlayers })
-      this.notifyGameStep()
+      this.s2c_gameStep()
       this.finalizeSelectCard()
     } else if (playerInactivityStrategy === 'forcePlay') {
       // Note: In test environment, always select the highest value card, to make tests deterministic
@@ -232,7 +232,7 @@ export default class RoomGameTakeSix {
       })
 
       this.game.step()
-      this.notifyGameStep()
+      this.s2c_gameStep()
       this.finalizeSelectCard()
     } else if (playerInactivityStrategy === 'kick') {
       if (leftActivePlayersCount <= 1) {
@@ -240,7 +240,7 @@ export default class RoomGameTakeSix {
         this.removePlayersFromRoom(inactivePlayers)
         this.notifyAboutKickedPlayers({ inactivePlayers })
         if (!this.room.isDestroyed) {
-          this.emitNotifyGameStopped({ reason: 'Player inactivity' })
+          this.emits2c_gameStopped({ reason: 'Player inactivity' })
         }
         return
       }
@@ -252,7 +252,7 @@ export default class RoomGameTakeSix {
       this.removePlayersFromRoom(inactivePlayers)
       this.game.step()
       this.notifyAboutKickedPlayers({ inactivePlayers })
-      this.notifyGameStep()
+      this.s2c_gameStep()
       this.finalizeSelectCard()
     }
   }
@@ -268,7 +268,7 @@ export default class RoomGameTakeSix {
 
     if (playerInactivityStrategy === 'forcePlay') {
       this.forceSelectRow()
-      this.notifyGameStep()
+      this.s2c_gameStep()
       this.finalizeSelectRow()
       return
     }
@@ -284,14 +284,14 @@ export default class RoomGameTakeSix {
       if (this.game.activePlayers.length <= 2) {
         this.unassignReferencesFromRoomAndRoomMembers()
         this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer] })
-        this.emitNotifyGameStopped({ reason: 'Player inactivity' })
+        this.emits2c_gameStopped({ reason: 'Player inactivity' })
         return
       }
 
       this.forceSelectRow()
       waitingForPlayer.deactivate()
       this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer] })
-      this.notifyGameStep()
+      this.s2c_gameStep()
       this.finalizeSelectRow()
       return
     }
@@ -301,7 +301,7 @@ export default class RoomGameTakeSix {
         this.removePlayersFromRoom([waitingForPlayer])
         this.unassignReferencesFromRoomAndRoomMembers()
         this.notifyAboutKickedPlayers({ inactivePlayers: [waitingForPlayer] })
-        this.emitNotifyGameStopped({ reason: 'Player inactivity' })
+        this.emits2c_gameStopped({ reason: 'Player inactivity' })
         return
       }
 
@@ -309,7 +309,7 @@ export default class RoomGameTakeSix {
       waitingForPlayer.deactivate()
       this.removePlayersFromRoom([waitingForPlayer])
       this.notifyAboutKickedPlayers({ inactivePlayers: [waitingForPlayer] })
-      this.notifyGameStep()
+      this.s2c_gameStep()
       this.finalizeSelectRow()
       return
     }
@@ -342,7 +342,7 @@ export default class RoomGameTakeSix {
     } as const
 
     inactivePlayers.forEach((inactivePlayer) => {
-      inactivePlayer.user.socket.emit('youHaveBeenMovedToSpectators', eventData)
+      inactivePlayer.user.socket.emit('s2c_youHaveBeenMovedToSpectators', eventData)
     })
 
     // Notify all other users
@@ -359,7 +359,7 @@ export default class RoomGameTakeSix {
       } as const
 
       usersToSendEventTo.forEach((user) => {
-        user.socket.emit('usersMovedToSpectators', eventData)
+        user.socket.emit('s2c_usersMovedToSpectators', eventData)
       })
     }
   }
@@ -375,7 +375,7 @@ export default class RoomGameTakeSix {
 
     // Notify inactive players
     inactivePlayers.forEach((inactivePlayer) => {
-      inactivePlayer.user.socket.emit('youHaveBeenKicked', { reason: 'inactivity' })
+      inactivePlayer.user.socket.emit('s2c_youHaveBeenKicked', { reason: 'inactivity' })
     })
 
     if (this.room.isDestroyed) {
@@ -396,7 +396,7 @@ export default class RoomGameTakeSix {
       } as const
 
       usersToSendEventTo.forEach((user) => {
-        user.socket.emit('usersLeft', eventData)
+        user.socket.emit('s2c_usersLeft', eventData)
       })
     }
   }
@@ -412,11 +412,11 @@ export default class RoomGameTakeSix {
   public stopGame({ reason }: { reason: string }): void {
     this.clearAllTimers()
     this.unassignReferencesFromRoomAndRoomMembers()
-    this.emitNotifyGameStopped({ reason })
+    this.emits2c_gameStopped({ reason })
   }
 
-  private emitNotifyGameStopped({ reason }: { reason: string }): void {
-    this.room.allUsers.forEach((user) => user.socket.emit('notifyGameStopped', { reason }))
+  private emits2c_gameStopped({ reason }: { reason: string }): void {
+    this.room.allUsers.forEach((user) => user.socket.emit('s2c_gameStopped', { reason }))
   }
 
   private unassignReferencesFromRoomAndRoomMembers(): void {
@@ -453,7 +453,7 @@ export default class RoomGameTakeSix {
       if (this.game.didAllPlayersSelectCard()) {
         this.game.step()
         notifyAboutPlayerLeave()
-        this.notifyGameStep()
+        this.s2c_gameStep()
         this.finalizeSelectCard()
       } else {
         notifyAboutPlayerLeave()
@@ -463,7 +463,7 @@ export default class RoomGameTakeSix {
         this.forceSelectRow()
         player.deactivate()
         notifyAboutPlayerLeave()
-        this.notifyGameStep()
+        this.s2c_gameStep()
         this.finalizeSelectRow()
       } else {
         player.deactivate()

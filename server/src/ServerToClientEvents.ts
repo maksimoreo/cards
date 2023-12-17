@@ -8,57 +8,57 @@ import { GameOptions } from './models/Room'
 export type UserLeftReason = 'selfAction' | 'kickedForInactivity' | 'kickedByOwner' | 'kickedByVote' | 'disconnected'
 
 // Events data types
-export interface NotifyUserLeftData {
+export interface EventData_s2c_userLeft {
   userId: string
   reason: UserLeftReason
   newRoomState: DecoratedRoom
   game: SerializedState | null
 }
 
-export interface EventData_usersLeft {
+export interface EventData_s2c_usersLeft {
   userIds: string[]
   reason: UserLeftReason
   newRoomState: DecoratedRoom
   game: SerializedState | null
 }
 
-export interface NotifyOwnerLeftData {
+export interface EventData_s2c_ownerLeft {
   newOwner: DecoratedUser
   newRoomState: DecoratedRoom
   game: SerializedState | null
 }
 
-export interface NotifyUserJoinedData {
+export interface EventData_s2c_userJoined {
   user: DecoratedUser
   newRoomState: DecoratedRoom
 }
 
-export interface NotifyUserPlayedCardData {
+export interface EventData_s2c_userPlayedCard {
   userId: string
 }
 
-export interface NotifyGameStartedData {
+export interface EventData_s2c_gameStarted {
   // TODO: Rename gameState -> game
   gameState: SerializedState
   playerCards?: Card[]
 }
 
-export interface NotifyGameStoppedData {
+export interface EventData_s2c_gameStopped {
   reason: string
 }
 
-export interface NotifyGameStepData {
+export interface EventData_s2c_gameStep {
   step: SerializedStep
   // TODO: Rename gameState -> game
   gameState: SerializedState
   playerCards?: Card[]
 }
 
-export interface NotifyRoomClosedData {
+export interface EventData_s2c_roomClosed {
   roomId: string
 }
 
-export interface NotifyUserMessageData {
+export interface EventData_s2c_userMessage {
   message: string
   user: DecoratedUser
 }
@@ -67,20 +67,20 @@ export interface EventData_Rooms {
   readonly rooms: readonly DecoratedGlobalRoom[]
 }
 
-export interface EventData_GameOptionsUpdated {
+export interface EventData_s2c_gameOptionsUpdated {
   readonly gameOptions: GameOptions
 }
 
 type UserMovedToSpectatorsReason = 'inactivity' | 'ownerAction' | 'selfAction'
 
-export interface EventData_UsersMovedToSpectators {
+export interface EventData_s2c_usersMovedToSpectators {
   readonly reason: UserMovedToSpectatorsReason
   readonly userIds: string[]
   readonly newRoomState: DecoratedRoom
   readonly game: SerializedState | null
 }
 
-export interface EventData_YouHaveBeenMovedToSpectators {
+export interface EventData_s2c_youHaveBeenMovedToSpectators {
   readonly reason: UserMovedToSpectatorsReason
   readonly newRoomState: DecoratedRoom
   readonly game: SerializedState | null
@@ -88,28 +88,27 @@ export interface EventData_YouHaveBeenMovedToSpectators {
 
 type UserKickedReason = 'inactivity' | 'ownerAction' | 'roomClosed'
 
-export interface EventData_youHaveBeenKicked {
+export interface EventData_s2c_youHaveBeenKicked {
   readonly reason: UserKickedReason
 }
 
-// All events type
-
 type ServerToClientEventCallback<DataT> = (data: DataT) => void
 
+// prettier-ignore
 export interface ServerToClientEvents {
-  notifyUserLeft: ServerToClientEventCallback<NotifyUserLeftData>
-  usersLeft: ServerToClientEventCallback<EventData_usersLeft>
-  notifyOwnerLeft: ServerToClientEventCallback<NotifyOwnerLeftData>
-  notifyUserJoined: ServerToClientEventCallback<NotifyUserJoinedData>
-  notifyUserPlayedCard: ServerToClientEventCallback<NotifyUserPlayedCardData>
-  notifyGameStarted: ServerToClientEventCallback<NotifyGameStartedData>
-  notifyGameStopped: ServerToClientEventCallback<NotifyGameStoppedData>
-  notifyGameStep: ServerToClientEventCallback<NotifyGameStepData>
-  notifyRoomClosed: ServerToClientEventCallback<NotifyRoomClosedData>
-  notifyUserMessage: ServerToClientEventCallback<NotifyUserMessageData>
-  rooms: ServerToClientEventCallback<EventData_Rooms>
-  gameOptionsUpdated: ServerToClientEventCallback<EventData_GameOptionsUpdated>
-  usersMovedToSpectators: ServerToClientEventCallback<EventData_UsersMovedToSpectators>
-  youHaveBeenMovedToSpectators: ServerToClientEventCallback<EventData_YouHaveBeenMovedToSpectators>
-  youHaveBeenKicked: ServerToClientEventCallback<EventData_youHaveBeenKicked>
+  s2c_userLeft:                     ServerToClientEventCallback<EventData_s2c_userLeft>
+  s2c_usersLeft:                    ServerToClientEventCallback<EventData_s2c_usersLeft>
+  s2c_ownerLeft:                    ServerToClientEventCallback<EventData_s2c_ownerLeft>
+  s2c_userJoined:                   ServerToClientEventCallback<EventData_s2c_userJoined>
+  s2c_userPlayedCard:               ServerToClientEventCallback<EventData_s2c_userPlayedCard>
+  s2c_gameStarted:                  ServerToClientEventCallback<EventData_s2c_gameStarted>
+  s2c_gameStopped:                  ServerToClientEventCallback<EventData_s2c_gameStopped>
+  s2c_gameStep:                     ServerToClientEventCallback<EventData_s2c_gameStep>
+  s2c_roomClosed:                   ServerToClientEventCallback<EventData_s2c_roomClosed>
+  s2c_userMessage:                  ServerToClientEventCallback<EventData_s2c_userMessage>
+  rooms:                            ServerToClientEventCallback<EventData_Rooms>
+  s2c_gameOptionsUpdated:           ServerToClientEventCallback<EventData_s2c_gameOptionsUpdated>
+  s2c_usersMovedToSpectators:       ServerToClientEventCallback<EventData_s2c_usersMovedToSpectators>
+  s2c_youHaveBeenMovedToSpectators: ServerToClientEventCallback<EventData_s2c_youHaveBeenMovedToSpectators>
+  s2c_youHaveBeenKicked:            ServerToClientEventCallback<EventData_s2c_youHaveBeenKicked>
 }

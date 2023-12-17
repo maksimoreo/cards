@@ -99,7 +99,7 @@ export default class StartGameHandler extends ResponseReturningMessageHandler<St
     room.game = game
 
     room.users.forEach((user) => {
-      user.socket.emit('notifyGameStarted', {
+      user.socket.emit('s2c_gameStarted', {
         gameState: game.generateSerializedState(),
         ...(user.player && { playerCards: user.player.cards }),
       })

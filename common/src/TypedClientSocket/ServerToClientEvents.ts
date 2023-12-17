@@ -10,53 +10,53 @@ import {
 } from './schemas'
 
 export default interface ServerToClientEvents {
-  notifyUserPlayedCard: (unknownData: unknown) => void
-  notifyGameStep: (unknownData: unknown) => void
-  notifyUserJoined: (unknownData: unknown) => void
-  notifyUserLeft: (unknownData: unknown) => void
-  notifyOwnerLeft: (unknownData: unknown) => void
-  notifyGameStarted: (unknownData: unknown) => void
-  notifyUserMessage: (unknownData: unknown) => void
+  s2c_userPlayedCard: (unknownData: unknown) => void
+  s2c_gameStep: (unknownData: unknown) => void
+  s2c_userJoined: (unknownData: unknown) => void
+  s2c_userLeft: (unknownData: unknown) => void
+  s2c_ownerLeft: (unknownData: unknown) => void
+  s2c_gameStarted: (unknownData: unknown) => void
+  s2c_userMessage: (unknownData: unknown) => void
   rooms: (unknownData: unknown) => void
-  gameOptionsUpdated: (unknownData: unknown) => void
+  s2c_gameOptionsUpdated: (unknownData: unknown) => void
 }
 
 export type ServerToClientEventsUnion = keyof ServerToClientEvents
 
 export const SERVER_NOTIFICATION_DATA_SCHEMA_MAP = {
-  notifyUserPlayedCard: z.object({
+  s2c_userPlayedCard: z.object({
     userId: z.string(),
   }),
 
-  notifyGameStep: z.object({
+  s2c_gameStep: z.object({
     step: GAME_STEP_SCHEMA,
     gameState: GAME_STATE_SCHEMA,
     playerCards: z.array(CARD_SCHEMA).optional(),
   }),
 
-  notifyUserJoined: z.object({
+  s2c_userJoined: z.object({
     user: USER_SCHEMA,
     newRoomState: ROOM_SCHEMA,
   }),
 
-  notifyUserLeft: z.object({
+  s2c_userLeft: z.object({
     userId: z.string(),
     newRoomState: ROOM_SCHEMA,
     game: GAME_STATE_SCHEMA.nullable(),
   }),
 
-  notifyOwnerLeft: z.object({
+  s2c_ownerLeft: z.object({
     newOwner: USER_SCHEMA,
     newRoomState: ROOM_SCHEMA,
     game: GAME_STATE_SCHEMA.nullable(),
   }),
 
-  notifyGameStarted: z.object({
+  s2c_gameStarted: z.object({
     gameState: GAME_STATE_SCHEMA,
     playerCards: z.array(CARD_SCHEMA).optional(),
   }),
 
-  notifyUserMessage: z.object({
+  s2c_userMessage: z.object({
     message: z.string(),
     user: USER_SCHEMA,
   }),
@@ -73,7 +73,7 @@ export const SERVER_NOTIFICATION_DATA_SCHEMA_MAP = {
     ),
   }),
 
-  gameOptionsUpdated: z.object({
+  s2c_gameOptionsUpdated: z.object({
     gameOptions: GAME_OPTIONS_SCHEMA,
   }),
 }
@@ -81,15 +81,15 @@ export const SERVER_NOTIFICATION_DATA_SCHEMA_MAP = {
 export type ServerEventToDataSchemaMapT = typeof SERVER_NOTIFICATION_DATA_SCHEMA_MAP
 
 export const SERVER_TO_CLIENT_EVENTS: (keyof ServerEventToDataSchemaMapT)[] = [
-  'notifyUserPlayedCard',
-  'notifyGameStep',
-  'notifyUserJoined',
-  'notifyUserLeft',
-  'notifyOwnerLeft',
-  'notifyGameStarted',
-  'notifyUserMessage',
+  's2c_userPlayedCard',
+  's2c_gameStep',
+  's2c_userJoined',
+  's2c_userLeft',
+  's2c_ownerLeft',
+  's2c_gameStarted',
+  's2c_userMessage',
   'rooms',
-  'gameOptionsUpdated',
+  's2c_gameOptionsUpdated',
 ]
 
 export function isServerEvent(event: string): event is keyof ServerEventToDataSchemaMapT {

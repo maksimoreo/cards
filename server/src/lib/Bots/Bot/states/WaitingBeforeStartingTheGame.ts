@@ -38,11 +38,11 @@ export default class WaitingBeforeStartingTheGameState {
     if (event.type === 'serverEvent') {
       const { serverEvent } = event.props
 
-      if (serverEvent.type === 'notifyUserMessage' || serverEvent.type === 'notifyUserPlayedCard') {
+      if (serverEvent.type === 's2c_userMessage' || serverEvent.type === 's2c_userPlayedCard') {
         return this
       }
 
-      if (serverEvent.type === 'notifyUserJoined' || serverEvent.type === 'notifyUserLeft') {
+      if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_userLeft') {
         return new WaitingBeforeStartingTheGameState({ ...props, room: serverEvent.data.newRoomState })
       }
     }

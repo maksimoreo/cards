@@ -47,7 +47,7 @@ export default class Room {
 
     // Notify users that room is closed
     this.allUsers.forEach((user) => {
-      user.socket.emit('notifyRoomClosed', { roomId: this.id })
+      user.socket.emit('s2c_roomClosed', { roomId: this.id })
     })
   }
 }

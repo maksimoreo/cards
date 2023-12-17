@@ -49,7 +49,7 @@ export default class UpdateGameOptionsHandler extends VoidMessageHandler {
     // Notify all room members except owner.
     // TODO: Debounce to 1 emit/sec
     room.users.forEach((user) => {
-      user.socket.emit('gameOptionsUpdated', {
+      user.socket.emit('s2c_gameOptionsUpdated', {
         gameOptions: room.gameOptions,
       })
     })

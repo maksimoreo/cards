@@ -43,7 +43,7 @@ export function Chat(): JSX.Element {
     })
   }
 
-  useSocketEventListener('notifyUserMessage', (data): void => {
+  useSocketEventListener('s2c_userMessage', (data): void => {
     dispatch(
       addMessage({
         type: 'remoteUserMessage',

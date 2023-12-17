@@ -35,14 +35,14 @@ export default class WaitingForGameStepState {
     if (event.type === 'serverEvent') {
       const { serverEvent } = event.props
 
-      if (serverEvent.type === 'notifyUserPlayedCard' || serverEvent.type === 'notifyUserMessage') {
+      if (serverEvent.type === 's2c_userPlayedCard' || serverEvent.type === 's2c_userMessage') {
         return this
       }
 
       if (
-        serverEvent.type === 'notifyUserJoined' ||
-        serverEvent.type === 'notifyUserLeft' ||
-        serverEvent.type === 'notifyOwnerLeft'
+        serverEvent.type === 's2c_userJoined' ||
+        serverEvent.type === 's2c_userLeft' ||
+        serverEvent.type === 's2c_ownerLeft'
       ) {
         return new WaitingForGameStepState({
           ...props,
@@ -50,7 +50,7 @@ export default class WaitingForGameStepState {
         })
       }
 
-      if (serverEvent.type === 'notifyGameStep') {
+      if (serverEvent.type === 's2c_gameStep') {
         if ('waitingPlayer' in serverEvent.data.step) {
           if (serverEvent.data.step.waitingPlayer === botInternals.socket.id) {
             const rowIndex = random(0, props.gameState.rows.length - 1)
