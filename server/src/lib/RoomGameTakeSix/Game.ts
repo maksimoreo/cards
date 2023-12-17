@@ -81,11 +81,13 @@ export default class RoomGameTakeSix {
   }
 
   public handleCardPlayed(): void {
-    if (this.didAllPlayersSelectCard()) {
-      this.clearStepTimer()
-
-      this.makeStep()
+    if (!this.didAllPlayersSelectCard()) {
+      return
     }
+
+    this.game.step()
+    this.notifyGameStep()
+    this.finalizeSelectCard()
   }
 
   public didAllPlayersSelectCard(): boolean {
@@ -97,34 +99,11 @@ export default class RoomGameTakeSix {
   }
 
   public handleRowSelected(): void {
-    this.clearSelectRowTimer()
     this.notifyGameStep()
-    this.finalizeStep()
+    this.finalizeSelectRow()
   }
 
-  // Assumes all players selected their cards, conditionally waits player to select row
-  public makeStep(): void {
-    this.game.step()
-
-    this.notifyGameStep()
-
-    if (this.game.isWaitingForPlayer()) {
-      this.startSelectRowTimer()
-    } else {
-      this.finalizeStep()
-    }
-  }
-
-  // Assumes that game is not waiting for player to select row
-  public finalizeStep(): void {
-    if (this.isEnded()) {
-      this.stopGame({ reason: 'Completed' })
-    } else {
-      this.startStepTimer()
-    }
-  }
-
-  public finalizeSelectCard(): void {
+  private finalizeSelectCard(): void {
     this.clearStepTimer()
 
     if (this.game.isWaitingForPlayer()) {
@@ -138,7 +117,7 @@ export default class RoomGameTakeSix {
     this.startStepTimer()
   }
 
-  public finalizeSelectRow(): void {
+  private finalizeSelectRow(): void {
     this.clearSelectRowTimer()
 
     if (this.isEnded()) {
@@ -161,12 +140,14 @@ export default class RoomGameTakeSix {
   }
 
   private notifyGameStep(): void {
+    const gameState = this.generateSerializedState()
+
     this.room.allUsers.forEach((user) => {
       const { player } = user
 
       const messageData = {
         step: this.game.lastSerializedStep,
-        gameState: this.generateSerializedState(),
+        gameState,
         ...(!!player && { playerCards: player.cards }),
       }
 
@@ -175,10 +156,8 @@ export default class RoomGameTakeSix {
   }
 
   public generateSerializedState(): SerializedState {
-    const serializedState = this.game.serializedState
-
     return {
-      ...serializedState,
+      ...this.game.serializedState,
       players: this.players.map((player) => ({
         id: player.player.id,
         penaltyPoints: player.player.penaltyPoints,
@@ -241,7 +220,7 @@ export default class RoomGameTakeSix {
       // Note: In test environment, always select the highest value card, to make tests deterministic
       const isTestEnv = process.env.NODE_ENV === 'test'
 
-      this.getActivePlayersWithoutSelectedCard().forEach((inactivePlayer) => {
+      inactivePlayers.forEach((inactivePlayer) => {
         const playerCards = inactivePlayer.cards
         const cardToSelect = isTestEnv ? maxBy(playerCards, (card) => card.value) : sample(playerCards)
 
@@ -252,7 +231,9 @@ export default class RoomGameTakeSix {
         inactivePlayer.player.selectCard(cardToSelect.value)
       })
 
-      this.makeStep()
+      this.game.step()
+      this.notifyGameStep()
+      this.finalizeSelectCard()
     } else if (playerInactivityStrategy === 'kick') {
       if (leftActivePlayersCount <= 1) {
         this.unassignReferencesFromRoomAndRoomMembers()
@@ -288,7 +269,7 @@ export default class RoomGameTakeSix {
     if (playerInactivityStrategy === 'forcePlay') {
       this.forceSelectRow()
       this.notifyGameStep()
-      this.finalizeStep()
+      this.finalizeSelectRow()
       return
     }
 
@@ -324,7 +305,6 @@ export default class RoomGameTakeSix {
         return
       }
 
-      // force select row
       this.forceSelectRow()
       waitingForPlayer.deactivate()
       this.removePlayersFromRoom([waitingForPlayer])
@@ -447,11 +427,6 @@ export default class RoomGameTakeSix {
         player.user.player = undefined
       }
     })
-  }
-
-  // TODO: Rename to `deactivatePlayer` after real `deactivatePlayer` method is removed
-  public justDeactivatePlayer(playerId: string): void {
-    this.findPlayer(playerId).deactivate()
   }
 
   public handlePlayerLeave({
