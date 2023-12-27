@@ -1,11 +1,14 @@
 import 'jest-extended'
 
+import App from '../App'
 import Room from './Room'
 import User from './User'
 
 describe('Room model', () => {
+  const app = {} as App
+
   describe('#name', () => {
-    const room = new Room({ name: 'name', owner: {} as User })
+    const room = new Room({ app, name: 'name', owner: {} as User })
 
     it('can be changed', () => {
       expect(room.name).toBe('name')
@@ -16,7 +19,7 @@ describe('Room model', () => {
 
   describe('#owner', () => {
     const ownerMock = { id: '1' } as User
-    const room = new Room({ name: 'name', owner: ownerMock })
+    const room = new Room({ app, name: 'name', owner: ownerMock })
 
     it('returns given user', () => {
       expect(room.owner).toBe(ownerMock)
@@ -25,7 +28,7 @@ describe('Room model', () => {
 
   describe('#users', () => {
     const ownerMock = { id: '1' } as User
-    const room = new Room({ name: 'name', owner: ownerMock })
+    const room = new Room({ app, name: 'name', owner: ownerMock })
 
     describe('without users', () => {
       it('does not return owner', () => {
@@ -47,7 +50,7 @@ describe('Room model', () => {
 
   describe('#allUsers', () => {
     const ownerMock = { id: '1' } as User
-    const room = new Room({ name: 'name', owner: ownerMock })
+    const room = new Room({ app, name: 'name', owner: ownerMock })
 
     describe('without users', () => {
       it('does not return owner', () => {

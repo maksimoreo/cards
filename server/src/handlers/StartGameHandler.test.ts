@@ -1,8 +1,9 @@
 import { Socket } from 'socket.io'
+import App from '../App'
+import { callMessageHandler, callMessageHandlerOptions } from '../__test__/testHelpers'
+import RoomGameTakeSix from '../lib/RoomGameTakeSix/Game'
 import Room from '../models/Room'
 import User from '../models/User'
-import RoomGameTakeSix from '../lib/RoomGameTakeSix/Game'
-import { callMessageHandler, callMessageHandlerOptions } from '../__test__/testHelpers'
 import StartGameHandler from './StartGameHandler'
 
 function callStartGameHandler(opts?: callMessageHandlerOptions): Promise<unknown> {
@@ -32,7 +33,7 @@ describe('StartGameHandler', () => {
 
       beforeEach(() => {
         roomOwner = new User({ socket: { id: 2 } as unknown as Socket, name: 'user 2' })
-        room = new Room({ name: 'room', owner: roomOwner })
+        room = new Room({ app: {} as App, name: 'room', owner: roomOwner })
 
         roomOwner.room = room
         room.users.push(currentUser)
@@ -51,7 +52,7 @@ describe('StartGameHandler', () => {
       let room: Room
 
       beforeEach(() => {
-        room = new Room({ name: 'room', owner: currentUser })
+        room = new Room({ app: {} as App, name: 'room', owner: currentUser })
         currentUser.room = room
       })
 

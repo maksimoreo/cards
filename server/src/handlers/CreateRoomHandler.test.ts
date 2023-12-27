@@ -118,7 +118,7 @@ describe('CreateRoomHandler', () => {
 
       describe('when password is empty string', () => {
         beforeEach(() => {
-          input = { name: 'valid_name', password: '' }
+          input = { name: 'valid name', password: '' }
         })
 
         it('does not create room', async () => {
@@ -152,7 +152,7 @@ describe('CreateRoomHandler', () => {
             validationErrors: [
               {
                 code: 'invalid_string',
-                message: 'Can only contain letters and digits',
+                message: 'Name must contain only a-z, A-Z or 0-9 characters',
                 path: ['name'],
                 validation: 'regex',
               },
@@ -169,7 +169,7 @@ describe('CreateRoomHandler', () => {
       expect(app.rooms.length).toBe(0)
 
       // Answers 'ok'
-      expect(await call({ input: { name: 'new_room' }, app, currentUser })).toMatchObject({ code: 'SUCCESS' })
+      expect(await call({ input: { name: 'new room' }, app, currentUser })).toMatchObject({ code: 'SUCCESS' })
 
       // Creates new room
       expect(app.rooms.length).toBe(1)
@@ -187,7 +187,7 @@ describe('CreateRoomHandler', () => {
       it('creates room with password', async () => {
         const app = createAppFake()
         const currentUser = createUserFake()
-        const input = { name: 'new_room', password: 'secret' }
+        const input = { name: 'new room', password: 'secret' }
 
         expect(await call({ input, app, currentUser })).toMatchObject({ code: 'SUCCESS' })
 
