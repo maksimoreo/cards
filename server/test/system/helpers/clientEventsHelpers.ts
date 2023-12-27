@@ -7,7 +7,7 @@ export async function createRoom(
   { name, password }: { readonly name: string; readonly password?: string },
   { globalClients }: { readonly globalClients: readonly TestClient[] },
 ): Promise<void> {
-  const globalClientsPromises = globalClients.map((client) => client.waitForEvent('rooms'))
+  const globalClientsPromises = globalClients.map((client) => client.waitForEvent('s2c_rooms'))
 
   await expect(emitEvent(client.socket, 'createRoom', { name, password })).resolves.toMatchObject({ code: 'SUCCESS' })
 
@@ -22,7 +22,7 @@ export async function joinRoom(
   { roomClients, globalClients }: { roomClients: readonly TestClient[]; globalClients?: readonly TestClient[] },
 ): Promise<void> {
   const roomClientsPromises = roomClients.map((client) => client.waitForEvent('s2c_userJoined'))
-  const globalClientsPromises = (globalClients || []).map((client) => client.waitForEvent('rooms'))
+  const globalClientsPromises = (globalClients || []).map((client) => client.waitForEvent('s2c_rooms'))
 
   await expect(client.emitEvent('joinRoom', { name, password })).resolves.toMatchObject({
     code: 'SUCCESS',
@@ -52,7 +52,7 @@ export async function leaveCurrentRoom(
   const roomClientsPromises = roomClients.map((client) => client.waitForEvent(expectedEventForRoomClients))
 
   // Note: client that leaves the room also received 'rooms' event
-  const globalClientsPromises = [...globalClients, client].map((client) => client.waitForEvent('rooms'))
+  const globalClientsPromises = [...globalClients, client].map((client) => client.waitForEvent('s2c_rooms'))
 
   await expect(client.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 

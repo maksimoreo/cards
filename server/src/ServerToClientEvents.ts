@@ -63,7 +63,7 @@ export interface EventData_s2c_userMessage {
   user: DecoratedUser
 }
 
-export interface EventData_Rooms {
+export interface EventData_s2c_rooms {
   readonly rooms: readonly DecoratedGlobalRoom[]
 }
 
@@ -106,7 +106,7 @@ export interface ServerToClientEvents {
   s2c_gameStep:                     ServerToClientEventCallback<EventData_s2c_gameStep>
   s2c_roomClosed:                   ServerToClientEventCallback<EventData_s2c_roomClosed>
   s2c_userMessage:                  ServerToClientEventCallback<EventData_s2c_userMessage>
-  rooms:                            ServerToClientEventCallback<EventData_Rooms>
+  s2c_rooms:                        ServerToClientEventCallback<EventData_s2c_rooms>
   s2c_gameOptionsUpdated:           ServerToClientEventCallback<EventData_s2c_gameOptionsUpdated>
   s2c_usersMovedToSpectators:       ServerToClientEventCallback<EventData_s2c_usersMovedToSpectators>
   s2c_youHaveBeenMovedToSpectators: ServerToClientEventCallback<EventData_s2c_youHaveBeenMovedToSpectators>

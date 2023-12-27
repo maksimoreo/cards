@@ -17,7 +17,7 @@ export default interface ServerToClientEvents {
   s2c_ownerLeft: (unknownData: unknown) => void
   s2c_gameStarted: (unknownData: unknown) => void
   s2c_userMessage: (unknownData: unknown) => void
-  rooms: (unknownData: unknown) => void
+  s2c_rooms: (unknownData: unknown) => void
   s2c_gameOptionsUpdated: (unknownData: unknown) => void
 }
 
@@ -61,7 +61,7 @@ export const SERVER_NOTIFICATION_DATA_SCHEMA_MAP = {
     user: USER_SCHEMA,
   }),
 
-  rooms: z.object({
+  s2c_rooms: z.object({
     rooms: z.array(
       z.object({
         id: z.string(),
@@ -88,7 +88,7 @@ export const SERVER_TO_CLIENT_EVENTS: (keyof ServerEventToDataSchemaMapT)[] = [
   's2c_ownerLeft',
   's2c_gameStarted',
   's2c_userMessage',
-  'rooms',
+  's2c_rooms',
   's2c_gameOptionsUpdated',
 ]
 

@@ -58,7 +58,7 @@ export default function RoomsList(): JSX.Element {
     fetchAllRooms()
   }, [])
 
-  useSocketEventListener('rooms', ({ rooms }): void => {
+  useSocketEventListener('s2c_rooms', ({ rooms }): void => {
     setRooms(rooms)
   })
 

@@ -15,7 +15,7 @@ export default class ScheduleRoomsEventToLobbyUsers {
   public constructor(private readonly props: Props) {}
 
   public call(): void {
-    this.props.app.io.to(LOBBY_ROOM_NAME).emit('rooms', {
+    this.props.app.io.to(LOBBY_ROOM_NAME).emit('s2c_rooms', {
       rooms: this.props.app.rooms.map((room) => decorateGlobalRoom(room)),
     })
   }
