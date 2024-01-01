@@ -59,7 +59,7 @@ describe('Send chat messages to other clients', () => {
     }
 
     await expect(
-      leaveCurrentRoom(client1, { asOwner: true }, { roomClients: [client2, client3], globalClients: [] }),
+      leaveCurrentRoom(client1, { roomClients: [client2, client3], globalClients: [] }),
     ).resolves.toBeUndefined()
 
     {

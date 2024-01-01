@@ -1,7 +1,6 @@
 import App from '../App'
 import { LOBBY_ROOM_NAME } from '../constants'
 import { decorateRoom } from '../decorators/RoomDecorator'
-import { decorateUser } from '../decorators/UserDecorator'
 import Room from '../models/Room'
 import User from '../models/User'
 import { removeSingleByIdOrThrow, removeSingleByPropertyOrThrow } from '../utils'
@@ -106,19 +105,9 @@ export default class LeaveCurrentRoom {
 
     const { app, room } = this.props
 
-    if (this.isOwner) {
-      app.io.in(room.name).emit('s2c_ownerLeft', {
-        newOwner: decorateUser(room.owner),
-        game: this.getGameStateForNotifyMemberLeftMessage(),
-        newRoomState: decorateRoom(room),
-      })
-
-      return
-    }
-
-    app.io.in(room.name).emit('s2c_userLeft', {
+    app.io.in(room.name).emit('s2c_usersLeft', {
       reason: 'selfAction',
-      userId: this.props.user.id,
+      userIds: [this.props.user.id],
       game: this.getGameStateForNotifyMemberLeftMessage(),
       newRoomState: decorateRoom(room),
     })

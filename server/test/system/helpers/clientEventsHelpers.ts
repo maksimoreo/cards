@@ -42,21 +42,21 @@ export async function joinRoom(
 
 export async function leaveCurrentRoom(
   client: TestClient,
-  { asOwner }: { asOwner: boolean },
   {
     roomClients,
     globalClients,
   }: { readonly roomClients: readonly TestClient[]; readonly globalClients: readonly TestClient[] },
 ): Promise<void> {
-  const expectedEventForRoomClients = asOwner ? 's2c_ownerLeft' : 's2c_userLeft'
-  const roomClientsPromises = roomClients.map((client) => client.waitForEvent(expectedEventForRoomClients))
+  const roomClientsPromises = roomClients.map((client) => client.waitForEvent('s2c_usersLeft'))
 
   // Note: client that leaves the room also received 'rooms' event
   const globalClientsPromises = [...globalClients, client].map((client) => client.waitForEvent('s2c_rooms'))
 
   await expect(client.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-  await expect(Promise.all(roomClientsPromises)).toResolve()
+  await expect(Promise.all(roomClientsPromises)).resolves.toMatchObject(
+    roomClientsPromises.map(() => ({ userIds: [client.id], reason: 'selfAction' })),
+  )
   await expect(Promise.all(globalClientsPromises)).toResolve()
 }
 

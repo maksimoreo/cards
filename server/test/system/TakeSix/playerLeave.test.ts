@@ -70,7 +70,7 @@ describe('Player leaving behavior', () => {
     ).resolves.toBeUndefined()
 
     await expect(
-      leaveCurrentRoom(client3, { asOwner: false }, { roomClients: [client1, client2, client4], globalClients: [] }),
+      leaveCurrentRoom(client3, { roomClients: [client1, client2, client4], globalClients: [] }),
     ).resolves.toBeUndefined()
 
     await expect(playCard(client2, { cardValue: 20, otherClients: [client1, client4] })).resolves.toBeUndefined()
@@ -259,9 +259,9 @@ describe('Player leaving behavior', () => {
 
     {
       const client1Promise_s2c_rooms = client1.waitForEvent('s2c_rooms')
-      const client2Promise_s2c_ownerLeft = client2.waitForEvent('s2c_ownerLeft')
-      const client3Promise_s2c_ownerLeft = client3.waitForEvent('s2c_ownerLeft')
-      const client4Promise_s2c_ownerLeft = client4.waitForEvent('s2c_ownerLeft')
+      const client2Promise_s2c_usersLeft = client2.waitForEvent('s2c_usersLeft')
+      const client3Promise_s2c_usersLeft = client3.waitForEvent('s2c_usersLeft')
+      const client4Promise_s2c_usersLeft = client4.waitForEvent('s2c_usersLeft')
       const client2Promise_s2c_gameStep = client2.waitForEvent('s2c_gameStep')
       const client3Promise_s2c_gameStep = client3.waitForEvent('s2c_gameStep')
       const client4Promise_s2c_gameStep = client4.waitForEvent('s2c_gameStep')
@@ -269,9 +269,9 @@ describe('Player leaving behavior', () => {
       await expect(client1.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client1Promise_s2c_rooms).toResolve()
-      await expect(client2Promise_s2c_ownerLeft).resolves.toMatchObject({ newOwner: { id: client2.id } })
-      await expect(client3Promise_s2c_ownerLeft).resolves.toMatchObject({ newOwner: { id: client2.id } })
-      await expect(client4Promise_s2c_ownerLeft).resolves.toMatchObject({ newOwner: { id: client2.id } })
+      await expect(client2Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client2.id } } })
+      await expect(client3Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client2.id } } })
+      await expect(client4Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client2.id } } })
 
       const sharedData = {
         step: {
@@ -343,15 +343,15 @@ describe('Player leaving behavior', () => {
     {
       const client1Promise_s2c_rooms = client1.waitForEvent('s2c_rooms')
       const client2Promise_s2c_rooms = client2.waitForEvent('s2c_rooms')
-      const client3Promise_s2c_ownerLeft = client3.waitForEvent('s2c_ownerLeft')
-      const client4Promise_s2c_ownerLeft = client4.waitForEvent('s2c_ownerLeft')
+      const client3Promise_s2c_usersLeft = client3.waitForEvent('s2c_usersLeft')
+      const client4Promise_s2c_usersLeft = client4.waitForEvent('s2c_usersLeft')
       const client3Promise_s2c_gameStopped = client3.waitForEvent('s2c_gameStopped')
       const client4Promise_s2c_gameStopped = client4.waitForEvent('s2c_gameStopped')
 
       await expect(client2.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client3Promise_s2c_ownerLeft).resolves.toMatchObject({ newOwner: { id: client4.id } })
-      await expect(client4Promise_s2c_ownerLeft).resolves.toMatchObject({ newOwner: { id: client4.id } })
+      await expect(client3Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client4.id } } })
+      await expect(client4Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client4.id } } })
       await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'Player left' })
       await expect(client4Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'Player left' })
       await expect(client1Promise_s2c_rooms).toResolve()
@@ -359,10 +359,10 @@ describe('Player leaving behavior', () => {
     }
 
     await expect(
-      leaveCurrentRoom(client4, { asOwner: true }, { roomClients: [client3], globalClients: [client1, client2] }),
+      leaveCurrentRoom(client4, { roomClients: [client3], globalClients: [client1, client2] }),
     ).resolves.toBeUndefined()
     await expect(
-      leaveCurrentRoom(client3, { asOwner: true }, { roomClients: [], globalClients: [client1, client2, client4] }),
+      leaveCurrentRoom(client3, { roomClients: [], globalClients: [client1, client2, client4] }),
     ).resolves.toBeUndefined()
 
     expectClientsExpectedEventsQueuesClean(getClients())

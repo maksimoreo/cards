@@ -8,22 +8,9 @@ import { GameOptions } from './models/Room'
 export type UserLeftReason = 'selfAction' | 'kickedForInactivity' | 'kickedByOwner' | 'kickedByVote' | 'disconnected'
 
 // Events data types
-export interface EventData_s2c_userLeft {
-  userId: string
-  reason: UserLeftReason
-  newRoomState: DecoratedRoom
-  game: SerializedState | null
-}
-
 export interface EventData_s2c_usersLeft {
   userIds: string[]
   reason: UserLeftReason
-  newRoomState: DecoratedRoom
-  game: SerializedState | null
-}
-
-export interface EventData_s2c_ownerLeft {
-  newOwner: DecoratedUser
   newRoomState: DecoratedRoom
   game: SerializedState | null
 }
@@ -96,9 +83,7 @@ type ServerToClientEventCallback<DataT> = (data: DataT) => void
 
 // prettier-ignore
 export interface ServerToClientEvents {
-  s2c_userLeft:                     ServerToClientEventCallback<EventData_s2c_userLeft>
   s2c_usersLeft:                    ServerToClientEventCallback<EventData_s2c_usersLeft>
-  s2c_ownerLeft:                    ServerToClientEventCallback<EventData_s2c_ownerLeft>
   s2c_userJoined:                   ServerToClientEventCallback<EventData_s2c_userJoined>
   s2c_userPlayedCard:               ServerToClientEventCallback<EventData_s2c_userPlayedCard>
   s2c_gameStarted:                  ServerToClientEventCallback<EventData_s2c_gameStarted>

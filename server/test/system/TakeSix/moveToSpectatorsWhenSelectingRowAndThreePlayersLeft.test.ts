@@ -353,13 +353,13 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
     }
 
     await expect(
-      leaveCurrentRoom(client1, { asOwner: true }, { roomClients: [client2, client3], globalClients: [] }),
+      leaveCurrentRoom(client1, { roomClients: [client2, client3], globalClients: [] }),
     ).resolves.toBeUndefined()
     await expect(
-      leaveCurrentRoom(client2, { asOwner: true }, { roomClients: [client3], globalClients: [client1] }),
+      leaveCurrentRoom(client2, { roomClients: [client3], globalClients: [client1] }),
     ).resolves.toBeUndefined()
     await expect(
-      leaveCurrentRoom(client3, { asOwner: true }, { roomClients: [], globalClients: [client1, client2] }),
+      leaveCurrentRoom(client3, { roomClients: [], globalClients: [client1, client2] }),
     ).resolves.toBeUndefined()
 
     expectClientsExpectedEventsQueuesClean(getClients())

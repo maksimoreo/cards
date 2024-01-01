@@ -505,20 +505,20 @@ describe('Game spectating', () => {
 
     {
       const client2Promise_s2c_rooms = client2.waitForEvent('s2c_rooms')
-      const client1Promise_s2c_userLeft = client1.waitForEvent('s2c_userLeft')
-      const client3Promise_s2c_userLeft = client3.waitForEvent('s2c_userLeft')
-      const client4Promise_s2c_userLeft = client4.waitForEvent('s2c_userLeft')
-      const client5Promise_s2c_userLeft = client5.waitForEvent('s2c_userLeft')
-      const client6Promise_s2c_userLeft = client6.waitForEvent('s2c_userLeft')
+      const client1Promise_s2c_usersLeft = client1.waitForEvent('s2c_usersLeft')
+      const client3Promise_s2c_usersLeft = client3.waitForEvent('s2c_usersLeft')
+      const client4Promise_s2c_usersLeft = client4.waitForEvent('s2c_usersLeft')
+      const client5Promise_s2c_usersLeft = client5.waitForEvent('s2c_usersLeft')
+      const client6Promise_s2c_usersLeft = client6.waitForEvent('s2c_usersLeft')
 
       await expect(client2.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client2Promise_s2c_rooms).toResolve()
-      await expect(client1Promise_s2c_userLeft).resolves.toMatchObject({ userId: client2.id })
-      await expect(client3Promise_s2c_userLeft).resolves.toMatchObject({ userId: client2.id })
-      await expect(client4Promise_s2c_userLeft).resolves.toMatchObject({ userId: client2.id })
-      await expect(client5Promise_s2c_userLeft).resolves.toMatchObject({ userId: client2.id })
-      await expect(client6Promise_s2c_userLeft).resolves.toMatchObject({ userId: client2.id })
+      await expect(client1Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client2.id] })
+      await expect(client3Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client2.id] })
+      await expect(client4Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client2.id] })
+      await expect(client5Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client2.id] })
+      await expect(client6Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client2.id] })
     }
 
     console.log('client3 leaves')
@@ -526,10 +526,10 @@ describe('Game spectating', () => {
     {
       const client2Promise_s2c_rooms = client2.waitForEvent('s2c_rooms')
       const client3Promise_s2c_rooms = client3.waitForEvent('s2c_rooms')
-      const client1Promise_s2c_userLeft = client1.waitForEvent('s2c_userLeft')
-      const client4Promise_s2c_userLeft = client4.waitForEvent('s2c_userLeft')
-      const client5Promise_s2c_userLeft = client5.waitForEvent('s2c_userLeft')
-      const client6Promise_s2c_userLeft = client6.waitForEvent('s2c_userLeft')
+      const client1Promise_s2c_usersLeft = client1.waitForEvent('s2c_usersLeft')
+      const client4Promise_s2c_usersLeft = client4.waitForEvent('s2c_usersLeft')
+      const client5Promise_s2c_usersLeft = client5.waitForEvent('s2c_usersLeft')
+      const client6Promise_s2c_usersLeft = client6.waitForEvent('s2c_usersLeft')
       const client1Promise_s2c_gameStopped = client1.waitForEvent('s2c_gameStopped')
       const client4Promise_s2c_gameStopped = client4.waitForEvent('s2c_gameStopped')
       const client5Promise_s2c_gameStopped = client5.waitForEvent('s2c_gameStopped')
@@ -545,10 +545,10 @@ describe('Game spectating', () => {
       await expect(client5Promise_s2c_gameStopped).toResolve()
       await expect(client6Promise_s2c_gameStopped).toResolve()
 
-      await expect(client1Promise_s2c_userLeft).resolves.toMatchObject({ userId: client3.id })
-      await expect(client4Promise_s2c_userLeft).resolves.toMatchObject({ userId: client3.id })
-      await expect(client5Promise_s2c_userLeft).resolves.toMatchObject({ userId: client3.id })
-      await expect(client6Promise_s2c_userLeft).resolves.toMatchObject({ userId: client3.id })
+      await expect(client1Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client3.id] })
+      await expect(client4Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client3.id] })
+      await expect(client5Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client3.id] })
+      await expect(client6Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client3.id] })
     }
 
     console.log('client4 leaves')
@@ -557,18 +557,18 @@ describe('Game spectating', () => {
       const client2Promise_s2c_rooms = client2.waitForEvent('s2c_rooms')
       const client3Promise_s2c_rooms = client3.waitForEvent('s2c_rooms')
       const client4Promise_s2c_rooms = client4.waitForEvent('s2c_rooms')
-      const client1Promise_s2c_userLeft = client1.waitForEvent('s2c_userLeft')
-      const client5Promise_s2c_userLeft = client5.waitForEvent('s2c_userLeft')
-      const client6Promise_s2c_userLeft = client6.waitForEvent('s2c_userLeft')
+      const client1Promise_s2c_usersLeft = client1.waitForEvent('s2c_usersLeft')
+      const client5Promise_s2c_usersLeft = client5.waitForEvent('s2c_usersLeft')
+      const client6Promise_s2c_usersLeft = client6.waitForEvent('s2c_usersLeft')
 
       await expect(client4.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client2Promise_s2c_rooms).toResolve()
       await expect(client3Promise_s2c_rooms).toResolve()
       await expect(client4Promise_s2c_rooms).toResolve()
-      await expect(client1Promise_s2c_userLeft).resolves.toMatchObject({ userId: client4.id })
-      await expect(client5Promise_s2c_userLeft).resolves.toMatchObject({ userId: client4.id })
-      await expect(client6Promise_s2c_userLeft).resolves.toMatchObject({ userId: client4.id })
+      await expect(client1Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client4.id] })
+      await expect(client5Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client4.id] })
+      await expect(client6Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client4.id] })
     }
 
     console.log('client1 leaves')
@@ -578,8 +578,8 @@ describe('Game spectating', () => {
       const client2Promise_s2c_rooms = client2.waitForEvent('s2c_rooms')
       const client3Promise_s2c_rooms = client3.waitForEvent('s2c_rooms')
       const client4Promise_s2c_rooms = client4.waitForEvent('s2c_rooms')
-      const client5Promise_s2c_ownerLeft = client5.waitForEvent('s2c_ownerLeft')
-      const client6Promise_s2c_ownerLeft = client6.waitForEvent('s2c_ownerLeft')
+      const client5Promise_s2c_usersLeft = client5.waitForEvent('s2c_usersLeft')
+      const client6Promise_s2c_usersLeft = client6.waitForEvent('s2c_usersLeft')
 
       await expect(client1.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
@@ -587,8 +587,8 @@ describe('Game spectating', () => {
       await expect(client2Promise_s2c_rooms).toResolve()
       await expect(client3Promise_s2c_rooms).toResolve()
       await expect(client4Promise_s2c_rooms).toResolve()
-      await expect(client5Promise_s2c_ownerLeft).resolves.toMatchObject({ newOwner: { id: client5.id } })
-      await expect(client6Promise_s2c_ownerLeft).resolves.toMatchObject({ newOwner: { id: client5.id } })
+      await expect(client5Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client5.id } } })
+      await expect(client6Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client5.id } } })
     }
 
     console.log('client5 leaves')
@@ -599,7 +599,7 @@ describe('Game spectating', () => {
       const client3Promise_s2c_rooms = client3.waitForEvent('s2c_rooms')
       const client4Promise_s2c_rooms = client4.waitForEvent('s2c_rooms')
       const client5Promise_s2c_rooms = client5.waitForEvent('s2c_rooms')
-      const client6Promise_s2c_ownerLeft = client6.waitForEvent('s2c_ownerLeft')
+      const client6Promise_s2c_usersLeft = client6.waitForEvent('s2c_usersLeft')
 
       await expect(client5.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
@@ -608,7 +608,7 @@ describe('Game spectating', () => {
       await expect(client3Promise_s2c_rooms).toResolve()
       await expect(client4Promise_s2c_rooms).toResolve()
       await expect(client5Promise_s2c_rooms).toResolve()
-      await expect(client6Promise_s2c_ownerLeft).resolves.toMatchObject({ newOwner: { id: client6.id } })
+      await expect(client6Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client6.id } } })
     }
 
     console.log('client6 leaves')

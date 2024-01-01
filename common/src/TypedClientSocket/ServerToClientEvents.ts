@@ -16,9 +16,7 @@ export default interface ServerToClientEvents {
   s2c_userPlayedCard: (unknownData: unknown) => void
   s2c_gameStep: (unknownData: unknown) => void
   s2c_userJoined: (unknownData: unknown) => void
-  s2c_userLeft: (unknownData: unknown) => void
   s2c_usersLeft: (unknownData: unknown) => void
-  s2c_ownerLeft: (unknownData: unknown) => void
   s2c_gameStarted: (unknownData: unknown) => void
   s2c_gameStopped: (unknownData: unknown) => void
   s2c_userMessage: (unknownData: unknown) => void
@@ -47,22 +45,9 @@ export const SERVER_NOTIFICATION_DATA_SCHEMA_MAP = {
     newRoomState: ROOM_SCHEMA,
   }),
 
-  s2c_userLeft: z.object({
-    userId: z.string(),
-    reason: USER_LEFT_REASON_SCHEMA,
-    newRoomState: ROOM_SCHEMA,
-    game: GAME_STATE_SCHEMA.nullable(),
-  }),
-
   s2c_usersLeft: z.object({
     userIds: z.array(z.string()),
     reason: USER_LEFT_REASON_SCHEMA,
-    newRoomState: ROOM_SCHEMA,
-    game: GAME_STATE_SCHEMA.nullable(),
-  }),
-
-  s2c_ownerLeft: z.object({
-    newOwner: USER_SCHEMA,
     newRoomState: ROOM_SCHEMA,
     game: GAME_STATE_SCHEMA.nullable(),
   }),
@@ -121,9 +106,7 @@ export const SERVER_TO_CLIENT_EVENTS: (keyof ServerEventToDataSchemaMapT)[] = [
   's2c_userPlayedCard',
   's2c_gameStep',
   's2c_userJoined',
-  's2c_userLeft',
   's2c_usersLeft',
-  's2c_ownerLeft',
   's2c_gameStarted',
   's2c_gameStopped',
   's2c_userMessage',
