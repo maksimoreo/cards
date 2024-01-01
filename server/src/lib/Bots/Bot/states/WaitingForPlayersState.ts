@@ -28,11 +28,7 @@ export default class WaitingForPlayersState {
     if (event.type === 'serverEvent') {
       const { serverEvent } = event.props
 
-      if (serverEvent.type === 's2c_userLeft') {
-        return new WaitingForPlayersState({ ...props, room: serverEvent.data.newRoomState })
-      }
-
-      if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_ownerLeft') {
+      if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_usersLeft') {
         const newState = new WaitingForPlayersState({ ...props, room: serverEvent.data.newRoomState })
 
         if (canStartGame(newState.props)) {

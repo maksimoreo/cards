@@ -42,11 +42,7 @@ export default class WaitingBeforePlayingCardState {
         return this
       }
 
-      if (
-        serverEvent.type === 's2c_userJoined' ||
-        serverEvent.type === 's2c_userLeft' ||
-        serverEvent.type === 's2c_ownerLeft'
-      ) {
+      if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_usersLeft') {
         return new WaitingBeforePlayingCardState({ ...props, room: serverEvent.data.newRoomState })
       }
     }

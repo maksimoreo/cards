@@ -42,7 +42,7 @@ export default class WaitingBeforeStartingTheGameState {
         return this
       }
 
-      if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_userLeft') {
+      if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_usersLeft') {
         return new WaitingBeforeStartingTheGameState({ ...props, room: serverEvent.data.newRoomState })
       }
     }

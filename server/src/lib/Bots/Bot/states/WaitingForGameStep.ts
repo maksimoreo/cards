@@ -39,11 +39,7 @@ export default class WaitingForGameStepState {
         return this
       }
 
-      if (
-        serverEvent.type === 's2c_userJoined' ||
-        serverEvent.type === 's2c_userLeft' ||
-        serverEvent.type === 's2c_ownerLeft'
-      ) {
+      if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_usersLeft') {
         return new WaitingForGameStepState({
           ...props,
           room: serverEvent.data.newRoomState,
