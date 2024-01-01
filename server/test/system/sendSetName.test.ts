@@ -1,17 +1,17 @@
 import 'jest-extended'
 
-import { useApp, useClient, useClients } from './helpers/testHooks'
+import { useApp, useClients } from './helpers/testHooks'
 
 describe('Send setName event', () => {
   const getApp = useApp()
 
   describe('with single client', () => {
-    const getClient = useClient(getApp)
+    const getClients = useClients(getApp, 1)
 
     it('changes user name to specified value', async () => {
       const app = getApp()
 
-      const response: string = await getClient().emitEvent('setName', { name: 'newname' })
+      const response: string = await getClients()[0].emitEvent('setName', { name: 'newname' })
 
       expect(response).toStrictEqual({ code: 'SUCCESS' })
       expect(app.users.all[0].name).toBe('newname')

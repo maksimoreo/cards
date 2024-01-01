@@ -5,14 +5,20 @@ import { connectClientAsync, emitEvent } from './testHelpers'
 export class TestClient {
   public readonly socket: Socket
   public readonly expectedEventsQueue: string[] = []
+
+  /**
+   * Should match variable name in source code, for easier traceability of failed tests. Is not expected to match user.name or socket.id. Convention is to use `client1`, `client2`, `client3` and so on.
+   */
+  public readonly variableName: string
   public disposed: boolean = false
 
-  public static async connect({ port }: { port: number }): Promise<TestClient> {
-    return new TestClient(await connectClientAsync(port))
+  public static async connect({ port, variableName }: { port: number; variableName: string }): Promise<TestClient> {
+    return new TestClient(await connectClientAsync(port), variableName)
   }
 
-  constructor(socket: Socket) {
+  constructor(socket: Socket, variableName: string) {
     this.socket = socket
+    this.variableName = variableName
     this.socket.onAny(this.handleAnySocketEvent.bind(this))
   }
 
@@ -61,7 +67,7 @@ export class TestClient {
         // const expectedEvent = this.expectedEventsQueue[0]
         // if (event !== expectedEvent) {
         //   return reject(
-        //     new Error(`Client '${this.id}' expected to receive '${expectedEvent}' first, but received '${event}'`),
+        //     new Error(`Client '${this.variableName}' expected to receive '${expectedEvent}' first, but received '${event}'`),
         //   )
         // }
 
@@ -70,7 +76,7 @@ export class TestClient {
 
       timer = setTimeout(() => {
         this.socket.off(event, handleEvent)
-        reject(new Error(`Client '${this.id}' did not receive '${event}' after ${timeout} ms`))
+        reject(new Error(`Client '${this.variableName}' did not receive '${event}' after ${timeout} ms`))
       }, timeout)
 
       this.socket.on(event, handleEvent)
@@ -83,7 +89,7 @@ export class TestClient {
 
     if (event !== expectedEvent) {
       throw new Error(
-        `Client '${this.id}' received unexpected event: '${event}'. Expected events queue [${
+        `Client '${this.variableName}' received unexpected event: '${event}'. Expected events queue [${
           this.expectedEventsQueue.length
         }]: ${expectedEventsQueue
           .slice(0, 5)
