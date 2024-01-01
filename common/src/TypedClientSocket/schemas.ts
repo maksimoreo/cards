@@ -66,3 +66,23 @@ export const GAME_STEP_SCHEMA = z.intersection(
     }),
   ])
 )
+
+export const USER_LEFT_REASON_SCHEMA = z.union([
+  z.literal('selfAction'),
+  z.literal('kickedForInactivity'),
+  z.literal('kickedByOwner'),
+  z.literal('kickedByVote'),
+  z.literal('disconnected'),
+])
+
+export const USER_MOVED_TO_SPECTATORS_REASON_SCHEMA = z.union([
+  z.literal('inactivity'),
+  z.literal('ownerAction'),
+  z.literal('selfAction'),
+])
+
+export const USER_KICKED_REASON_SCHEMA = z.union([
+  z.literal('inactivity'),
+  z.literal('ownerAction'),
+  z.literal('roomClosed'),
+])

@@ -7,6 +7,7 @@ import { addMessage } from '../../features/chat/chatSlice'
 import { setGame } from '../../features/game/gameSlice'
 import { setRoom } from '../../features/room/roomSlice'
 import { useRequiredAllRoomUsers, useRequiredRoom } from '../../features/room/selectors'
+import { setScreen } from '../../features/screen/screenSlice'
 import { useSocket } from '../../hooks/useSocket'
 import useSocketEventListener from '../../hooks/useSocketEventListener'
 import { findByIdOrThrow, tryFindById } from '../../utils/utils'
@@ -97,6 +98,63 @@ export default function RoomView(): JSX.Element {
     )
 
     dispatch(addMessage({ type: 'gameStarted', players: participants }))
+  })
+
+  useSocketEventListener('s2c_gameStopped', (data) => {
+    dispatch(setGame(null))
+    dispatch(addMessage({ type: 'gameEnded', reason: data.reason }))
+  })
+
+  useSocketEventListener('s2c_usersMovedToSpectators', (data) => {
+    if (!data.game) {
+      dispatch(setGame(null))
+    }
+
+    dispatch(
+      addMessage({
+        type: 'usersMovedToSpectators',
+        reason: 'inactivity',
+        users: room.users.filter((user) => data.userIds.includes(user.id)).map((user) => createUserIdentity(user)),
+      }),
+    )
+  })
+
+  useSocketEventListener('s2c_youHaveBeenMovedToSpectators', (data) => {
+    if (!data.game) {
+      dispatch(setGame(null))
+    }
+
+    dispatch(addMessage({ type: 'youHaveBeenMovedToSpectators', reason: 'inactivity' }))
+  })
+
+  useSocketEventListener('s2c_usersLeft', (data) => {
+    if (!data.game) {
+      dispatch(setGame(null))
+    }
+
+    dispatch(
+      addMessage({
+        type: 'usersLeftRoom',
+        reason: 'kickedForInactivity',
+        users: room.users.filter((user) => data.userIds.includes(user.id)).map((user) => createUserIdentity(user)),
+        roomName: room.name,
+      }),
+    )
+
+    dispatch(
+      setRoom({
+        ...room,
+        owner: data.newRoomState.owner,
+        users: data.newRoomState.users,
+      }),
+    )
+  })
+
+  useSocketEventListener('s2c_youHaveBeenKicked', () => {
+    dispatch(setGame(null))
+    dispatch(setRoom(null))
+    dispatch(setScreen('rooms'))
+    dispatch(addMessage({ type: 'currentUserLeftRoom', roomName: room?.name ?? '', reason: 'kickedForInactivity' }))
   })
 
   return (

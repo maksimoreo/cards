@@ -135,7 +135,7 @@ export default function GameForm() {
           </>
         ) : (
           <p className='mx-2 mt-8 text-center text-sm italic text-neutral-400'>
-            Only room owner is allowed to start the game.
+            Wait until room owner starts the game.
           </p>
         )}
       </form>

@@ -22,7 +22,7 @@ export default function RoomSection({ room }: Props) {
         dispatch(setRoom(null))
         dispatch(setScreen('rooms'))
 
-        dispatch(addMessage({ type: 'currentUserLeftRoom', roomName: room?.name ?? '' }))
+        dispatch(addMessage({ type: 'currentUserLeftRoom', roomName: room?.name ?? '', reason: 'selfAction' }))
       }
     })
   }

@@ -44,6 +44,12 @@ export interface UserLeftRoom extends MessageBase<'userLeftRoom'> {
   readonly roomName: string
 }
 
+export interface UsersLeftRoom extends MessageBase<'usersLeftRoom'> {
+  readonly users: UserIdentity[]
+  readonly roomName: string
+  readonly reason: 'selfAction' | 'kickedForInactivity'
+}
+
 export interface OwnerLeftRoom extends MessageBase<'ownerLeftRoom'> {
   readonly user: UserIdentity
   readonly newRoomOwner: UserIdentity
@@ -56,6 +62,7 @@ export interface CurrentUserJoinedRoom extends MessageBase<'currentUserJoinedRoo
 
 export interface CurrentUserLeftRoom extends MessageBase<'currentUserLeftRoom'> {
   readonly roomName: string
+  readonly reason: 'selfAction' | 'kickedForInactivity' // | 'kickedByOwner' | 'kickedByVote' | ...
 }
 
 export interface UserNameChange extends MessageBase<'userNameChange'> {
@@ -69,11 +76,23 @@ export interface GameStarted extends MessageBase<'gameStarted'> {
 }
 
 export interface GameEnded extends MessageBase<'gameEnded'> {
-  readonly sortedPlayers: {
-    readonly user: UserIdentity
-    readonly penaltyPoints: number
-  }[]
-  readonly reason: 'win' | 'notEnoughPlayers'
+  readonly sortedPlayers?:
+    | {
+        readonly user: UserIdentity
+        readonly penaltyPoints: number
+      }[]
+    | null
+    | undefined
+  readonly reason: string
+}
+
+export interface UsersMovedToSpectators extends MessageBase<'usersMovedToSpectators'> {
+  readonly users: UserIdentity[]
+  readonly reason: 'inactivity' // | 'ownerAction' | ...
+}
+
+export interface YouHaveBeenMovedToSpectators extends MessageBase<'youHaveBeenMovedToSpectators'> {
+  readonly reason: 'inactivity' // | 'ownerAction' | ...
 }
 
 export type ChatMessage =
@@ -84,8 +103,11 @@ export type ChatMessage =
   | Command
   | UserJoinedRoom
   | UserLeftRoom
+  | UsersLeftRoom
   | OwnerLeftRoom
   | CurrentUserLeftRoom
   | CurrentUserJoinedRoom
   | GameStarted
   | GameEnded
+  | UsersMovedToSpectators
+  | YouHaveBeenMovedToSpectators
