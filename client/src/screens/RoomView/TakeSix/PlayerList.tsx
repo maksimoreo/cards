@@ -72,7 +72,9 @@ export default function PlayerList({ entries }: Props): JSX.Element {
               <td className='py-1 pr-2'>
                 <div className='h-7 w-5 lg:h-14 lg:w-10'>
                   <div ref={refSetter} className='h-7 w-5 lg:h-14 lg:w-10'>
-                    {playerListItem.hasSelectedCard ? (
+                    {!playerListItem.isActive ? (
+                      <div className='h-7 w-5 rounded lg:h-14 lg:w-10'></div>
+                    ) : playerListItem.hasSelectedCard ? (
                       playerListItem.selectedCard === undefined ? (
                         <div className='h-7 w-5 rounded bg-neutral-500 lg:h-14 lg:w-10'></div>
                       ) : (
