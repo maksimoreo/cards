@@ -120,6 +120,12 @@ export default function Line({ message }: LineProps): JSX.Element {
     return <BasicMessageLine>{joinUsers(message.users)} were moved to spectators due to inactivity</BasicMessageLine>
   } else if (message.type === 'youHaveBeenMovedToSpectators') {
     return <BasicMessageLine>You have been moved to spectators due to inactivity</BasicMessageLine>
+  } else if (message.type === 'newRoomOwner') {
+    return (
+      <BasicMessageLine>
+        <UserName {...message.owner} /> is new owner of <RoomName roomName={message.roomName} />
+      </BasicMessageLine>
+    )
   }
 
   assertUnreachable(message)

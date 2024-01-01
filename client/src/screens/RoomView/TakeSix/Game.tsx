@@ -122,7 +122,11 @@ export default function Game(props: Props): JSX.Element {
     setHasSelectedCardTrue(userId)
   })
 
-  const updatePlayerListOnUserLeave = (game: GameState) => {
+  useSocketEventListener('s2c_usersLeft', ({ game }) => {
+    if (!game) {
+      return
+    }
+
     setPlayerList((playerList) =>
       game.players.map((player) => {
         const playerOnClient = playerList.find((playerOnClient) => playerOnClient.user.id === player.id)
@@ -134,18 +138,6 @@ export default function Game(props: Props): JSX.Element {
         }
       }),
     )
-  }
-
-  useSocketEventListener('s2c_userLeft', ({ game }) => {
-    if (game) {
-      updatePlayerListOnUserLeave(game)
-    }
-  })
-
-  useSocketEventListener('s2c_ownerLeft', ({ game }) => {
-    if (game) {
-      updatePlayerListOnUserLeave(game)
-    }
   })
 
   const finalizeStep = (gameState: GameState): void => {

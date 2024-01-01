@@ -1,4 +1,5 @@
 import UserIdentity from './UserName/UserIdentity'
+import { UsersLeftRoomReason } from './lines/utils'
 
 export interface MessageBase<MessageType> {
   readonly type: MessageType
@@ -47,7 +48,7 @@ export interface UserLeftRoom extends MessageBase<'userLeftRoom'> {
 export interface UsersLeftRoom extends MessageBase<'usersLeftRoom'> {
   readonly users: UserIdentity[]
   readonly roomName: string
-  readonly reason: 'selfAction' | 'kickedForInactivity'
+  readonly reason: UsersLeftRoomReason
 }
 
 export interface OwnerLeftRoom extends MessageBase<'ownerLeftRoom'> {
@@ -95,6 +96,11 @@ export interface YouHaveBeenMovedToSpectators extends MessageBase<'youHaveBeenMo
   readonly reason: 'inactivity' // | 'ownerAction' | ...
 }
 
+export interface NewRoomOwner extends MessageBase<'newRoomOwner'> {
+  readonly owner: UserIdentity
+  readonly roomName: string
+}
+
 export type ChatMessage =
   | RemoteUserMessage
   | LocalUserMessage
@@ -111,3 +117,4 @@ export type ChatMessage =
   | GameEnded
   | UsersMovedToSpectators
   | YouHaveBeenMovedToSpectators
+  | NewRoomOwner

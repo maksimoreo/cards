@@ -2,23 +2,21 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../app/store'
 import { useUserIdentityCreator } from '../../components/Chat/UserName/UserIdentity'
 import UserNameFromUser from '../../components/Chat/UserName/UserNameFromUser'
+import { s2c_usersLeftReasonToChatMessageReason } from '../../components/Chat/lines/utils'
 import MainViewHeader from '../../components/MainViewHeader'
 import { addMessage } from '../../features/chat/chatSlice'
 import { setGame } from '../../features/game/gameSlice'
 import { setRoom } from '../../features/room/roomSlice'
 import { useRequiredAllRoomUsers, useRequiredRoom } from '../../features/room/selectors'
 import { setScreen } from '../../features/screen/screenSlice'
-import { useSocket } from '../../hooks/useSocket'
 import useSocketEventListener from '../../hooks/useSocketEventListener'
-import { findByIdOrThrow, tryFindById } from '../../utils/utils'
+import { findByIdOrThrow } from '../../utils/utils'
 import GameOptionsForm from './GameOptionsForm'
 import Game from './TakeSix/Game'
 import { GameState } from './TakeSix/types'
 
 export default function RoomView(): JSX.Element {
   const dispatch = useDispatch()
-  const { socket } = useSocket()
-  const { id: currentUserId } = socket
   const room = useRequiredRoom()
   const allRoomUsers = useRequiredAllRoomUsers()
   const game = useSelector((state: RootState) => state.game)
@@ -51,43 +49,6 @@ export default function RoomView(): JSX.Element {
         roomName,
       }),
     )
-  })
-
-  useSocketEventListener('s2c_userLeft', (data) => {
-    dispatch(setRoom({ ...room, users: data.newRoomState.users }))
-
-    tryFindById(room.users, data.userId, (user) =>
-      dispatch(addMessage({ type: 'userLeftRoom', user: createUserIdentity(user), roomName })),
-    )
-
-    if (!data.game) {
-      dispatch(setGame(null))
-    }
-  })
-
-  useSocketEventListener('s2c_ownerLeft', (data) => {
-    const { owner: previousOwner } = room
-
-    dispatch(
-      setRoom({
-        ...room,
-        owner: data.newOwner,
-        users: data.newRoomState.users,
-      }),
-    )
-
-    dispatch(
-      addMessage({
-        type: 'ownerLeftRoom',
-        user: { ...previousOwner, isRoomOwner: true, isCurrentUser: false },
-        newRoomOwner: { ...data.newOwner, isRoomOwner: true, isCurrentUser: currentUserId === data.newOwner.id },
-        roomName,
-      }),
-    )
-
-    if (!data.game) {
-      dispatch(setGame(null))
-    }
   })
 
   useSocketEventListener('s2c_gameStarted', (s2c_gameStartedData) => {
@@ -135,11 +96,23 @@ export default function RoomView(): JSX.Element {
     dispatch(
       addMessage({
         type: 'usersLeftRoom',
-        reason: 'kickedForInactivity',
-        users: room.users.filter((user) => data.userIds.includes(user.id)).map((user) => createUserIdentity(user)),
+        reason: s2c_usersLeftReasonToChatMessageReason(data.reason),
+        users: [room.owner, ...room.users]
+          .filter((user) => data.userIds.includes(user.id))
+          .map((user) => createUserIdentity(user)),
         roomName: room.name,
       }),
     )
+
+    if (room.owner.id !== data.newRoomState.owner.id) {
+      dispatch(
+        addMessage({
+          type: 'newRoomOwner',
+          owner: { ...createUserIdentity(data.newRoomState.owner), isRoomOwner: true },
+          roomName: data.newRoomState.name,
+        }),
+      )
+    }
 
     dispatch(
       setRoom({
