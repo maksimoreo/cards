@@ -8,6 +8,7 @@ import AppMainView from './AppMainView'
 import { store } from './app/store'
 import Button from './components/Button'
 import { Chat } from './components/Chat/Chat'
+import Party from './components/Party'
 import SideBarRight from './components/SideBarRight'
 import { SocketProvider } from './hooks/useSocket'
 
@@ -100,6 +101,8 @@ function App({ socket }: AppProps): JSX.Element {
                 }}
               ></div>
             </div>
+
+            <Party />
           </div>
         </Provider>
       </SocketProvider>

@@ -9,16 +9,20 @@ import { setGame } from '../../features/game/gameSlice'
 import { setRoom } from '../../features/room/roomSlice'
 import { useRequiredAllRoomUsers, useRequiredRoom } from '../../features/room/selectors'
 import { setScreen } from '../../features/screen/screenSlice'
+import useCurrentUser from '../../hooks/useCurrentUser'
+import useParty from '../../hooks/useParty'
 import useSocketEventListener from '../../hooks/useSocketEventListener'
 import { findByIdOrThrow } from '../../utils/utils'
 import GameOptionsForm from './GameOptionsForm'
 import Game from './TakeSix/Game'
 
 export default function RoomView(): JSX.Element {
+  const currentUser = useCurrentUser()
   const dispatch = useDispatch()
   const room = useRequiredRoom()
   const allRoomUsers = useRequiredAllRoomUsers()
   const game = useSelector((state: RootState) => state.game)
+  const { party } = useParty()
 
   const createUserIdentity = useUserIdentityCreator()
 
@@ -57,6 +61,11 @@ export default function RoomView(): JSX.Element {
 
     if (data.reason === 'completed') {
       const winnerIds = data.winners.map((winner) => winner.id)
+
+      if (winnerIds.includes(currentUser.id)) {
+        party()
+      }
+
       dispatch(
         addMessage({
           type: 'gameEnded',

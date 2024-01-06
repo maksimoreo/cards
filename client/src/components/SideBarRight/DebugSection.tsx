@@ -1,8 +1,11 @@
-import { faPen } from '@fortawesome/free-solid-svg-icons'
+import { faChampagneGlasses, faPen } from '@fortawesome/free-solid-svg-icons'
 import { LOCAL_STORAGE_KEY__SERVER_URL } from '../../const'
+import useParty from '../../hooks/useParty'
 import Button from '../Button'
 
 export default function DebugSection() {
+  const { party } = useParty()
+
   return (
     <>
       <hr className='mx-2 my-4 border-t border-t-neutral-800' />
@@ -32,6 +35,10 @@ export default function DebugSection() {
           Server address is not set - please set VITE_SET_SERVER_ADDRESS_BUTTON env variable
         </p>
       )}
+
+      <Button iconProps={{ icon: faChampagneGlasses }} onClick={party} color='success'>
+        Party
+      </Button>
 
       <hr className='mx-2 my-4 border-t border-t-neutral-800' />
 

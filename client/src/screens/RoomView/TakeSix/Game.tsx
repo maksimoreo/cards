@@ -176,8 +176,6 @@ export default function Game(props: Props): JSX.Element {
     )
 
     if (gameState.stepsLeft === 0) {
-      console.log('Our frontend intelligence has detected that the gaem has been ended')
-
       props.onGameDone && props.onGameDone(gameState)
 
       return
