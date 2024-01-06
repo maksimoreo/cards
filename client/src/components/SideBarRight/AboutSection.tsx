@@ -1,3 +1,5 @@
+import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Collapsable from './Collapsable'
 
 export default function AboutSection() {
@@ -72,14 +74,13 @@ export default function AboutSection() {
         for more info on the <span className='whitespace-nowrap italic'>6 nimmt!</span> game.
       </p>
 
-      {/* TODO: Icon */}
       <p className='mx-2 my-2 text-neutral-400'>
-        GitHub: <span className='italic text-neutral-600'>coming</span>
-      </p>
-
-      {/* TODO: Icon */}
-      <p className='mx-2 my-2 text-neutral-400'>
-        Discord: <span className='italic text-neutral-600'>coming</span>
+        <a target='_blank' href='http://github.com' className='p-2 hover:text-neutral-300'>
+          <FontAwesomeIcon size='lg' icon={faGithub} />
+        </a>
+        <a target='_blank' href='http://discord.com' className='p-2 hover:text-neutral-300'>
+          <FontAwesomeIcon size='lg' icon={faDiscord} />
+        </a>
       </p>
     </>
   )
