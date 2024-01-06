@@ -340,15 +340,18 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
 
       // Everyone receives 's2c_gameStopped' event
       await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual({
-        reason: 'Player inactivity',
+        reason: 'playerInactivity',
+        winners: [],
       })
 
       await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual({
-        reason: 'Player inactivity',
+        reason: 'playerInactivity',
+        winners: [],
       })
 
       await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({
-        reason: 'Player inactivity',
+        reason: 'playerInactivity',
+        winners: [],
       })
     }
 

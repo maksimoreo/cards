@@ -19,6 +19,6 @@ export default class StopGameHandler extends VoidMessageHandler {
       return { badRequest: 'Game is not running' }
     }
 
-    game.stopGame({ reason: 'Room owner action' })
+    game.stopGame({ reason: 'roomOwnerAction' })
   }
 }

@@ -398,7 +398,8 @@ describe('Player Inactivity Strategy: Kick', () => {
       })
 
       await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({
-        reason: 'Player inactivity',
+        reason: 'playerInactivity',
+        winners: [],
       })
     }
 

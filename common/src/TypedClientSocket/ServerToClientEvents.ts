@@ -5,6 +5,7 @@ import {
   GAME_OPTIONS_SCHEMA,
   GAME_STATE_SCHEMA,
   GAME_STEP_SCHEMA,
+  GAME_STOPPED_REASON_SCHEMA,
   ROOM_SCHEMA,
   USER_KICKED_REASON_SCHEMA,
   USER_LEFT_REASON_SCHEMA,
@@ -58,7 +59,15 @@ export const SERVER_NOTIFICATION_DATA_SCHEMA_MAP = {
   }),
 
   s2c_gameStopped: z.object({
-    reason: z.string(),
+    reason: GAME_STOPPED_REASON_SCHEMA,
+    winners: z.array(
+      z.object({
+        id: z.string(),
+        penaltyPoints: z.number(),
+        user: USER_SCHEMA,
+      })
+    ),
+    game: GAME_STATE_SCHEMA,
   }),
 
   s2c_userMessage: z.object({

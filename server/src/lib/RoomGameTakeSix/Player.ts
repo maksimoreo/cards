@@ -21,6 +21,10 @@ export class RoomGameTakeSixPlayer {
     return this.player.isActive
   }
 
+  public get penaltyPoints(): number {
+    return this.player.penaltyPoints
+  }
+
   public playCard(card: number): void {
     this.player.selectCard(card)
   }

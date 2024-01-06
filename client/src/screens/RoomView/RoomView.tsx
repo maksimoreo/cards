@@ -13,7 +13,6 @@ import useSocketEventListener from '../../hooks/useSocketEventListener'
 import { findByIdOrThrow } from '../../utils/utils'
 import GameOptionsForm from './GameOptionsForm'
 import Game from './TakeSix/Game'
-import { GameState } from './TakeSix/types'
 
 export default function RoomView(): JSX.Element {
   const dispatch = useDispatch()
@@ -25,18 +24,8 @@ export default function RoomView(): JSX.Element {
 
   const roomName = room.name
 
-  const handleGameDone = (finalGameState: GameState): void => {
+  const handleGameDone = (): void => {
     dispatch(setGame(null))
-
-    const sortedPlayers = finalGameState.players
-      .map((player) => ({
-        user: createUserIdentity(allRoomUsers.find((user) => user.id === player.id) || player.user),
-        isActive: player.isActive,
-        penaltyPoints: player.penaltyPoints,
-      }))
-      .sort((a, b) => a.penaltyPoints - b.penaltyPoints)
-
-    dispatch(addMessage({ type: 'gameEnded', reason: 'win', sortedPlayers }))
   }
 
   useSocketEventListener('s2c_userJoined', (data) => {
@@ -63,7 +52,25 @@ export default function RoomView(): JSX.Element {
 
   useSocketEventListener('s2c_gameStopped', (data) => {
     dispatch(setGame(null))
-    dispatch(addMessage({ type: 'gameEnded', reason: data.reason }))
+
+    const winnerIds = data.winners.map((winner) => winner.id)
+    dispatch(
+      addMessage({
+        type: 'gameEnded',
+        reason: data.reason,
+        winners: data.winners.map((winner) => ({
+          user: createUserIdentity(winner.user),
+          penaltyPoints: winner.penaltyPoints,
+        })),
+        otherPlayers: data.game.players
+          .filter((player) => player.isActive && !winnerIds.includes(player.id))
+          .sort((a, b) => a.penaltyPoints - b.penaltyPoints)
+          .map((winner) => ({
+            user: createUserIdentity(winner.user),
+            penaltyPoints: winner.penaltyPoints,
+          })),
+      }),
+    )
   })
 
   useSocketEventListener('s2c_usersMovedToSpectators', (data) => {

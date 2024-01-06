@@ -42,7 +42,7 @@ export default class Room {
 
   public close(): void {
     if (this.game) {
-      this.game.stopGame({ reason: 'Room closed' })
+      this.game.stopGame({ reason: 'roomClosed' })
     }
 
     // Notify users that room is closed

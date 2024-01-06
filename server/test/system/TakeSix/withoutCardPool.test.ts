@@ -71,8 +71,8 @@ describe('Game without card pool', () => {
 
       await expect(client1.emitEvent('stopGame', undefined)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
-      await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'Room owner action' })
-      await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'Room owner action' })
+      await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'roomOwnerAction', winners: [] })
+      await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'roomOwnerAction', winners: [] })
     }
 
     expectClientsExpectedEventsQueuesClean(getClients())

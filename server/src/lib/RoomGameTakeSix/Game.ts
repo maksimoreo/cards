@@ -1,4 +1,5 @@
 import { maxBy, random, sample } from 'lodash'
+import { GameStoppedReason } from '../../ServerToClientEvents'
 import { decorateRoom } from '../../decorators/RoomDecorator'
 import Room from '../../models/Room'
 import User, { UserIdentity } from '../../models/User'
@@ -111,7 +112,7 @@ export default class RoomGameTakeSix {
     }
 
     if (this.isEnded()) {
-      return this.stopGame({ reason: 'Completed' })
+      return this.stopGame({ reason: 'completed' })
     }
 
     this.startStepTimer()
@@ -121,7 +122,7 @@ export default class RoomGameTakeSix {
     this.clearSelectRowTimer()
 
     if (this.isEnded()) {
-      return this.stopGame({ reason: 'Completed' })
+      return this.stopGame({ reason: 'completed' })
     }
 
     this.startStepTimer()
@@ -204,7 +205,7 @@ export default class RoomGameTakeSix {
       if (leftActivePlayersCount <= 1) {
         this.unassignReferencesFromRoomAndRoomMembers()
         this.notifyAboutPlayerMoveToSpectators({ inactivePlayers })
-        this.emits2c_gameStopped({ reason: 'Player inactivity' })
+        this.emits2c_gameStopped({ reason: 'playerInactivity' })
         return
       }
 
@@ -240,7 +241,7 @@ export default class RoomGameTakeSix {
         this.removePlayersFromRoom(inactivePlayers)
         this.notifyAboutKickedPlayers({ inactivePlayers })
         if (!this.room.isDestroyed) {
-          this.emits2c_gameStopped({ reason: 'Player inactivity' })
+          this.emits2c_gameStopped({ reason: 'playerInactivity' })
         }
         return
       }
@@ -284,7 +285,7 @@ export default class RoomGameTakeSix {
       if (this.game.activePlayers.length <= 2) {
         this.unassignReferencesFromRoomAndRoomMembers()
         this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer] })
-        this.emits2c_gameStopped({ reason: 'Player inactivity' })
+        this.emits2c_gameStopped({ reason: 'playerInactivity' })
         return
       }
 
@@ -301,7 +302,7 @@ export default class RoomGameTakeSix {
         this.removePlayersFromRoom([waitingForPlayer])
         this.unassignReferencesFromRoomAndRoomMembers()
         this.notifyAboutKickedPlayers({ inactivePlayers: [waitingForPlayer] })
-        this.emits2c_gameStopped({ reason: 'Player inactivity' })
+        this.emits2c_gameStopped({ reason: 'playerInactivity' })
         return
       }
 
@@ -409,14 +410,25 @@ export default class RoomGameTakeSix {
     return this.game.isEnded()
   }
 
-  public stopGame({ reason }: { reason: string }): void {
+  public stopGame({ reason }: { reason: GameStoppedReason }): void {
     this.clearAllTimers()
     this.unassignReferencesFromRoomAndRoomMembers()
     this.emits2c_gameStopped({ reason })
   }
 
-  private emits2c_gameStopped({ reason }: { reason: string }): void {
-    this.room.allUsers.forEach((user) => user.socket.emit('s2c_gameStopped', { reason }))
+  private emits2c_gameStopped({ reason }: { reason: GameStoppedReason }): void {
+    let winners: { id: string; user: UserIdentity; penaltyPoints: number }[] = []
+
+    if (reason === 'completed') {
+      const activePlayers = this.players.filter((player) => player.isActive)
+      const winnerScore = Math.min(...activePlayers.map((player) => player.penaltyPoints))
+      winners = activePlayers
+        .filter((player) => player.penaltyPoints === winnerScore)
+        .map((player) => ({ id: player.id, penaltyPoints: player.penaltyPoints, user: player.user.identity }))
+    }
+
+    const eventData = { reason, winners, game: this.generateSerializedState() }
+    this.room.allUsers.forEach((user) => user.socket.emit('s2c_gameStopped', eventData))
   }
 
   private unassignReferencesFromRoomAndRoomMembers(): void {
@@ -441,7 +453,7 @@ export default class RoomGameTakeSix {
     if (this.game.activePlayers.length <= 2) {
       player.deactivate()
       notifyAboutPlayerLeave()
-      this.stopGame({ reason: 'Player left' })
+      this.stopGame({ reason: 'playerLeft' })
       return
     }
 

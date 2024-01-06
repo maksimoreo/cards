@@ -884,13 +884,12 @@ describe('Game #1', () => {
         playerCards: [],
       })
 
-      await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual({
-        reason: 'Completed',
-      })
-
-      await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual({
-        reason: 'Completed',
-      })
+      const eventData_gameStopped = {
+        reason: 'completed',
+        winners: [{ id: client2.id, user: { id: client2.id, color: 'D1D5DB', name: client2.id }, penaltyPoints: 7 }],
+      }
+      await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual(eventData_gameStopped)
+      await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual(eventData_gameStopped)
     }
 
     // Game. Ends. Now. (ensure room cleanup is correct)

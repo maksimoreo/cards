@@ -352,8 +352,8 @@ describe('Player leaving behavior', () => {
 
       await expect(client3Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client4.id } } })
       await expect(client4Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client4.id } } })
-      await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'Player left' })
-      await expect(client4Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'Player left' })
+      await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'playerLeft', winners: [] })
+      await expect(client4Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'playerLeft', winners: [] })
       await expect(client1Promise_s2c_rooms).toResolve()
       await expect(client2Promise_s2c_rooms).toResolve()
     }

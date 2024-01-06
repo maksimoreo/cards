@@ -1,4 +1,5 @@
 import React from 'react'
+import { assertUnreachable } from '../../../utils'
 import { ChatMessage } from '../ChatMessage'
 import UserIdentity from '../UserName/UserIdentity'
 import UserName from '../UserName/UserName'
@@ -10,16 +11,18 @@ function RoomName({ roomName }: { roomName: string }): JSX.Element {
 }
 
 function joinUsers(users: readonly UserIdentity[]) {
-  const userNames = users.map<React.ReactNode>((user, index) => <UserName key={index} {...user} />)
+  return nodesToSentence(users.map((user) => <UserName key={user.id} {...user} />))
+}
 
-  if (userNames.length <= 1) {
-    return userNames
+function nodesToSentence(nodes: React.ReactNode[]): React.ReactNode[] {
+  if (nodes.length <= 1) {
+    return nodes
   }
 
-  return userNames
-    .slice(1, userNames.length - 1)
-    .reduce<React.ReactNode[]>((nodes, userName) => nodes.concat([', ', userName]), [userNames[0]])
-    .concat([' and ', userNames.at(-1)])
+  return nodes
+    .slice(1, nodes.length - 1)
+    .reduce<React.ReactNode[]>((accumulatedNodes, nextNode) => accumulatedNodes.concat([', ', nextNode]), [nodes[0]])
+    .concat([' and ', nodes.at(-1)])
 }
 
 interface LineProps {
@@ -84,20 +87,30 @@ function getMessageLineText(message: ChatMessage) {
   } else if (message.type === 'gameStarted') {
     return <>Game started with {joinUsers(message.players)}</>
   } else if (message.type === 'gameEnded') {
-    if (message.sortedPlayers && message.sortedPlayers.length > 0) {
-      const winnerPoints = message.sortedPlayers[0].penaltyPoints
-      const winners = message.sortedPlayers
-        .filter((player) => player.penaltyPoints === winnerPoints)
-        .map((player) => player.user)
-
+    if (message.reason === 'completed') {
       return (
         <>
-          Game ended! {joinUsers(winners)} won with the least penalty points ({winnerPoints}).
+          Game ended! {joinUsers(message.winners.map((winner) => winner.user))} won with the least penalty points (
+          {message.winners[0].penaltyPoints}). Other players:{' '}
+          {nodesToSentence(
+            message.otherPlayers.map((entry) => [
+              <UserName key={entry.user.id} {...entry.user} />,
+              ` - ${entry.penaltyPoints}`,
+            ]),
+          )}
         </>
       )
+    } else if (message.reason === 'playerInactivity') {
+      return <>Game ended due to players being inactive</>
+    } else if (message.reason === 'playerLeft') {
+      return <>Game ended because players left</>
+    } else if (message.reason === 'roomClosed') {
+      return <>Game ended because room was closed</>
+    } else if (message.reason === 'roomOwnerAction') {
+      return <>Room owner stopped the game</>
     }
 
-    return <>Game ended. Reason: {message.reason}</>
+    assertUnreachable(message.reason)
   } else if (message.type === 'usersMovedToSpectators') {
     return <>{joinUsers(message.users)} were moved to spectators due to inactivity</>
   } else if (message.type === 'youHaveBeenMovedToSpectators') {

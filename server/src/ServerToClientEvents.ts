@@ -4,8 +4,10 @@ import { SerializedState } from './lib/RoomGameTakeSix/Game'
 import Card from './lib/TakeSix/Card'
 import { SerializedStep } from './lib/TakeSix/TakeSix'
 import { GameOptions } from './models/Room'
+import { UserIdentity } from './models/User'
 
 export type UserLeftReason = 'selfAction' | 'kickedForInactivity' | 'kickedByOwner' | 'kickedByVote' | 'disconnected'
+export type GameStoppedReason = 'completed' | 'playerInactivity' | 'playerLeft' | 'roomOwnerAction' | 'roomClosed'
 
 // Events data types
 export interface EventData_s2c_usersLeft {
@@ -31,7 +33,13 @@ export interface EventData_s2c_gameStarted {
 }
 
 export interface EventData_s2c_gameStopped {
-  reason: string
+  reason: GameStoppedReason
+  winners: {
+    id: string
+    user: UserIdentity
+    penaltyPoints: number
+  }[]
+  game: SerializedState
 }
 
 export interface EventData_s2c_gameStep {

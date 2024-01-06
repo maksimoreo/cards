@@ -30,11 +30,7 @@ export const GAME_STATE_SCHEMA = z.object({
       id: z.string(),
       penaltyPoints: z.number(),
       isActive: z.boolean(),
-      user: z.object({
-        id: z.string(),
-        name: z.string(),
-        color: z.string(),
-      }),
+      user: USER_SCHEMA,
       hasSelectedCard: z.boolean(),
     })
   ),
@@ -86,3 +82,12 @@ export const USER_KICKED_REASON_SCHEMA = z.union([
   z.literal('ownerAction'),
   z.literal('roomClosed'),
 ])
+
+export const GAME_STOPPED_REASON_SCHEMA = z.union([
+  z.literal('completed'),
+  z.literal('playerInactivity'),
+  z.literal('playerLeft'),
+  z.literal('roomOwnerAction'),
+  z.literal('roomClosed'),
+])
+export type GameStoppedReason = z.infer<typeof GAME_STOPPED_REASON_SCHEMA>
