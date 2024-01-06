@@ -24,9 +24,11 @@ export function Chat(): JSX.Element {
       addMessage({
         id,
         type: 'localUserMessage',
-        text: message,
-        sender: createUserIdentity(currentUser),
-        deliveryStatus: 'pending',
+        data: {
+          text: message,
+          sender: createUserIdentity(currentUser),
+          deliveryStatus: 'pending',
+        },
       }),
     )
 
@@ -47,8 +49,10 @@ export function Chat(): JSX.Element {
     dispatch(
       addMessage({
         type: 'remoteUserMessage',
-        text: data.message,
-        sender: createUserIdentity(data.user),
+        data: {
+          text: data.message,
+          sender: createUserIdentity(data.user),
+        },
       }),
     )
   })

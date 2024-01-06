@@ -15,94 +15,128 @@ export interface MessageBase<MessageType> {
 }
 
 export interface RemoteUserMessage extends MessageBase<'remoteUserMessage'> {
-  readonly sender: UserIdentity
-  readonly text: string
+  readonly data: {
+    readonly sender: UserIdentity
+    readonly text: string
+  }
 }
 
 export type LocalUserMessageDeliveryStatus = 'pending' | 'delivered' | 'error'
 export interface LocalUserMessage extends MessageBase<'localUserMessage'> {
-  readonly deliveryStatus: LocalUserMessageDeliveryStatus
-  readonly sender: UserIdentity
-  readonly text: string
+  readonly data: {
+    readonly deliveryStatus: LocalUserMessageDeliveryStatus
+    readonly sender: UserIdentity
+    readonly text: string
+  }
 }
 
 export interface ServerMessage extends MessageBase<'serverMessage'> {
-  readonly text: string
+  readonly data: {
+    readonly text: string
+  }
 }
 
 export interface LocalNotification extends MessageBase<'localNotification'> {
-  readonly text: string
+  readonly data: {
+    readonly text: string
+  }
 }
 
 export interface Command extends MessageBase<'command'> {
-  readonly text: string
+  readonly data: {
+    readonly text: string
+  }
 }
 
 export interface UserJoinedRoom extends MessageBase<'userJoinedRoom'> {
-  readonly user: UserIdentity
-  readonly roomName: string
+  readonly data: {
+    readonly user: UserIdentity
+    readonly roomName: string
+  }
 }
 
 export interface UserLeftRoom extends MessageBase<'userLeftRoom'> {
-  readonly user: UserIdentity
-  readonly roomName: string
+  readonly data: {
+    readonly user: UserIdentity
+    readonly roomName: string
+  }
 }
 
 export interface UsersLeftRoom extends MessageBase<'usersLeftRoom'> {
-  readonly users: UserIdentity[]
-  readonly roomName: string
-  readonly reason: UsersLeftRoomReason
+  readonly data: {
+    readonly users: UserIdentity[]
+    readonly roomName: string
+    readonly reason: UsersLeftRoomReason
+  }
 }
 
 export interface OwnerLeftRoom extends MessageBase<'ownerLeftRoom'> {
-  readonly user: UserIdentity
-  readonly newRoomOwner: UserIdentity
-  readonly roomName: string
+  readonly data: {
+    readonly user: UserIdentity
+    readonly newRoomOwner: UserIdentity
+    readonly roomName: string
+  }
 }
 
 export interface CurrentUserJoinedRoom extends MessageBase<'currentUserJoinedRoom'> {
-  readonly roomName: string
+  readonly data: {
+    readonly roomName: string
+  }
 }
 
 export interface CurrentUserLeftRoom extends MessageBase<'currentUserLeftRoom'> {
-  readonly roomName: string
-  readonly reason: 'selfAction' | 'kickedForInactivity' // | 'kickedByOwner' | 'kickedByVote' | ...
+  readonly data: {
+    readonly roomName: string
+    readonly reason: 'selfAction' | 'kickedForInactivity' // | 'kickedByOwner' | 'kickedByVote' | ...
+  }
 }
 
 export interface UserNameChange extends MessageBase<'userNameChange'> {
-  readonly previousName: string
-  readonly newName: string
-  readonly newUserIdentity: UserIdentity
+  readonly data: {
+    readonly previousName: string
+    readonly newName: string
+    readonly newUserIdentity: UserIdentity
+  }
 }
 
 export interface GameStarted extends MessageBase<'gameStarted'> {
-  readonly players: UserIdentity[]
+  readonly data: {
+    readonly players: UserIdentity[]
+  }
 }
 
 export interface GameEnded extends MessageBase<'gameEnded'> {
-  readonly winners: {
-    readonly user: UserIdentity
-    readonly penaltyPoints: number
-  }[]
-  readonly otherPlayers: {
-    readonly user: UserIdentity
-    readonly penaltyPoints: number
-  }[]
-  readonly reason: GameStoppedReason
+  readonly data: {
+    readonly winners: {
+      readonly user: UserIdentity
+      readonly penaltyPoints: number
+    }[]
+    readonly otherPlayers: {
+      readonly user: UserIdentity
+      readonly penaltyPoints: number
+    }[]
+    readonly reason: GameStoppedReason
+  }
 }
 
 export interface UsersMovedToSpectators extends MessageBase<'usersMovedToSpectators'> {
-  readonly users: UserIdentity[]
-  readonly reason: 'inactivity' // | 'ownerAction' | ...
+  readonly data: {
+    readonly users: UserIdentity[]
+    readonly reason: 'inactivity' // | 'ownerAction' | ...
+  }
 }
 
 export interface YouHaveBeenMovedToSpectators extends MessageBase<'youHaveBeenMovedToSpectators'> {
-  readonly reason: 'inactivity' // | 'ownerAction' | ...
+  readonly data: {
+    readonly reason: 'inactivity' // | 'ownerAction' | ...
+  }
 }
 
 export interface NewRoomOwner extends MessageBase<'newRoomOwner'> {
-  readonly owner: UserIdentity
-  readonly roomName: string
+  readonly data: {
+    readonly owner: UserIdentity
+    readonly roomName: string
+  }
 }
 
 export type ChatMessage =

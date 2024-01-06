@@ -15,11 +15,11 @@ export default function AppMainView(): JSX.Element {
   const { socket } = useSocket()
 
   const handleSocketConnect = (): void => {
-    dispatch(addMessage({ type: 'localNotification', text: 'Connected to the server' }))
+    dispatch(addMessage({ type: 'localNotification', data: { text: 'Connected to the server' } }))
   }
 
   const handleSocketDisconnect = (): void => {
-    dispatch(addMessage({ type: 'localNotification', text: 'Disconnected from the server' }))
+    dispatch(addMessage({ type: 'localNotification', data: { text: 'Disconnected from the server' } }))
   }
 
   useEffect(() => {

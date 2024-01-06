@@ -49,7 +49,7 @@ export const chatSlice = createSlice({
         throw new Error(`Message#${message.id} is not of type localUserMessage`)
       }
 
-      message.deliveryStatus = action.payload.deliveryStatus
+      message.data.deliveryStatus = action.payload.deliveryStatus
     },
   },
 })

@@ -47,7 +47,7 @@ export default function RoomForm(): JSX.Element {
         dispatch(setGame(null))
         dispatch(setScreen('room'))
 
-        dispatch(addMessage({ type: 'currentUserJoinedRoom', roomName: response.data.room.name }))
+        dispatch(addMessage({ type: 'currentUserJoinedRoom', data: { roomName: response.data.room.name } }))
 
         return
       }

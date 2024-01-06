@@ -34,8 +34,10 @@ export default function RoomView(): JSX.Element {
     dispatch(
       addMessage({
         type: 'userJoinedRoom',
-        user: { ...data.user, isCurrentUser: false, isRoomOwner: false },
-        roomName,
+        data: {
+          user: { ...data.user, isCurrentUser: false, isRoomOwner: false },
+          roomName,
+        },
       }),
     )
   })
@@ -47,7 +49,7 @@ export default function RoomView(): JSX.Element {
       createUserIdentity(findByIdOrThrow(allRoomUsers, id)),
     )
 
-    dispatch(addMessage({ type: 'gameStarted', players: participants }))
+    dispatch(addMessage({ type: 'gameStarted', data: { players: participants } }))
   })
 
   useSocketEventListener('s2c_gameStopped', (data) => {
@@ -57,18 +59,20 @@ export default function RoomView(): JSX.Element {
     dispatch(
       addMessage({
         type: 'gameEnded',
-        reason: data.reason,
-        winners: data.winners.map((winner) => ({
-          user: createUserIdentity(winner.user),
-          penaltyPoints: winner.penaltyPoints,
-        })),
-        otherPlayers: data.game.players
-          .filter((player) => player.isActive && !winnerIds.includes(player.id))
-          .sort((a, b) => a.penaltyPoints - b.penaltyPoints)
-          .map((winner) => ({
+        data: {
+          reason: data.reason,
+          winners: data.winners.map((winner) => ({
             user: createUserIdentity(winner.user),
             penaltyPoints: winner.penaltyPoints,
           })),
+          otherPlayers: data.game.players
+            .filter((player) => player.isActive && !winnerIds.includes(player.id))
+            .sort((a, b) => a.penaltyPoints - b.penaltyPoints)
+            .map((winner) => ({
+              user: createUserIdentity(winner.user),
+              penaltyPoints: winner.penaltyPoints,
+            })),
+        },
       }),
     )
   })
@@ -81,8 +85,10 @@ export default function RoomView(): JSX.Element {
     dispatch(
       addMessage({
         type: 'usersMovedToSpectators',
-        reason: 'inactivity',
-        users: room.users.filter((user) => data.userIds.includes(user.id)).map((user) => createUserIdentity(user)),
+        data: {
+          reason: 'inactivity',
+          users: room.users.filter((user) => data.userIds.includes(user.id)).map((user) => createUserIdentity(user)),
+        },
       }),
     )
   })
@@ -92,7 +98,7 @@ export default function RoomView(): JSX.Element {
       dispatch(setGame(null))
     }
 
-    dispatch(addMessage({ type: 'youHaveBeenMovedToSpectators', reason: 'inactivity' }))
+    dispatch(addMessage({ type: 'youHaveBeenMovedToSpectators', data: { reason: 'inactivity' } }))
   })
 
   useSocketEventListener('s2c_usersLeft', (data) => {
@@ -103,11 +109,13 @@ export default function RoomView(): JSX.Element {
     dispatch(
       addMessage({
         type: 'usersLeftRoom',
-        reason: s2c_usersLeftReasonToChatMessageReason(data.reason),
-        users: [room.owner, ...room.users]
-          .filter((user) => data.userIds.includes(user.id))
-          .map((user) => createUserIdentity(user)),
-        roomName: room.name,
+        data: {
+          reason: s2c_usersLeftReasonToChatMessageReason(data.reason),
+          users: [room.owner, ...room.users]
+            .filter((user) => data.userIds.includes(user.id))
+            .map((user) => createUserIdentity(user)),
+          roomName: room.name,
+        },
       }),
     )
 
@@ -115,8 +123,10 @@ export default function RoomView(): JSX.Element {
       dispatch(
         addMessage({
           type: 'newRoomOwner',
-          owner: { ...createUserIdentity(data.newRoomState.owner), isRoomOwner: true },
-          roomName: data.newRoomState.name,
+          data: {
+            owner: { ...createUserIdentity(data.newRoomState.owner), isRoomOwner: true },
+            roomName: data.newRoomState.name,
+          },
         }),
       )
     }
@@ -134,7 +144,9 @@ export default function RoomView(): JSX.Element {
     dispatch(setGame(null))
     dispatch(setRoom(null))
     dispatch(setScreen('rooms'))
-    dispatch(addMessage({ type: 'currentUserLeftRoom', roomName: room?.name ?? '', reason: 'kickedForInactivity' }))
+    dispatch(
+      addMessage({ type: 'currentUserLeftRoom', data: { roomName: room?.name ?? '', reason: 'kickedForInactivity' } }),
+    )
   })
 
   return (

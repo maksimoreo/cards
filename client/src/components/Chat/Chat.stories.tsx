@@ -33,22 +33,38 @@ const user3 = { id: '3', name: 'MegaTurtle99', color: '#f6993f', isCurrentUser: 
 const roomName = 'gamers'
 
 const sampleMessages: readonly ChatMessage[] = [
-  addId({ type: 'localNotification', text: 'Connected to the server' }),
-  addId({ type: 'currentUserJoinedRoom', roomName }),
-  addId({ type: 'userJoinedRoom', user: user2, roomName }),
-  addId({ type: 'userJoinedRoom', user: user3, roomName }),
-  addId({ type: 'localUserMessage', text: 'Hello everyone!', deliveryStatus: 'delivered', sender: user1 }),
-  addId({ type: 'remoteUserMessage', text: 'Hi', sender: user3 }),
-  addId({ type: 'remoteUserMessage', text: 'Welcome back!', sender: user2 }),
-  addId({ type: 'localUserMessage', text: 'How is it going? :)', deliveryStatus: 'delivered', sender: user1 }),
-  addId({ type: 'remoteUserMessage', text: 'doing well', sender: user2 }),
-  addId({ type: 'remoteUserMessage', text: 'all good, hbu?', sender: user3 }),
-  addId({ type: 'remoteUserMessage', text: 'ready for a game?', sender: user2 }),
-  addId({ type: 'localUserMessage', text: 'Sure, lets do it!', deliveryStatus: 'pending', sender: user1 }),
-  addId({ type: 'localNotification', text: 'Game started' }),
-  addId({ type: 'userLeftRoom', user: user2, roomName }),
-  addId({ type: 'userLeftRoom', user: user3, roomName }),
-  addId({ type: 'localUserMessage', text: 'bruh', deliveryStatus: 'delivered', sender: user1 }),
+  addId({ timestamp: 1704060000000, type: 'localNotification', data: { text: 'Connected to the server' } }),
+  addId({ timestamp: 1704060000000, type: 'currentUserJoinedRoom', data: { roomName } }),
+  addId({ timestamp: 1704060000000, type: 'userJoinedRoom', data: { user: user2, roomName } }),
+  addId({ timestamp: 1704060000000, type: 'userJoinedRoom', data: { user: user3, roomName } }),
+  addId({
+    timestamp: 1704060000000,
+    type: 'localUserMessage',
+    data: { text: 'Hello everyone!', deliveryStatus: 'delivered', sender: user1 },
+  }),
+  addId({ timestamp: 1704060000000, type: 'remoteUserMessage', data: { text: 'Hi', sender: user3 } }),
+  addId({ timestamp: 1704060000000, type: 'remoteUserMessage', data: { text: 'Welcome back!', sender: user2 } }),
+  addId({
+    timestamp: 1704060000000,
+    type: 'localUserMessage',
+    data: { text: 'How is it going? :)', deliveryStatus: 'delivered', sender: user1 },
+  }),
+  addId({ timestamp: 1704060000000, type: 'remoteUserMessage', data: { text: 'doing well', sender: user2 } }),
+  addId({ timestamp: 1704060000000, type: 'remoteUserMessage', data: { text: 'all good, hbu?', sender: user3 } }),
+  addId({ timestamp: 1704060000000, type: 'remoteUserMessage', data: { text: 'ready for a game?', sender: user2 } }),
+  addId({
+    timestamp: 1704060000000,
+    type: 'localUserMessage',
+    data: { text: 'Sure, lets do it!', deliveryStatus: 'pending', sender: user1 },
+  }),
+  addId({ timestamp: 1704060000000, type: 'localNotification', data: { text: 'Game started' } }),
+  addId({ timestamp: 1704060000000, type: 'userLeftRoom', data: { user: user2, roomName } }),
+  addId({ timestamp: 1704060000000, type: 'userLeftRoom', data: { user: user3, roomName } }),
+  addId({
+    timestamp: 1704060000000,
+    type: 'localUserMessage',
+    data: { text: 'bruh', deliveryStatus: 'delivered', sender: user1 },
+  }),
 ]
 
 export const WithSampleMessages: Story = {

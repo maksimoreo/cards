@@ -49,7 +49,7 @@ export default function RoomsList(): JSX.Element {
         )
         dispatch(setRoom(response.data.room))
         dispatch(setScreen('room'))
-        dispatch(addMessage({ type: 'currentUserJoinedRoom', roomName: response.data.room.name }))
+        dispatch(addMessage({ type: 'currentUserJoinedRoom', data: { roomName: response.data.room.name } }))
       }
     })
   }

@@ -9,8 +9,8 @@ export default function UserMessageLine({ message }: UserMessageLineProps): JSX.
   return (
     <div className='px-2 pt-0.5 hover:bg-white/5' title={new Date(message.timestamp).toLocaleTimeString()}>
       <p>
-        <UserName {...message.sender} />
-        <span className='text-sm text-neutral-300'>: {message.text}</span>
+        <UserName {...message.data.sender} />
+        <span className='text-sm text-neutral-300'>: {message.data.text}</span>
       </p>
     </div>
   )

@@ -39,86 +39,86 @@ export default function Line({ message }: LineProps): JSX.Element {
   // assertUnreachable(message)
 }
 
-function getMessageLineText(message: ChatMessage) {
-  if (message.type === 'localNotification') {
-    return message.text
-  } else if (message.type === 'userJoinedRoom') {
+function getMessageLineText({ type, data }: ChatMessage) {
+  if (type === 'localNotification') {
+    return data.text
+  } else if (type === 'userJoinedRoom') {
     return (
       <>
-        <UserName {...message.user} /> joined <RoomName roomName={message.roomName} />
+        <UserName {...data.user} /> joined <RoomName roomName={data.roomName} />
       </>
     )
-  } else if (message.type === 'userLeftRoom') {
+  } else if (type === 'userLeftRoom') {
     return (
       <>
-        <UserName {...message.user} /> left <RoomName roomName={message.roomName} />
+        <UserName {...data.user} /> left <RoomName roomName={data.roomName} />
       </>
     )
-  } else if (message.type === 'usersLeftRoom') {
-    const users = joinUsers(message.users)
-    return message.reason === 'kickedForInactivity' ? (
+  } else if (type === 'usersLeftRoom') {
+    const users = joinUsers(data.users)
+    return data.reason === 'kickedForInactivity' ? (
       <>
-        {users} {message.users.length == 1 ? 'was' : 'were'} kicked from <RoomName roomName={message.roomName} /> due to
+        {users} {data.users.length == 1 ? 'was' : 'were'} kicked from <RoomName roomName={data.roomName} /> due to
         inactivity
       </>
-    ) : message.reason === 'selfAction' ? (
+    ) : data.reason === 'selfAction' ? (
       <>
-        {users} left <RoomName roomName={message.roomName} />
+        {users} left <RoomName roomName={data.roomName} />
       </>
     ) : (
       ''
     )
-  } else if (message.type === 'currentUserJoinedRoom') {
+  } else if (type === 'currentUserJoinedRoom') {
     return (
       <>
-        You joined <RoomName roomName={message.roomName} />
+        You joined <RoomName roomName={data.roomName} />
       </>
     )
-  } else if (message.type === 'currentUserLeftRoom') {
-    return message.reason === 'kickedForInactivity' ? (
+  } else if (type === 'currentUserLeftRoom') {
+    return data.reason === 'kickedForInactivity' ? (
       <>
-        You have been kicked from <RoomName roomName={message.roomName} /> due to inactivity
+        You have been kicked from <RoomName roomName={data.roomName} /> due to inactivity
       </>
     ) : (
       <>
-        You left <RoomName roomName={message.roomName} />
+        You left <RoomName roomName={data.roomName} />
       </>
     )
-  } else if (message.type === 'gameStarted') {
-    return <>Game started with {joinUsers(message.players)}</>
-  } else if (message.type === 'gameEnded') {
-    if (message.reason === 'completed') {
+  } else if (type === 'gameStarted') {
+    return <>Game started with {joinUsers(data.players)}</>
+  } else if (type === 'gameEnded') {
+    if (data.reason === 'completed') {
       return (
         <>
-          Game ended! {joinUsers(message.winners.map((winner) => winner.user))} won with the least penalty points (
-          {message.winners[0].penaltyPoints}). Other players:{' '}
+          Game ended! {joinUsers(data.winners.map((winner) => winner.user))} won with the least penalty points (
+          {data.winners[0].penaltyPoints}). Other players:{' '}
           {nodesToSentence(
-            message.otherPlayers.map((entry) => [
+            data.otherPlayers.map((entry) => [
               <UserName key={entry.user.id} {...entry.user} />,
               ` - ${entry.penaltyPoints}`,
             ]),
           )}
         </>
       )
-    } else if (message.reason === 'playerInactivity') {
+    } else if (data.reason === 'playerInactivity') {
       return <>Game ended due to players being inactive</>
-    } else if (message.reason === 'playerLeft') {
+    } else if (data.reason === 'playerLeft') {
       return <>Game ended because players left</>
-    } else if (message.reason === 'roomClosed') {
+    } else if (data.reason === 'roomClosed') {
       return <>Game ended because room was closed</>
-    } else if (message.reason === 'roomOwnerAction') {
+    } else if (data.reason === 'roomOwnerAction') {
       return <>Room owner stopped the game</>
     }
 
-    assertUnreachable(message.reason)
-  } else if (message.type === 'usersMovedToSpectators') {
-    return <>{joinUsers(message.users)} were moved to spectators due to inactivity</>
-  } else if (message.type === 'youHaveBeenMovedToSpectators') {
+    assertUnreachable(data.reason)
+  } else if (type === 'usersMovedToSpectators') {
+    return <>{joinUsers(data.users)} were moved to spectators due to inactivity</>
+  } else if (type === 'youHaveBeenMovedToSpectators') {
     return <>You have been moved to spectators due to inactivity</>
-  } else if (message.type === 'newRoomOwner') {
+  } else if (type === 'newRoomOwner') {
     return (
       <>
-        <UserName {...message.owner} /> is new owner of <RoomName roomName={message.roomName} />
+        <UserName {...data.owner} /> is new owner of <RoomName roomName={data.roomName} />
       </>
     )
   }
