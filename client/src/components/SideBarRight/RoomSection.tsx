@@ -1,5 +1,6 @@
 import { faRightFromBracket, faStop } from '@fortawesome/free-solid-svg-icons'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../app/store'
 import { Room } from '../../commonTypes'
 import { addMessage } from '../../features/chat/chatSlice'
 import { setGame } from '../../features/game/gameSlice'
@@ -18,6 +19,10 @@ export default function RoomSection({ room }: Props) {
   const dispatch = useDispatch()
   const { send } = useSocket()
   const isRoomOwner = useIsOwner()
+  const gamePlayers = useSelector((state: RootState) => state.game?.gameState.players)
+
+  const isUserSpectator: (id: string) => boolean = (id: string) =>
+    !!gamePlayers && !gamePlayers?.find((gamePlayer) => gamePlayer.id === id)
 
   const handleStopGame = (): void => {
     send('stopGame', undefined, (response) => {
@@ -48,17 +53,17 @@ export default function RoomSection({ room }: Props) {
 
       <ul className='mt-4'>
         <li className='px-3 py-1'>
-          <UserNameFromUser user={room.owner} />
+          <UserNameFromUser user={room.owner} isSpectator={isUserSpectator(room.owner.id)} />
         </li>
 
         {room.users.map((user) => (
           <li key={user.id} className='px-3 py-1'>
-            <UserNameFromUser user={user} />
+            <UserNameFromUser user={user} isSpectator={isUserSpectator(user.id)} />
           </li>
         ))}
       </ul>
 
-      {isRoomOwner && (
+      {isRoomOwner && gamePlayers && gamePlayers.length >= 2 && (
         <Button iconProps={{ icon: faStop }} color='error' onClick={handleStopGame} className='mt-2'>
           Stop game
         </Button>

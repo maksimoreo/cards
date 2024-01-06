@@ -5,6 +5,7 @@ import UserName from './UserName'
 interface Props {
   readonly user: User
   readonly isInactive?: boolean
+  readonly isSpectator?: boolean
 }
 
 export default function UserNameFromUser({ user, ...otherProps }: Props): JSX.Element {
