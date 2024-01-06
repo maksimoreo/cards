@@ -15,8 +15,18 @@ export const chatSlice = createSlice({
     messages: [] as readonly ChatMessage[],
   },
   reducers: {
-    addMessage: (state, action: PayloadAction<ChatMessage | DistributiveOmit<ChatMessage, 'id'>>) => {
-      const newMessage = 'id' in action.payload ? action.payload : { ...action.payload, id: uniqueId() }
+    addMessage: (
+      state,
+      action: PayloadAction<ChatMessage | DistributiveOmit<DistributiveOmit<ChatMessage, 'id'>, 'timestamp'>>,
+    ) => {
+      const { payload } = action
+      const id = 'id' in payload ? payload.id : uniqueId()
+      const timestamp = 'timestamp' in payload ? payload.timestamp : Date.now()
+      const newMessage = {
+        ...action.payload,
+        id,
+        timestamp,
+      }
 
       if (state.messages.length >= MAX_MESSAGES_COUNT) {
         state.messages = state.messages.slice(1).concat(newMessage)

@@ -9,6 +9,8 @@ export interface MessageBase<MessageType> {
   // This ID is not stored on the server
   // The same message on a different client with have a different ID
   readonly id: string
+
+  readonly timestamp: number
 }
 
 export interface RemoteUserMessage extends MessageBase<'remoteUserMessage'> {
