@@ -16,6 +16,7 @@ export interface EventToInputDataTypeMapT {
     stepTimeout?: number
     playerInactivityStrategy?: PlayerInactivityStrategy
   }
+  stopGame: undefined
 }
 
 type ClientToServerEvents = {

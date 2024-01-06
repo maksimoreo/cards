@@ -107,10 +107,14 @@ function getMessageLineText({ type, data }: ChatMessage) {
     } else if (data.reason === 'roomClosed') {
       return <>Game ended because room was closed</>
     } else if (data.reason === 'roomOwnerAction') {
-      return <>Room owner stopped the game</>
+      return (
+        <>
+          <UserName {...data.roomOwner} /> stopped the game
+        </>
+      )
     }
 
-    assertUnreachable(data.reason)
+    assertUnreachable(data)
   } else if (type === 'usersMovedToSpectators') {
     return <>{joinUsers(data.users)} were moved to spectators due to inactivity</>
   } else if (type === 'youHaveBeenMovedToSpectators') {

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EventToInputDataTypeMapT } from './ClientToServerEvents'
 import { CARD_SCHEMA, GAME_STATE_SCHEMA, GAME_STEP_SCHEMA, ROOM_SCHEMA } from './schemas'
 
 export const EVENT_TO_OUTPUT_DATA_SCHEMA_MAP = {
@@ -43,6 +44,8 @@ export const EVENT_TO_OUTPUT_DATA_SCHEMA_MAP = {
   selectRow: z.unknown(),
 
   updateGameOptions: z.unknown(),
-}
+
+  stopGame: z.unknown(),
+} satisfies Record<keyof EventToInputDataTypeMapT, z.ZodSchema>
 
 export type EventToOutputDataSchemaMapT = typeof EVENT_TO_OUTPUT_DATA_SCHEMA_MAP

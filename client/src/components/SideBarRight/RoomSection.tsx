@@ -1,9 +1,11 @@
-import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons'
+import { faRightFromBracket, faStop } from '@fortawesome/free-solid-svg-icons'
 import { useDispatch } from 'react-redux'
 import { Room } from '../../commonTypes'
 import { addMessage } from '../../features/chat/chatSlice'
+import { setGame } from '../../features/game/gameSlice'
 import { setRoom } from '../../features/room/roomSlice'
 import { setScreen } from '../../features/screen/screenSlice'
+import { useIsOwner } from '../../hooks/useIsOwner'
 import { useSocket } from '../../hooks/useSocket'
 import Button from '../Button'
 import UserNameFromUser from '../Chat/UserName/UserNameFromUser'
@@ -15,6 +17,15 @@ interface Props {
 export default function RoomSection({ room }: Props) {
   const dispatch = useDispatch()
   const { send } = useSocket()
+  const isRoomOwner = useIsOwner()
+
+  const handleStopGame = (): void => {
+    send('stopGame', undefined, (response) => {
+      if (response.code === 'SUCCESS') {
+        dispatch(setGame(null))
+      }
+    })
+  }
 
   const handleLeave = (): void => {
     send('leaveCurrentRoom', null, (response) => {
@@ -47,7 +58,13 @@ export default function RoomSection({ room }: Props) {
         ))}
       </ul>
 
-      <Button iconProps={{ icon: faRightFromBracket }} color='error' onClick={handleLeave} className='mt-2'>
+      {isRoomOwner && (
+        <Button iconProps={{ icon: faStop }} color='error' onClick={handleStopGame} className='mt-2'>
+          Stop game
+        </Button>
+      )}
+
+      <Button iconProps={{ icon: faRightFromBracket }} color='error' onClick={handleLeave} className=''>
         Leave
       </Button>
     </>

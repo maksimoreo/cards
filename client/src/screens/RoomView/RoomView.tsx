@@ -55,26 +55,37 @@ export default function RoomView(): JSX.Element {
   useSocketEventListener('s2c_gameStopped', (data) => {
     dispatch(setGame(null))
 
-    const winnerIds = data.winners.map((winner) => winner.id)
-    dispatch(
-      addMessage({
-        type: 'gameEnded',
-        data: {
-          reason: data.reason,
-          winners: data.winners.map((winner) => ({
-            user: createUserIdentity(winner.user),
-            penaltyPoints: winner.penaltyPoints,
-          })),
-          otherPlayers: data.game.players
-            .filter((player) => player.isActive && !winnerIds.includes(player.id))
-            .sort((a, b) => a.penaltyPoints - b.penaltyPoints)
-            .map((winner) => ({
+    if (data.reason === 'completed') {
+      const winnerIds = data.winners.map((winner) => winner.id)
+      dispatch(
+        addMessage({
+          type: 'gameEnded',
+          data: {
+            reason: data.reason,
+            winners: data.winners.map((winner) => ({
               user: createUserIdentity(winner.user),
               penaltyPoints: winner.penaltyPoints,
             })),
-        },
-      }),
-    )
+            otherPlayers: data.game.players
+              .filter((player) => player.isActive && !winnerIds.includes(player.id))
+              .sort((a, b) => a.penaltyPoints - b.penaltyPoints)
+              .map((winner) => ({
+                user: createUserIdentity(winner.user),
+                penaltyPoints: winner.penaltyPoints,
+              })),
+          },
+        }),
+      )
+    } else if (data.reason === 'roomOwnerAction') {
+      dispatch(
+        addMessage({
+          type: 'gameEnded',
+          data: { reason: 'roomOwnerAction', roomOwner: createUserIdentity(room.owner) },
+        }),
+      )
+    } else {
+      dispatch(addMessage({ type: 'gameEnded', data: { reason: data.reason } }))
+    }
   })
 
   useSocketEventListener('s2c_usersMovedToSpectators', (data) => {

@@ -1,4 +1,3 @@
-import { GameStoppedReason } from 'common/src/TypedClientSocket/schemas'
 import UserIdentity from './UserName/UserIdentity'
 import { UsersLeftRoomReason } from './lines/utils'
 
@@ -106,17 +105,25 @@ export interface GameStarted extends MessageBase<'gameStarted'> {
 }
 
 export interface GameEnded extends MessageBase<'gameEnded'> {
-  readonly data: {
-    readonly winners: {
-      readonly user: UserIdentity
-      readonly penaltyPoints: number
-    }[]
-    readonly otherPlayers: {
-      readonly user: UserIdentity
-      readonly penaltyPoints: number
-    }[]
-    readonly reason: GameStoppedReason
-  }
+  readonly data:
+    | {
+        readonly reason: 'completed'
+        readonly winners: {
+          readonly user: UserIdentity
+          readonly penaltyPoints: number
+        }[]
+        readonly otherPlayers: {
+          readonly user: UserIdentity
+          readonly penaltyPoints: number
+        }[]
+      }
+    | { readonly reason: 'playerInactivity' }
+    | { readonly reason: 'playerLeft' }
+    | {
+        readonly reason: 'roomOwnerAction'
+        readonly roomOwner: UserIdentity
+      }
+    | { readonly reason: 'roomClosed' }
 }
 
 export interface UsersMovedToSpectators extends MessageBase<'usersMovedToSpectators'> {
