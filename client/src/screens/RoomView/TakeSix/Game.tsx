@@ -77,6 +77,9 @@ export default function Game(props: Props): JSX.Element {
   >()
   const [allowSelectCard, setAllowSelectCard] = useState(true)
 
+  // Other
+  const [stepsLeft, setStepsLeft] = useState(initialGameState.game.stepsLeft)
+
   // Animation
   type AnimationStep =
     | {
@@ -423,6 +426,8 @@ export default function Game(props: Props): JSX.Element {
   }, [animationStep])
 
   useSocketEventListener('s2c_gameStep', (data): void => {
+    setStepsLeft(data.game.stepsLeft)
+
     // Players will see animations for up to ~ 5-10 seconds, but server is already counting step timeout
     resetStepTimeoutIndicator()
 
@@ -482,7 +487,11 @@ export default function Game(props: Props): JSX.Element {
   return (
     <>
       <div className='flex flex-col md:flex-row' style={{ height: 'calc(100vh - 48px)' }}>
-        <div className='mx-2 flex items-center md:mx-4'>
+        <div className='mx-2 flex flex-col justify-center md:mx-4'>
+          <p className='mb-1 text-center text-lg text-neutral-400'>
+            <span className='font-bold text-neutral-300'>{stepsLeft}</span> Steps left
+          </p>
+
           <PlayerList
             entries={playerList.map((playerListItem, index) => ({
               playerListItem,
