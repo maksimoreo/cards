@@ -111,6 +111,10 @@ export const SERVER_NOTIFICATION_DATA_SCHEMA_MAP = {
 
 export type ServerEventToDataSchemaMapT = typeof SERVER_NOTIFICATION_DATA_SCHEMA_MAP
 
+export type S2C_EventData<EventT extends keyof ServerEventToDataSchemaMapT> = z.infer<
+  ServerEventToDataSchemaMapT[EventT]
+>
+
 export const SERVER_TO_CLIENT_EVENTS: (keyof ServerEventToDataSchemaMapT)[] = [
   's2c_userPlayedCard',
   's2c_gameStep',

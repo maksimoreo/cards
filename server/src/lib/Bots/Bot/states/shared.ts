@@ -21,7 +21,7 @@ export function toWaitingBeforeStartingTheGame({
   return new WaitingBeforeStartingTheGameState({
     botInternals,
     room,
-    timer: botInternals.sendTimerDoneAfter(random(3000, 10000)),
+    timer: botInternals.sendTimerDoneAfter(random(10000, 15000)),
   })
 }
 

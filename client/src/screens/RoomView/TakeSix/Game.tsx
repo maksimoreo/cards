@@ -1,9 +1,14 @@
 import { cloneDeep } from 'lodash'
 import { useEffect, useRef, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
+import { S2C_EventData } from 'common/src/TypedClientSocket/ServerToClientEvents'
 import { RootState } from '../../../app/store'
+import { useUserIdentityCreator } from '../../../components/Chat/UserName/UserIdentity'
+import { addMessage } from '../../../features/chat/chatSlice'
 import { selectRequired, useRequiredAllRoomUsers } from '../../../features/room/selectors'
+import useCurrentUser from '../../../hooks/useCurrentUser'
+import useParty from '../../../hooks/useParty'
 import { useSocket } from '../../../hooks/useSocket'
 import useSocketEventListener from '../../../hooks/useSocketEventListener'
 import { findByIdOrThrow } from '../../../utils/utils'
@@ -19,6 +24,7 @@ import { Card, GameState, GameStep, PlayerMove } from './types'
 
 const CARD_FLY_DURATION = 700
 const PLAYER_CARDS_REVEAL_DURATION = 700
+const AFTER_GAME_COMPLETED_DURATION = 2000
 
 interface Props {
   readonly onGameDone?: (finalGameState: GameState) => void
@@ -29,6 +35,13 @@ export default function Game(props: Props): JSX.Element {
   const { id: currentUserId } = socket
   const allRoomUsers = useRequiredAllRoomUsers()
   const initialGameState = useSelector((state: RootState) => selectRequired(state.game))
+  const { party } = useParty()
+  const [delayedGameCompletedEvent, setDelayedGameCompletedEvent] = useState<S2C_EventData<'s2c_gameStopped'> | null>(
+    null,
+  )
+  const currentUser = useCurrentUser()
+  const dispatch = useDispatch()
+  const createUserIdentity = useUserIdentityCreator()
 
   // PlayerList
   const [playerList, setPlayerList] = useState<readonly PlayerListItem[]>(
@@ -142,51 +155,6 @@ export default function Game(props: Props): JSX.Element {
       }),
     )
   })
-
-  const finalizeStep = (gameState: GameState): void => {
-    // Animations are done
-    setAnimationStep(undefined)
-    setAnimationStepTimer(undefined)
-
-    // Remove all flying cards
-    setFlyingCards([])
-
-    // Render game state from server's state
-
-    // Show players that selected cards while animation was playing
-    setPlayerList(
-      gameState.players.map((player) => ({
-        penaltyPoints: player.penaltyPoints,
-        user: allRoomUsers.find((user) => user.id === player.id) || player.user,
-        hasSelectedCard: postponedCardSelections.includes(player.id),
-        selectedCard: undefined,
-        isActive: player.isActive,
-        isPickingRow: false,
-      })),
-    )
-    setPostponedCardSelections([])
-
-    setCardsFieldRows(
-      gameState.rows.map((row, rowIndex) =>
-        row.map((card, cardIndex) => {
-          const tiltedCard = cardsFieldRows[rowIndex][cardIndex]
-
-          const tilt = tiltedCard ? tiltedCard.tilt : getRandomTilt()
-
-          return { card, tilt }
-        }),
-      ),
-    )
-
-    if (gameState.stepsLeft === 0) {
-      props.onGameDone && props.onGameDone(gameState)
-
-      return
-    }
-
-    // Allow selecting cards
-    setAllowSelectCard(true)
-  }
 
   useEffect(() => {
     if (!animationStep) {
@@ -420,8 +388,78 @@ export default function Game(props: Props): JSX.Element {
         }, CARD_FLY_DURATION),
       )
     } else if (animationStep.type === 'finalize') {
-      // Do this as separate step to ensure that finalizeStep() function gets the most recent updated state vars
-      finalizeStep(animationStep.finalGameState)
+      // Remove all flying cards
+      setFlyingCards([])
+
+      // Render game state from server's state
+
+      // Show players that selected cards while animation was playing
+      setPlayerList(
+        animationStep.finalGameState.players.map((player) => ({
+          penaltyPoints: player.penaltyPoints,
+          user: allRoomUsers.find((user) => user.id === player.id) || player.user,
+          hasSelectedCard: postponedCardSelections.includes(player.id),
+          selectedCard: undefined,
+          isActive: player.isActive,
+          isPickingRow: false,
+        })),
+      )
+      setPostponedCardSelections([])
+
+      setCardsFieldRows(
+        animationStep.finalGameState.rows.map((row, rowIndex) =>
+          row.map((card, cardIndex) => {
+            const tiltedCard = cardsFieldRows[rowIndex][cardIndex]
+
+            const tilt = tiltedCard ? tiltedCard.tilt : getRandomTilt()
+
+            return { card, tilt }
+          }),
+        ),
+      )
+
+      if (delayedGameCompletedEvent) {
+        const winnerIds = delayedGameCompletedEvent.winners.map((winner) => winner.id)
+
+        if (winnerIds.includes(currentUser.id)) {
+          party()
+        }
+
+        dispatch(
+          addMessage({
+            type: 'gameEnded',
+            data: {
+              reason: 'completed',
+              winners: delayedGameCompletedEvent.winners.map((winner) => ({
+                user: createUserIdentity(winner.user),
+                penaltyPoints: winner.penaltyPoints,
+              })),
+              otherPlayers: delayedGameCompletedEvent.game.players
+                .filter((player) => player.isActive && !winnerIds.includes(player.id))
+                .sort((a, b) => a.penaltyPoints - b.penaltyPoints)
+                .map((winner) => ({
+                  user: createUserIdentity(winner.user),
+                  penaltyPoints: winner.penaltyPoints,
+                })),
+            },
+          }),
+        )
+
+        setAnimationStepTimer(
+          setTimeout((): void => {
+            props.onGameDone && props.onGameDone(animationStep.finalGameState)
+          }, AFTER_GAME_COMPLETED_DURATION),
+        )
+
+        return
+      }
+
+      // Animations are done
+      setAnimationStep(undefined)
+      setAnimationStepTimer(undefined)
+
+      // Allow selecting cards
+      setAllowSelectCard(true)
     }
   }, [animationStep])
 
@@ -447,6 +485,16 @@ export default function Game(props: Props): JSX.Element {
       gameStep: data.step,
       finalGameState: data.game,
     })
+  })
+
+  useSocketEventListener('s2c_gameStopped', (data) => {
+    if (data.reason !== 'completed') {
+      // RoomView will handle it
+      return
+    }
+
+    // Process this event after animations are completed
+    setDelayedGameCompletedEvent(data)
   })
 
   const handleRowSelected = (rowIndex: number): void => {

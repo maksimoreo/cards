@@ -9,21 +9,16 @@ import { setGame } from '../../features/game/gameSlice'
 import { setRoom } from '../../features/room/roomSlice'
 import { useRequiredAllRoomUsers, useRequiredRoom } from '../../features/room/selectors'
 import { setScreen } from '../../features/screen/screenSlice'
-import useCurrentUser from '../../hooks/useCurrentUser'
-import useParty from '../../hooks/useParty'
 import useSocketEventListener from '../../hooks/useSocketEventListener'
 import { findByIdOrThrow } from '../../utils/utils'
 import GameOptionsForm from './GameOptionsForm'
 import Game from './TakeSix/Game'
 
 export default function RoomView(): JSX.Element {
-  const currentUser = useCurrentUser()
   const dispatch = useDispatch()
   const room = useRequiredRoom()
   const allRoomUsers = useRequiredAllRoomUsers()
   const game = useSelector((state: RootState) => state.game)
-  const { party } = useParty()
-
   const createUserIdentity = useUserIdentityCreator()
 
   const roomName = room.name
@@ -57,51 +52,23 @@ export default function RoomView(): JSX.Element {
   })
 
   useSocketEventListener('s2c_gameStopped', (data) => {
-    dispatch(setGame(null))
+    // Case when data.reason === 'completed' will be handled by Gaem.tsx
 
-    if (data.reason === 'completed') {
-      const winnerIds = data.winners.map((winner) => winner.id)
-
-      if (winnerIds.includes(currentUser.id)) {
-        party()
-      }
-
-      dispatch(
-        addMessage({
-          type: 'gameEnded',
-          data: {
-            reason: data.reason,
-            winners: data.winners.map((winner) => ({
-              user: createUserIdentity(winner.user),
-              penaltyPoints: winner.penaltyPoints,
-            })),
-            otherPlayers: data.game.players
-              .filter((player) => player.isActive && !winnerIds.includes(player.id))
-              .sort((a, b) => a.penaltyPoints - b.penaltyPoints)
-              .map((winner) => ({
-                user: createUserIdentity(winner.user),
-                penaltyPoints: winner.penaltyPoints,
-              })),
-          },
-        }),
-      )
-    } else if (data.reason === 'roomOwnerAction') {
+    if (data.reason === 'roomOwnerAction') {
+      dispatch(setGame(null))
       dispatch(
         addMessage({
           type: 'gameEnded',
           data: { reason: 'roomOwnerAction', roomOwner: createUserIdentity(room.owner) },
         }),
       )
-    } else {
+    } else if (data.reason === 'playerInactivity' || data.reason === 'playerLeft' || data.reason === 'roomClosed') {
+      dispatch(setGame(null))
       dispatch(addMessage({ type: 'gameEnded', data: { reason: data.reason } }))
     }
   })
 
   useSocketEventListener('s2c_usersMovedToSpectators', (data) => {
-    if (!data.game) {
-      dispatch(setGame(null))
-    }
-
     dispatch(
       addMessage({
         type: 'usersMovedToSpectators',
@@ -113,19 +80,11 @@ export default function RoomView(): JSX.Element {
     )
   })
 
-  useSocketEventListener('s2c_youHaveBeenMovedToSpectators', (data) => {
-    if (!data.game) {
-      dispatch(setGame(null))
-    }
-
+  useSocketEventListener('s2c_youHaveBeenMovedToSpectators', () => {
     dispatch(addMessage({ type: 'youHaveBeenMovedToSpectators', data: { reason: 'inactivity' } }))
   })
 
   useSocketEventListener('s2c_usersLeft', (data) => {
-    if (!data.game) {
-      dispatch(setGame(null))
-    }
-
     dispatch(
       addMessage({
         type: 'usersLeftRoom',
