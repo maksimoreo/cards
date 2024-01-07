@@ -13,7 +13,7 @@ import { assignResponseValidationMessagesToForm } from '../../utils'
 
 export default function RoomForm(): JSX.Element {
   const dispatch = useDispatch()
-  const { socket, send } = useSocket()
+  const { socket, emit } = useSocket()
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -41,7 +41,7 @@ export default function RoomForm(): JSX.Element {
       name: { value: roomName },
     } = e.target as typeof e.target & { name: { value: string } }
 
-    send('createRoom', { name: roomName, ...(isPasswordProtected && { password }) }, (response) => {
+    emit('createRoom', { name: roomName, ...(isPasswordProtected && { password }) }, (response) => {
       if (response.code === 'SUCCESS') {
         dispatch(setRoom(response.data.room))
         dispatch(setGame(null))

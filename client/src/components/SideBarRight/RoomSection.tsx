@@ -17,7 +17,7 @@ interface Props {
 
 export default function RoomSection({ room }: Props) {
   const dispatch = useDispatch()
-  const { send } = useSocket()
+  const { emit } = useSocket()
   const isRoomOwner = useIsOwner()
   const gamePlayers = useSelector((state: RootState) => state.game?.game.players)
 
@@ -25,7 +25,7 @@ export default function RoomSection({ room }: Props) {
     !!gamePlayers && !gamePlayers?.find((gamePlayer) => gamePlayer.id === id)
 
   const handleStopGame = (): void => {
-    send('stopGame', undefined, (response) => {
+    emit('stopGame', undefined, (response) => {
       if (response.code === 'SUCCESS') {
         dispatch(setGame(null))
       }
@@ -33,7 +33,7 @@ export default function RoomSection({ room }: Props) {
   }
 
   const handleLeave = (): void => {
-    send('leaveCurrentRoom', null, (response) => {
+    emit('leaveCurrentRoom', null, (response) => {
       if (response.code === 'SUCCESS') {
         dispatch(setRoom(null))
         dispatch(setScreen('rooms'))

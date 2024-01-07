@@ -11,7 +11,7 @@ import { useUserIdentityCreator } from './UserName/UserIdentity'
 
 export function Chat(): JSX.Element {
   const dispatch = useDispatch()
-  const { socket, send } = useSocket()
+  const { socket, emit } = useSocket()
   const room = useRoom()
   const currentUser = useCurrentUser()
   const createUserIdentity = useUserIdentityCreator()
@@ -32,7 +32,7 @@ export function Chat(): JSX.Element {
       }),
     )
 
-    send('sendMessage', { message }, (response) => {
+    emit('sendMessage', { message }, (response) => {
       if (response.code === 'SUCCESS') {
         dispatch(updateDeliveryStatus({ id, deliveryStatus: 'delivered' }))
 

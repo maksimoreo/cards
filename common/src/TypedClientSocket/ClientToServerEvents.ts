@@ -20,8 +20,8 @@ export interface EventToInputDataTypeMapT {
 }
 
 type ClientToServerEvents = {
-  [MesssageName in keyof EventToInputDataTypeMapT]: (
-    data: EventToInputDataTypeMapT[MesssageName],
+  [EventT in keyof EventToInputDataTypeMapT]: (
+    data: EventToInputDataTypeMapT[EventT],
     acknowledgeCallback: (unknownResponse: unknown) => void
   ) => void
 }

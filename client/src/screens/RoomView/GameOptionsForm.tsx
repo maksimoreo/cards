@@ -21,7 +21,7 @@ import {
 } from './GameOptionsForm/TakeSix/StepTimeoutField/extra'
 
 export default function GameForm() {
-  const { send } = useSocket()
+  const { emit } = useSocket()
   const dispatch = useDispatch()
   const isRoomOwner = useIsOwner()
   const room = useRequiredRoom()
@@ -53,7 +53,7 @@ export default function GameForm() {
   const handleStartGameButtonClick = (): void => {
     saveGameOptionsToGlobalState()
 
-    send('startGame', null, (response) => {
+    emit('startGame', null, (response) => {
       if (response.code === 'SUCCESS') {
         dispatch(setGame({ ...response.data, type: 'takesix', playersWithSelectedCard: [] }))
       }
@@ -84,7 +84,7 @@ export default function GameForm() {
           onChange={(value) => {
             setGameMode(value)
 
-            send('updateGameOptions', { type: 'takeSix', mode: value }, () => {})
+            emit('updateGameOptions', { type: 'takeSix', mode: value }, () => {})
           }}
           disabled={!isRoomOwner}
           cardsCount={cardsCount}
@@ -95,7 +95,7 @@ export default function GameForm() {
           onChange={(value) => {
             setStepTimeout(value)
 
-            send(
+            emit(
               'updateGameOptions',
               { type: 'takeSix', stepTimeout: STEP_TIMEOUT_VALUE_TO_STEP_TIMEOUT_NUMBER_MAP[value] },
               () => {},
@@ -109,7 +109,7 @@ export default function GameForm() {
           onChange={(value) => {
             setPlayerInactivityStrategy(value)
 
-            send('updateGameOptions', { type: 'takeSix', playerInactivityStrategy: value }, () => {})
+            emit('updateGameOptions', { type: 'takeSix', playerInactivityStrategy: value }, () => {})
           }}
           disabled={!isRoomOwner}
         />

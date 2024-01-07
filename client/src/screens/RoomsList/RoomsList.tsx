@@ -19,12 +19,12 @@ export interface Room {
 }
 
 export default function RoomsList(): JSX.Element {
-  const { send } = useSocket()
+  const { emit } = useSocket()
   const dispatch = useDispatch()
   const [rooms, setRooms] = useState<readonly Room[]>([])
 
   const fetchAllRooms = (): void => {
-    send('getAllRooms', null, (response) => {
+    emit('getAllRooms', null, (response) => {
       if (response.code === 'SUCCESS') {
         setRooms(response.data)
       }
@@ -32,7 +32,7 @@ export default function RoomsList(): JSX.Element {
   }
 
   const handleJoinRoom = (name: string): void => {
-    send('joinRoom', { name }, (response) => {
+    emit('joinRoom', { name }, (response) => {
       if (response.code === 'SUCCESS') {
         const game = response.data.game
         dispatch(

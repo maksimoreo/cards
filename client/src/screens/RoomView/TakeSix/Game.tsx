@@ -25,7 +25,7 @@ interface Props {
 }
 
 export default function Game(props: Props): JSX.Element {
-  const { socket, send } = useSocket()
+  const { socket, emit } = useSocket()
   const { id: currentUserId } = socket
   const allRoomUsers = useRequiredAllRoomUsers()
   const initialGameState = useSelector((state: RootState) => selectRequired(state.game))
@@ -227,7 +227,7 @@ export default function Game(props: Props): JSX.Element {
               })),
             )
 
-            // Wait for 's2c_gameStep' message
+            // Wait for 's2c_gameStep' event
           } else {
             setAnimationStep({
               type: 'playingCard',
@@ -445,12 +445,12 @@ export default function Game(props: Props): JSX.Element {
   })
 
   const handleRowSelected = (rowIndex: number): void => {
-    // TODO: Indicate that message is sent and we are waiting for the response from the server
-    send('selectRow', { rowIndex }, (response) => {
+    // TODO: Indicate that event is sent and we are waiting for the response from the server
+    emit('selectRow', { rowIndex }, (response) => {
       if (response.code === 'SUCCESS') {
         setAllowSelectRow(false)
 
-        // Continue when 's2c_gameStep' message comes in
+        // Continue when 's2c_gameStep' event comes in
       }
     })
   }
@@ -464,7 +464,7 @@ export default function Game(props: Props): JSX.Element {
 
     setSelectedCardIndex({ index: cardIndex, accepted: false })
 
-    send('playCard', { card: selectedCard.value }, (response) => {
+    emit('playCard', { card: selectedCard.value }, (response) => {
       if (response.code !== 'SUCCESS') {
         setSelectedCardIndex(undefined)
 

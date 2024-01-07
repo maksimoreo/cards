@@ -14,7 +14,7 @@ import { useSocket } from '../../hooks/useSocket'
 
 export default function Login(): JSX.Element {
   const dispatch = useDispatch()
-  const { send } = useSocket()
+  const { emit } = useSocket()
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -36,7 +36,7 @@ export default function Login(): JSX.Element {
     setNameError('')
     setError('')
 
-    send('setName', { name, color }, (response) => {
+    emit('setName', { name, color }, (response) => {
       setLoading(false)
 
       if (response.code === 'SERVER_ERROR') {

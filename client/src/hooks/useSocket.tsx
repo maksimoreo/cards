@@ -4,7 +4,7 @@ import React, { useMemo } from 'react'
 
 interface SocketContextValueT {
   socket: ClientSocketT
-  send: ReturnType<typeof createSocketEventEmitter>
+  emit: ReturnType<typeof createSocketEventEmitter>
 }
 
 export const SocketContext = React.createContext<SocketContextValueT | null>(null)
@@ -20,7 +20,7 @@ export function useSocket(): SocketContextValueT {
 }
 
 export function SocketProvider({ socket, children }: React.PropsWithChildren<{ socket: ClientSocketT }>): JSX.Element {
-  const send = useMemo(() => createSocketEventEmitter(socket), [])
+  const emit = useMemo(() => createSocketEventEmitter(socket), [])
 
-  return <SocketContext.Provider value={{ socket, send }}>{children}</SocketContext.Provider>
+  return <SocketContext.Provider value={{ socket, emit }}>{children}</SocketContext.Provider>
 }
