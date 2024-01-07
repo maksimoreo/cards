@@ -53,8 +53,8 @@ export default function Game(props: Props): JSX.Element {
         penaltyPoints: player.penaltyPoints,
         hasSelectedCard: player.hasSelectedCard,
         selectedCard: undefined,
-        isActive: player.isActive, // This prob will always be `true`
-        isPickingRow:
+        isActive: player.isActive,
+        isHighlighted:
           (initialGameState.lastStep &&
             'waitingPlayer' in initialGameState.lastStep &&
             initialGameState.lastStep.waitingPlayer === player.id) ??
@@ -152,7 +152,7 @@ export default function Game(props: Props): JSX.Element {
         return {
           ...player,
           selectedCard: playerOnClient ? playerOnClient.selectedCard : undefined,
-          isPickingRow: playerOnClient?.isPickingRow ?? false,
+          isHighlighted: playerOnClient?.isHighlighted ?? false,
         }
       }),
     )
@@ -196,7 +196,7 @@ export default function Game(props: Props): JSX.Element {
             setPlayerList((playerList) =>
               playerList.map((playerListItem) => ({
                 ...playerListItem,
-                isPickingRow: waitingPlayerId === playerListItem.user.id,
+                isHighlighted: waitingPlayerId === playerListItem.user.id,
               })),
             )
 
@@ -220,13 +220,14 @@ export default function Game(props: Props): JSX.Element {
       setPlayerList(
         playerList.map((playerListItem) => {
           if (playerListItem.user.id !== move.playerId) {
-            return playerListItem
+            return { ...playerListItem, isHighlighted: false }
           }
 
           return {
             ...playerListItem,
             hasSelectedCard: false,
             selectedCard: undefined,
+            isHighlighted: true,
           }
         }),
       )
@@ -403,7 +404,7 @@ export default function Game(props: Props): JSX.Element {
           hasSelectedCard: postponedCardSelections.includes(player.id),
           selectedCard: undefined,
           isActive: player.isActive,
-          isPickingRow: false,
+          isHighlighted: false,
         })),
       )
       setPostponedCardSelections([])

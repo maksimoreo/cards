@@ -21,7 +21,7 @@ export interface PlayerListItem {
   readonly hasSelectedCard: boolean
   readonly selectedCard: Card | undefined
 
-  readonly isPickingRow: boolean
+  readonly isHighlighted: boolean
 }
 
 interface Props {
@@ -59,7 +59,7 @@ export default function PlayerList({ entries }: Props): JSX.Element {
           return (
             <tr
               key={playerListItem.user.id}
-              className={classNames('', playerListItem.isPickingRow && 'owl-takesix-player-list-item-selecting-row')}
+              className={classNames('', playerListItem.isHighlighted && 'owl-takesix-player-list-item-selecting-row')}
             >
               <td className='pl-2 pr-4'>
                 <UserNameFromUser user={playerListItem.user} isInactive={!playerListItem.isActive} />
