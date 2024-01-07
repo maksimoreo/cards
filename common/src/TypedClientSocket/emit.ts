@@ -35,7 +35,7 @@ export function wrapApiResponseDataSchema<
   ])
 }
 
-export function createSocketEventSender(socket: ClientSocketT) {
+export function createSocketEventEmitter(socket: ClientSocketT) {
   return function emit<EventT extends keyof EventToInputDataTypeMapT>(
     event: EventT,
     data: EventToInputDataTypeMapT[EventT],

@@ -6,7 +6,7 @@ import {
   EVENT_TO_OUTPUT_DATA_SCHEMA_MAP,
   EventToOutputDataSchemaMapT,
 } from 'common/src/TypedClientSocket/EventToOutputDataSchemaMap'
-import { wrapApiResponseDataSchema } from 'common/src/TypedClientSocket/send'
+import { wrapApiResponseDataSchema } from 'common/src/TypedClientSocket/emit'
 
 export class UnsuccessfulSendError extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

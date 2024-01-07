@@ -1,4 +1,4 @@
-import { ResponseCodeBadRequest, ResponseCodeServerError, ResponseCodeSuccess } from 'common/src/TypedClientSocket/send'
+import { ResponseCodeBadRequest, ResponseCodeServerError, ResponseCodeSuccess } from 'common/src/TypedClientSocket/emit'
 import { z } from 'zod'
 
 export type ResponseCode = ResponseCodeSuccess | ResponseCodeBadRequest | ResponseCodeServerError

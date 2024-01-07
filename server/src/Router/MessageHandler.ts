@@ -4,11 +4,11 @@ import {
   RESPONSE_CODE_BAD_REQUEST,
   RESPONSE_CODE_SERVER_ERROR,
   RESPONSE_CODE_SUCCESS,
-} from 'common/src/TypedClientSocket/send'
+} from 'common/src/TypedClientSocket/emit'
 import App from '../App'
 import { SocketT } from '../ISocketData'
-import User from '../models/User'
 import { AcknowledgeCallback } from '../Router/AcknowledgeCallback'
+import User from '../models/User'
 
 export interface MessageHandlerConstructorOptions<ResponseData> {
   readonly app: App

@@ -1,4 +1,4 @@
-import { ResponseCodeBadRequest } from 'common/src/TypedClientSocket/send'
+import { ResponseCodeBadRequest } from 'common/src/TypedClientSocket/emit'
 import { isEqual } from 'lodash'
 
 export { assertUnreachable } from './utils'

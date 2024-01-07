@@ -2,7 +2,7 @@ import Client, { Socket } from 'socket.io-client'
 
 import { EventToInputDataTypeMapT } from 'common/src/TypedClientSocket/ClientToServerEvents'
 import { EVENT_TO_OUTPUT_DATA_SCHEMA_MAP } from 'common/src/TypedClientSocket/EventToOutputDataSchemaMap'
-import { ApiResponse, wrapApiResponseDataSchema } from 'common/src/TypedClientSocket/send'
+import { ApiResponse, wrapApiResponseDataSchema } from 'common/src/TypedClientSocket/emit'
 import App from '../../../src/App'
 import { createTestLogger } from '../../../src/Logger'
 import { withTimeout } from '../../../src/utils'

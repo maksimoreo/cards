@@ -1,10 +1,10 @@
 import { ClientSocketT } from 'common/src/TypedClientSocket/ClientSocketT'
-import { createSocketEventSender } from 'common/src/TypedClientSocket/send'
+import { createSocketEventEmitter } from 'common/src/TypedClientSocket/emit'
 import React, { useMemo } from 'react'
 
 interface SocketContextValueT {
   socket: ClientSocketT
-  send: ReturnType<typeof createSocketEventSender>
+  send: ReturnType<typeof createSocketEventEmitter>
 }
 
 export const SocketContext = React.createContext<SocketContextValueT | null>(null)
@@ -20,7 +20,7 @@ export function useSocket(): SocketContextValueT {
 }
 
 export function SocketProvider({ socket, children }: React.PropsWithChildren<{ socket: ClientSocketT }>): JSX.Element {
-  const send = useMemo(() => createSocketEventSender(socket), [])
+  const send = useMemo(() => createSocketEventEmitter(socket), [])
 
   return <SocketContext.Provider value={{ socket, send }}>{children}</SocketContext.Provider>
 }
