@@ -10,7 +10,9 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
 
   jest.setTimeout(40000)
 
-  test('Move player to spectators when selecting row and three players in game, then when selecting cards and two players in game', async () => {
+  // client2 is moved to spectators for selecting row for too long in Step 1.2
+  // client1 is moved to spectators for selecting a card for too long in Step 2, game stops
+  test('moveToSpectators2', async () => {
     const [client1, client2, client3] = getClients()
 
     await expect(
