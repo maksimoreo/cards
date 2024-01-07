@@ -41,7 +41,7 @@ function formatCombineForHumanReadable() {
     // fields on this object
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     format.printf((info: any) => {
-      if (info.isSocketMessageLog) {
+      if (info.isSocketEventLog) {
         const paddedEventName = (info.socketEvent || '').padEnd(MAX_EVENT_NAME_LENGTH, ' ')
 
         return (

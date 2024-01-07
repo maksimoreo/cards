@@ -48,7 +48,7 @@ export class Router {
       try {
         this.app.logger.info({
           message: `Received new event: '${clientEvent}' from ${socket.id} (${socket.data.user?.name})`,
-          isSocketMessageLog: true,
+          isSocketEventLog: true,
           socketEvent: clientEvent,
           socketId: socket.id,
           userName: socket.data.user?.name,

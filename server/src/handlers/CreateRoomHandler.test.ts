@@ -1,10 +1,10 @@
 import { Socket } from 'socket.io'
 import { createAppFake } from '../__test__/mocks'
-import { createMessageHandlerCaller } from '../__test__/testHelpers'
+import { createEventHandlerCaller } from '../__test__/testHelpers'
 import User from '../models/User'
 import CreateRoomHandler from './CreateRoomHandler'
 
-const call = createMessageHandlerCaller(CreateRoomHandler)
+const call = createEventHandlerCaller(CreateRoomHandler)
 
 describe('CreateRoomHandler', () => {
   describe('#call', () => {

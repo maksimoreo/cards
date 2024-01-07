@@ -108,12 +108,12 @@ export default class LeaveCurrentRoom {
     app.io.in(room.name).emit('s2c_usersLeft', {
       reason: 'selfAction',
       userIds: [this.props.user.id],
-      game: this.getGameStateForNotifyMemberLeftMessage(),
+      game: this.getGameStateForNotifyMemberLeftEvent(),
       newRoomState: decorateRoom(room),
     })
   }
 
-  private getGameStateForNotifyMemberLeftMessage() {
+  private getGameStateForNotifyMemberLeftEvent() {
     return this.props.room.game?.generateSerializedState() ?? null
   }
 }

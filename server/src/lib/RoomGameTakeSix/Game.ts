@@ -146,13 +146,13 @@ export default class RoomGameTakeSix {
     this.room.allUsers.forEach((user) => {
       const { player } = user
 
-      const messageData = {
+      const eventData = {
         step: this.game.lastSerializedStep,
         game: gameState,
         ...(!!player && { playerCards: player.cards }),
       }
 
-      user.socket.emit('s2c_gameStep', messageData)
+      user.socket.emit('s2c_gameStep', eventData)
     })
   }
 

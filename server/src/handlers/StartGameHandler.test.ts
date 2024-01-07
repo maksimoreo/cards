@@ -1,13 +1,13 @@
 import { Socket } from 'socket.io'
 import App from '../App'
-import { callMessageHandler, callMessageHandlerOptions } from '../__test__/testHelpers'
+import { callEventHandler, callEventHandlerOptions } from '../__test__/testHelpers'
 import RoomGameTakeSix from '../lib/RoomGameTakeSix/Game'
 import Room from '../models/Room'
 import User from '../models/User'
 import StartGameHandler from './StartGameHandler'
 
-function callStartGameHandler(opts?: callMessageHandlerOptions): Promise<unknown> {
-  return callMessageHandler(StartGameHandler, opts)
+function callStartGameHandler(opts?: callEventHandlerOptions): Promise<unknown> {
+  return callEventHandler(StartGameHandler, opts)
 }
 
 describe('StartGameHandler', () => {
