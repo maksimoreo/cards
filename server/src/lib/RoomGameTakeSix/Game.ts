@@ -4,6 +4,7 @@ import { decorateRoom } from '../../decorators/RoomDecorator'
 import Room from '../../models/Room'
 import User, { UserIdentity } from '../../models/User'
 import RemoveUsersFromRoom from '../../services/RemoveUsersFromRoom'
+import ScheduleRoomsEventToLobbyUsers from '../../services/ScheduleRoomsEventToLobbyUsers'
 import * as TakeSix from '../TakeSix'
 import Card from '../TakeSix/Card'
 import { SerializedStep } from '../TakeSix/TakeSix'
@@ -205,7 +206,8 @@ export default class RoomGameTakeSix {
       if (leftActivePlayersCount <= 1) {
         this.unassignReferencesFromRoomAndRoomMembers()
         this.notifyAboutPlayerMoveToSpectators({ inactivePlayers })
-        this.emits2c_gameStopped({ reason: 'playerInactivity' })
+        this.emit_s2c_gameStopped({ reason: 'playerInactivity' })
+        this.emit_s2c_rooms()
         return
       }
 
@@ -241,8 +243,9 @@ export default class RoomGameTakeSix {
         this.removePlayersFromRoom(inactivePlayers)
         this.notifyAboutKickedPlayers({ inactivePlayers })
         if (!this.room.isDestroyed) {
-          this.emits2c_gameStopped({ reason: 'playerInactivity' })
+          this.emit_s2c_gameStopped({ reason: 'playerInactivity' })
         }
+        this.emit_s2c_rooms()
         return
       }
 
@@ -285,7 +288,8 @@ export default class RoomGameTakeSix {
       if (this.game.activePlayers.length <= 2) {
         this.unassignReferencesFromRoomAndRoomMembers()
         this.notifyAboutPlayerMoveToSpectators({ inactivePlayers: [waitingForPlayer] })
-        this.emits2c_gameStopped({ reason: 'playerInactivity' })
+        this.emit_s2c_gameStopped({ reason: 'playerInactivity' })
+        this.emit_s2c_rooms()
         return
       }
 
@@ -302,7 +306,8 @@ export default class RoomGameTakeSix {
         this.removePlayersFromRoom([waitingForPlayer])
         this.unassignReferencesFromRoomAndRoomMembers()
         this.notifyAboutKickedPlayers({ inactivePlayers: [waitingForPlayer] })
-        this.emits2c_gameStopped({ reason: 'playerInactivity' })
+        this.emit_s2c_gameStopped({ reason: 'playerInactivity' })
+        this.emit_s2c_rooms()
         return
       }
 
@@ -310,6 +315,7 @@ export default class RoomGameTakeSix {
       waitingForPlayer.deactivate()
       this.removePlayersFromRoom([waitingForPlayer])
       this.notifyAboutKickedPlayers({ inactivePlayers: [waitingForPlayer] })
+      this.emit_s2c_rooms()
       this.s2c_gameStep()
       this.finalizeSelectRow()
       return
@@ -413,10 +419,10 @@ export default class RoomGameTakeSix {
   public stopGame({ reason }: { reason: GameStoppedReason }): void {
     this.clearAllTimers()
     this.unassignReferencesFromRoomAndRoomMembers()
-    this.emits2c_gameStopped({ reason })
+    this.emit_s2c_gameStopped({ reason })
   }
 
-  private emits2c_gameStopped({ reason }: { reason: GameStoppedReason }): void {
+  private emit_s2c_gameStopped({ reason }: { reason: GameStoppedReason }): void {
     let winners: { id: string; user: UserIdentity; penaltyPoints: number }[] = []
 
     if (reason === 'completed') {
@@ -429,6 +435,10 @@ export default class RoomGameTakeSix {
 
     const eventData = { reason, winners, game: this.generateSerializedState() }
     this.room.allUsers.forEach((user) => user.socket.emit('s2c_gameStopped', eventData))
+  }
+
+  private emit_s2c_rooms() {
+    ScheduleRoomsEventToLobbyUsers.call({ app: this.room.app })
   }
 
   private unassignReferencesFromRoomAndRoomMembers(): void {

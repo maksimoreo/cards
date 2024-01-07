@@ -200,6 +200,7 @@ describe('Player Inactivity Strategy: Kick', () => {
 
     {
       const client1Promise_s2c_youHaveBeenKicked = client1.waitForEvent('s2c_youHaveBeenKicked')
+      const client1Promise_s2c_rooms = client1.waitForEvent('s2c_rooms')
       const client2Promise_s2c_usersLeft = client2.waitForEvent('s2c_usersLeft')
       const client3Promise_s2c_usersLeft = client3.waitForEvent('s2c_usersLeft')
       const client2Promise_s2c_gameStep = client2.waitForEvent('s2c_gameStep')
@@ -209,6 +210,8 @@ describe('Player Inactivity Strategy: Kick', () => {
       await expect(client1Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({
         reason: 'inactivity',
       })
+
+      await expect(client1Promise_s2c_rooms).toResolve()
 
       const sharedData_game = {
         rows: [
@@ -371,13 +374,18 @@ describe('Player Inactivity Strategy: Kick', () => {
     await sleep(4500)
 
     {
+      const client1Promise_s2c_rooms = client1.waitForEvent('s2c_rooms')
       const client2Promise_s2c_youHaveBeenKicked = client2.waitForEvent('s2c_youHaveBeenKicked')
+      const client2Promise_s2c_rooms = client2.waitForEvent('s2c_rooms')
       const client3Promise_s2c_usersLeft = client3.waitForEvent('s2c_usersLeft')
       const client3Promise_s2c_gameStopped = client3.waitForEvent('s2c_gameStopped')
+
+      await expect(client1Promise_s2c_rooms).toResolve()
 
       await expect(client2Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({
         reason: 'inactivity',
       })
+      await expect(client2Promise_s2c_rooms).toResolve()
 
       await expect(client3Promise_s2c_usersLeft).resolves.toStrictEqual({
         userIds: [client2.id],

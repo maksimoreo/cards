@@ -148,10 +148,20 @@ describe('Player Inactivity Strategy: Kick', () => {
       const client3Promise_s2c_youHaveBeenKicked = client3.waitForEvent('s2c_youHaveBeenKicked')
       const client4Promise_s2c_youHaveBeenKicked = client4.waitForEvent('s2c_youHaveBeenKicked')
 
+      const client1Promise_s2c_rooms = client1.waitForEvent('s2c_rooms')
+      const client2Promise_s2c_rooms = client2.waitForEvent('s2c_rooms')
+      const client3Promise_s2c_rooms = client3.waitForEvent('s2c_rooms')
+      const client4Promise_s2c_rooms = client4.waitForEvent('s2c_rooms')
+
       await expect(client1Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
       await expect(client2Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
       await expect(client3Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
       await expect(client4Promise_s2c_youHaveBeenKicked).resolves.toStrictEqual({ reason: 'inactivity' })
+
+      await expect(client1Promise_s2c_rooms).toResolve()
+      await expect(client2Promise_s2c_rooms).toResolve()
+      await expect(client3Promise_s2c_rooms).toResolve()
+      await expect(client4Promise_s2c_rooms).toResolve()
     }
 
     expect(app.rooms).toBeEmpty()
