@@ -1,4 +1,9 @@
+import {
+  SERVER_NOTIFICATION_DATA_SCHEMA_MAP,
+  ServerToClientEventsUnion,
+} from 'common/src/TypedClientSocket/ServerToClientEvents'
 import { Socket } from 'socket.io-client'
+import { z } from 'zod'
 import { connectClientAsync, emitEvent } from './testHelpers'
 
 // Holds a socket and a queue of expected events
@@ -48,11 +53,12 @@ export class TestClient {
   ): Promise<ResponseDataT> {
     return emitEvent(this.socket, event, data, timeout)
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public waitForEvent<ResponseDataT = any>(
-    event: string,
+
+  public waitForEvent<Event extends ServerToClientEventsUnion>(
+    event: Event,
     options?: { timeout: number } | null | undefined,
-  ): Promise<ResponseDataT> {
+  ): Promise<z.infer<(typeof SERVER_NOTIFICATION_DATA_SCHEMA_MAP)[Event]>> {
+    const { socket } = this
     const timeout = options?.timeout || 1000
 
     this.expectedEventsQueue.push(event)
@@ -60,9 +66,9 @@ export class TestClient {
     return new Promise((resolve, reject) => {
       let timer: NodeJS.Timeout | null = null
 
-      const handleEvent = (data: ResponseDataT): void => {
+      const handleEvent = (unknownData: unknown): void => {
         timer && clearTimeout(timer)
-        this.socket.off(event, handleEvent)
+        socket.off.apply(socket, [event, handleEvent])
 
         // const expectedEvent = this.expectedEventsQueue[0]
         // if (event !== expectedEvent) {
@@ -71,15 +77,24 @@ export class TestClient {
         //   )
         // }
 
-        resolve(data)
+        const dataSchema = SERVER_NOTIFICATION_DATA_SCHEMA_MAP[event]
+
+        // Using `safeParse` here instead of `parse`, because need to call `reject` explicitly
+        const dataParsingResult = dataSchema.safeParse(unknownData)
+
+        if (dataParsingResult.success) {
+          resolve(dataParsingResult.data)
+        } else {
+          reject(dataParsingResult.error)
+        }
       }
 
       timer = setTimeout(() => {
-        this.socket.off(event, handleEvent)
+        socket.off.apply(socket, [event, handleEvent])
         reject(new Error(`Client '${this.variableName}' did not receive '${event}' after ${timeout} ms`))
       }, timeout)
 
-      this.socket.on(event, handleEvent)
+      socket.on.apply(socket, [event, handleEvent])
     })
   }
 
