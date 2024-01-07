@@ -50,7 +50,7 @@ export default class WaitingBeforeStartingTheGameState {
       }
 
       if (serverEvent.type === 's2c_usersLeft') {
-        if (canStartGame(props)) {
+        if (canStartGame({ botInternals, room: serverEvent.data.newRoomState })) {
           return new WaitingBeforeStartingTheGameState({ ...props, room: serverEvent.data.newRoomState })
         } else {
           clearTimeout(props.timer)
