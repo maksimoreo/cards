@@ -61,13 +61,13 @@ export default class WaitingForGameStepState {
           return this
         }
 
-        if (serverEvent.data.gameState.stepsLeft === 0) {
+        if (serverEvent.data.game.stepsLeft === 0) {
           // Game ended
           botInternals.sharedState.gamesPlayed += 1
 
           // determine if won the game
           if (
-            serverEvent.data.gameState.players.reduce((prev, next) =>
+            serverEvent.data.game.players.reduce((prev, next) =>
               next.penaltyPoints < prev.penaltyPoints ? next : prev,
             ).id === botInternals.socket.id
           ) {

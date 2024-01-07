@@ -19,7 +19,7 @@ export default function RoomSection({ room }: Props) {
   const dispatch = useDispatch()
   const { send } = useSocket()
   const isRoomOwner = useIsOwner()
-  const gamePlayers = useSelector((state: RootState) => state.game?.gameState.players)
+  const gamePlayers = useSelector((state: RootState) => state.game?.game.players)
 
   const isUserSpectator: (id: string) => boolean = (id: string) =>
     !!gamePlayers && !gamePlayers?.find((gamePlayer) => gamePlayer.id === id)

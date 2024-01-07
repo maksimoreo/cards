@@ -40,7 +40,7 @@ export default function RoomsList(): JSX.Element {
             game
               ? {
                   type: 'takesix',
-                  gameState: game.state,
+                  game: game.state,
                   playersWithSelectedCard: game.playersWithSelectedCard,
                   lastStep: game.lastStep,
                 }

@@ -27,8 +27,7 @@ export interface EventData_s2c_userPlayedCard {
 }
 
 export interface EventData_s2c_gameStarted {
-  // TODO: Rename gameState -> game
-  gameState: SerializedState
+  game: SerializedState
   playerCards?: Card[]
 }
 
@@ -44,8 +43,7 @@ export interface EventData_s2c_gameStopped {
 
 export interface EventData_s2c_gameStep {
   step: SerializedStep
-  // TODO: Rename gameState -> game
-  gameState: SerializedState
+  game: SerializedState
   playerCards?: Card[]
 }
 

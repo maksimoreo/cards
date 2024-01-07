@@ -148,7 +148,7 @@ export default class RoomGameTakeSix {
 
       const messageData = {
         step: this.game.lastSerializedStep,
-        gameState,
+        game: gameState,
         ...(!!player && { playerCards: player.cards }),
       }
 

@@ -32,7 +32,7 @@ export default class WaitingBeforeStartingTheGameState {
         throw new Error('Did not receive cards from the server')
       }
 
-      return toWaitingBeforePlayingCard({ ...props, playerCards: data.playerCards, gameState: data.gameState })
+      return toWaitingBeforePlayingCard({ ...props, playerCards: data.playerCards, gameState: data.game })
     }
 
     if (event.type === 'serverEvent') {

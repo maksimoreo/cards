@@ -35,7 +35,7 @@ export const EVENT_TO_OUTPUT_DATA_SCHEMA_MAP = {
   leaveCurrentRoom: z.unknown(),
 
   startGame: z.object({
-    gameState: GAME_STATE_SCHEMA,
+    game: GAME_STATE_SCHEMA,
     playerCards: z.array(CARD_SCHEMA).optional(),
   }),
 

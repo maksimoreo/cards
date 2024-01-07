@@ -28,7 +28,7 @@ const inputSchema = z
   .optional()
 
 export interface StartGameHandlerDataT {
-  gameState: SerializedState
+  game: SerializedState
   playerCards?: Card[]
 }
 
@@ -100,7 +100,7 @@ export default class StartGameHandler extends ResponseReturningMessageHandler<St
 
     room.users.forEach((user) => {
       user.socket.emit('s2c_gameStarted', {
-        gameState: game.generateSerializedState(),
+        game: game.generateSerializedState(),
         ...(user.player && { playerCards: user.player.cards }),
       })
     })
@@ -109,7 +109,7 @@ export default class StartGameHandler extends ResponseReturningMessageHandler<St
 
     return {
       data: {
-        gameState: game.generateSerializedState(),
+        game: game.generateSerializedState(),
         ...(currentUser.player && { playerCards: currentUser.player.cards }),
       },
     }

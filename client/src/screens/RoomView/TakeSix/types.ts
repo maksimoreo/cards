@@ -34,7 +34,7 @@ export type GameStep = {
 } & ({ readonly waitingPlayer: string } | { readonly moves: readonly PlayerMove[] })
 
 export interface ClientGameState {
-  readonly gameState: GameState
+  readonly game: GameState
   readonly playersWithSelectedCard: readonly string[]
   readonly lastStep?: GameStep | undefined
   readonly playerCards?: readonly Card[] | undefined

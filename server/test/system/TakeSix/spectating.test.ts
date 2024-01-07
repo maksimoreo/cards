@@ -41,7 +41,7 @@ describe('Game spectating', () => {
       const client2Promise_s2c_gameStarted = client2.waitForEvent('s2c_gameStarted')
       const client3Promise_s2c_gameStarted = client3.waitForEvent('s2c_gameStarted')
 
-      const gameState = {
+      const game = {
         players: [
           {
             id: client1.id,
@@ -74,18 +74,18 @@ describe('Game spectating', () => {
       ).resolves.toStrictEqual({
         code: 'SUCCESS',
         data: {
-          gameState,
+          game: game,
           playerCards: c([6, 7, 8, 13, 14, 15, 19, 24, 25, 32]),
         },
       })
 
       await expect(client2Promise_s2c_gameStarted).resolves.toStrictEqual({
-        gameState,
+        game,
         playerCards: c([1, 3, 5, 12, 16, 17, 22, 26, 27, 28]),
       })
 
       await expect(client3Promise_s2c_gameStarted).resolves.toStrictEqual({
-        gameState,
+        game,
         playerCards: c([2, 4, 9, 20, 21, 23, 29, 30, 31, 33]),
       })
     }
@@ -271,7 +271,7 @@ describe('Game spectating', () => {
             { playerId: client3.id, card: c(20), rowIndex: 2, takesRow: false },
           ],
         },
-        gameState: {
+        game: {
           rows: [
             c([10]), //
             c([34]),
@@ -363,7 +363,7 @@ describe('Game spectating', () => {
           ],
           waitingPlayer: client1.id,
         },
-        gameState: {
+        game: {
           rows: [
             c([10]), //
             c([34]),

@@ -32,7 +32,7 @@ describe('Game without card pool', () => {
 
       // objects are unfilled bc they r randomized
       const gameData = {
-        gameState: {
+        game: {
           players: [
             {
               id: client1.id,

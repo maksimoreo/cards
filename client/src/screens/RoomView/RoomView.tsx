@@ -49,7 +49,7 @@ export default function RoomView(): JSX.Element {
   useSocketEventListener('s2c_gameStarted', (s2c_gameStartedData) => {
     dispatch(setGame({ ...s2c_gameStartedData, type: 'takesix', playersWithSelectedCard: [] }))
 
-    const participants = s2c_gameStartedData.gameState.players.map(({ id }) =>
+    const participants = s2c_gameStartedData.game.players.map(({ id }) =>
       createUserIdentity(findByIdOrThrow(allRoomUsers, id)),
     )
 

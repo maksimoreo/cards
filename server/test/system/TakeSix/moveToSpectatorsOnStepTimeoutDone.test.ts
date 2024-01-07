@@ -95,10 +95,10 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
     ]
 
     {
-      const client1Promise = client1.waitForEvent('s2c_gameStarted')
-      const client2Promise = client2.waitForEvent('s2c_gameStarted')
+      const client1Promise_s2c_gameStarted = client1.waitForEvent('s2c_gameStarted')
+      const client2Promise_s2c_gameStarted = client2.waitForEvent('s2c_gameStarted')
 
-      const gameState = {
+      const game = {
         players: [
           {
             id: client3.id,
@@ -129,18 +129,18 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
       await expect(client3.emitEvent('startGame', { cardsPool })).resolves.toStrictEqual({
         code: 'SUCCESS',
         data: {
-          gameState,
+          game: game,
           playerCards: c([8, 10, 14, 15, 17, 20, 24, 27, 29, 32]),
         },
       })
 
-      await expect(client1Promise).resolves.toStrictEqual({
-        gameState,
+      await expect(client1Promise_s2c_gameStarted).resolves.toStrictEqual({
+        game,
         playerCards: c([1, 5, 9, 19, 21, 23, 25, 30, 31, 34]),
       })
 
-      await expect(client2Promise).resolves.toStrictEqual({
-        gameState,
+      await expect(client2Promise_s2c_gameStarted).resolves.toStrictEqual({
+        game,
         playerCards: c([2, 4, 7, 11, 12, 13, 16, 22, 28, 33]),
       })
     }
@@ -176,7 +176,7 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
             { playerId: client1.id, card: c(9), rowIndex: 1, takesRow: false },
           ],
         },
-        gameState: {
+        game: {
           rows: [
             c([26]), //
             c([6, 7, 8, 9]),
@@ -243,7 +243,7 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
       const client2Promise_s2c_gameStep = client2.waitForEvent('s2c_gameStep')
       const client3Promise_s2c_gameStep = client3.waitForEvent('s2c_gameStep')
 
-      const sharedData_gameState = {
+      const sharedData_game = {
         rows: [
           c([26]), //
           c([6, 7, 8, 9, 10]),
@@ -295,14 +295,14 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
       // client1, client3, receive 's2c_usersMovedToSpectators' event
       await expect(client1Promise_s2c_usersMovedToSpectators).resolves.toStrictEqual({
         reason: 'inactivity',
-        game: sharedData_gameState,
+        game: sharedData_game,
         userIds: [client2.id],
         newRoomState: sharedData_newRoomState,
       })
 
       await expect(client3Promise_s2c_usersMovedToSpectators).resolves.toStrictEqual({
         reason: 'inactivity',
-        game: sharedData_gameState,
+        game: sharedData_game,
         userIds: [client2.id],
         newRoomState: sharedData_newRoomState,
       })
@@ -310,7 +310,7 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
       // client2 receives 's2c_youHaveBeenMovedToSpectators' event
       await expect(client2Promise_s2c_youHaveBeenMovedToSpectators).resolves.toStrictEqual({
         reason: 'inactivity',
-        game: sharedData_gameState,
+        game: sharedData_game,
         newRoomState: sharedData_newRoomState,
       })
 
@@ -326,7 +326,7 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
             { playerId: client1.id, card: c(19), rowIndex: 3, takesRow: false },
           ],
         },
-        gameState: sharedData_gameState,
+        game: sharedData_game,
       }
 
       await expect(client1Promise_s2c_gameStep).resolves.toStrictEqual({

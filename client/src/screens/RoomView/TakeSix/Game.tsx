@@ -32,7 +32,7 @@ export default function Game(props: Props): JSX.Element {
 
   // PlayerList
   const [playerList, setPlayerList] = useState<readonly PlayerListItem[]>(
-    initialGameState.gameState.players.map((player) => {
+    initialGameState.game.players.map((player) => {
       const roomUser = allRoomUsers.find((user) => user.id === player.id)
 
       return {
@@ -62,7 +62,7 @@ export default function Game(props: Props): JSX.Element {
 
   // CardsField
   const [cardsFieldRows, setCardsFieldRows] = useState<readonly (readonly TiltedCard[])[]>(
-    initialGameState.gameState.rows.map((row) => row.map((card) => new TiltedCard(card))),
+    initialGameState.game.rows.map((row) => row.map((card) => new TiltedCard(card))),
   )
   const cardsFieldCardsRef = useRef<TiltedCardHtmlElement[][]>([])
   const rowNewItemEmptySpacesRef = useRef<RowNewItemSpaceHtmlElement[]>([])
@@ -440,7 +440,7 @@ export default function Game(props: Props): JSX.Element {
     setAnimationStep({
       type: 'revealingCards',
       gameStep: data.step,
-      finalGameState: data.gameState,
+      finalGameState: data.game,
     })
   })
 

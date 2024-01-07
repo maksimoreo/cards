@@ -100,7 +100,7 @@ describe('Player leaving behavior', () => {
             { playerId: client4.id, card: c(25), rowIndex: 3, takesRow: false },
           ],
         },
-        gameState: {
+        game: {
           rows: [
             c([9, 12, 28, 37]), //
             c([6, 29]),
@@ -188,7 +188,7 @@ describe('Player leaving behavior', () => {
             { playerId: client4.id, card: c(32), rowIndex: 1, takesRow: false },
           ],
         },
-        gameState: {
+        game: {
           rows: [
             c([9, 12, 28, 37]), //
             c([6, 29, 31, 32]),
@@ -284,7 +284,7 @@ describe('Player leaving behavior', () => {
             { playerId: client4.id, card: c(43), rowIndex: 0, takesRow: false },
           ],
         },
-        gameState: {
+        game: {
           rows: [
             c([9, 12, 28, 37, 43]), //
             c([6, 29, 31, 32, 33]),

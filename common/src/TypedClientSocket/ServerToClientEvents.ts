@@ -37,7 +37,7 @@ export const SERVER_NOTIFICATION_DATA_SCHEMA_MAP = {
 
   s2c_gameStep: z.object({
     step: GAME_STEP_SCHEMA,
-    gameState: GAME_STATE_SCHEMA,
+    game: GAME_STATE_SCHEMA,
     playerCards: z.array(CARD_SCHEMA).optional(),
   }),
 
@@ -54,7 +54,7 @@ export const SERVER_NOTIFICATION_DATA_SCHEMA_MAP = {
   }),
 
   s2c_gameStarted: z.object({
-    gameState: GAME_STATE_SCHEMA,
+    game: GAME_STATE_SCHEMA,
     playerCards: z.array(CARD_SCHEMA).optional(),
   }),
 
