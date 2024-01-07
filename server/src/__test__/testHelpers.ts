@@ -1,7 +1,7 @@
 import App from '../App'
-import User from '../models/User'
-import { MessageHandlerConstructor } from '../Router/MessageHandler'
 import { AcknowledgeCallback } from '../Router/AcknowledgeCallback'
+import { EventHandlerConstructor } from '../Router/EventHandler'
+import User from '../models/User'
 import { instantly } from '../utils'
 import { createAppFake, createSocketFake } from './mocks/mocks'
 
@@ -24,7 +24,7 @@ export interface callMessageHandlerOptions {
  * @returns Promise with result of calling instantiated handler.
  */
 export async function callMessageHandler<HandlerReturnType>(
-  handlerConstructor: MessageHandlerConstructor<HandlerReturnType>,
+  handlerConstructor: EventHandlerConstructor<HandlerReturnType>,
   handlerOptions: callMessageHandlerOptions = {},
 ): Promise<HandlerReturnType> {
   const app = handlerOptions.app ?? createAppFake()
@@ -61,7 +61,7 @@ export async function callMessageHandler<HandlerReturnType>(
  * @param callerClass Class, that extends MessageHandler and implements `#call`
  * @returns Caller function with binded MessageHandler
  */
-export function createMessageHandlerCaller<HandlerReturnType, T extends MessageHandlerConstructor<HandlerReturnType>>(
+export function createMessageHandlerCaller<HandlerReturnType, T extends EventHandlerConstructor<HandlerReturnType>>(
   callerClass: T,
 ): (opts?: callMessageHandlerOptions) => Promise<HandlerReturnType | undefined> {
   return (opts?: callMessageHandlerOptions) => callMessageHandler(callerClass, opts)

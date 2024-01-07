@@ -1,4 +1,4 @@
-import { MessageHandlerReturnValue, ResponseReturningMessageHandler } from '../Router/MessageHandler'
+import { EventHandlerReturnValue, ResponseReturningEventHandler } from '../Router/EventHandler'
 
 type GetAllRoomsResponseT = {
   id: string
@@ -8,8 +8,8 @@ type GetAllRoomsResponseT = {
   isPlaying: boolean
 }[]
 
-export default class GetAllRoomsHandler extends ResponseReturningMessageHandler<GetAllRoomsResponseT> {
-  public async handle(): Promise<MessageHandlerReturnValue<GetAllRoomsResponseT>> {
+export default class GetAllRoomsHandler extends ResponseReturningEventHandler<GetAllRoomsResponseT> {
+  public async handle(): Promise<EventHandlerReturnValue<GetAllRoomsResponseT>> {
     return {
       data: this.app.rooms.map((room) => ({
         id: room.id,

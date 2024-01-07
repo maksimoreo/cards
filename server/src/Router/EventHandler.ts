@@ -7,10 +7,10 @@ import {
 } from 'common/src/TypedClientSocket/emit'
 import App from '../App'
 import { SocketT } from '../ISocketData'
-import { AcknowledgeCallback } from '../Router/AcknowledgeCallback'
 import User from '../models/User'
+import { AcknowledgeCallback } from './AcknowledgeCallback'
 
-export interface MessageHandlerConstructorOptions<ResponseData> {
+export interface EventHandlerConstructorOptions<ResponseData> {
   readonly app: App
   readonly socket: SocketT
   readonly input: unknown
@@ -18,26 +18,20 @@ export interface MessageHandlerConstructorOptions<ResponseData> {
   readonly acknowledgeCallback: AcknowledgeCallback<ResponseData>
 }
 
-export type MessageHandlerConstructor<ResponseData> = {
-  new (options: MessageHandlerConstructorOptions<ResponseData>): MessageHandler<ResponseData>
+export type EventHandlerConstructor<ResponseData> = {
+  new (options: EventHandlerConstructorOptions<ResponseData>): EventHandler<ResponseData>
 }
 
 type ZodIssues = readonly z.ZodIssue[]
 
-export abstract class MessageHandler<ResponseData> {
+export abstract class EventHandler<ResponseData> {
   protected readonly app: App
   protected readonly socket: SocketT
   protected readonly input: unknown
   protected readonly currentUser: User
   private readonly acknowledgeCallback: AcknowledgeCallback<ResponseData>
 
-  constructor({
-    app,
-    socket,
-    input,
-    currentUser,
-    acknowledgeCallback,
-  }: MessageHandlerConstructorOptions<ResponseData>) {
+  constructor({ app, socket, input, currentUser, acknowledgeCallback }: EventHandlerConstructorOptions<ResponseData>) {
     this.app = app
     this.socket = socket
     this.input = input
@@ -72,12 +66,9 @@ export abstract class MessageHandler<ResponseData> {
   }
 }
 
-export type MessageHandlerReturnValue<DataT> =
-  | { data: DataT }
-  | { badRequest: string }
-  | { validationErrors: ZodIssues }
+export type EventHandlerReturnValue<DataT> = { data: DataT } | { badRequest: string } | { validationErrors: ZodIssues }
 
-export abstract class ResponseReturningMessageHandler<ResponseData> extends MessageHandler<ResponseData> {
+export abstract class ResponseReturningEventHandler<ResponseData> extends EventHandler<ResponseData> {
   public async call(): Promise<void> {
     const returnValue = await this.handle()
 
@@ -92,12 +83,12 @@ export abstract class ResponseReturningMessageHandler<ResponseData> extends Mess
     }
   }
 
-  protected abstract handle(): Promise<MessageHandlerReturnValue<ResponseData>>
+  protected abstract handle(): Promise<EventHandlerReturnValue<ResponseData>>
 }
 
-export type VoidMessageHandlerReturnValue = undefined | void | { badRequest: string } | { validationErrors: ZodIssues }
+export type VoidEventHandlerReturnValue = undefined | void | { badRequest: string } | { validationErrors: ZodIssues }
 
-export abstract class VoidMessageHandler extends MessageHandler<void> {
+export abstract class VoidEventHandler extends EventHandler<void> {
   public async call(): Promise<void> {
     const returnValue = await this.handle()
 
@@ -112,10 +103,10 @@ export abstract class VoidMessageHandler extends MessageHandler<void> {
     }
   }
 
-  protected abstract handle(): Promise<VoidMessageHandlerReturnValue>
+  protected abstract handle(): Promise<VoidEventHandlerReturnValue>
 }
 
-export abstract class BasicMessageHandler<ResponseData> extends MessageHandler<ResponseData> {
+export abstract class BasicEventHandler<ResponseData> extends EventHandler<ResponseData> {
   public async call(): Promise<void> {
     await this.handle()
   }

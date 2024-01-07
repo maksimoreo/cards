@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { MessageHandlerReturnValue, ResponseReturningMessageHandler } from '../Router/MessageHandler'
+import { EventHandlerReturnValue, ResponseReturningEventHandler } from '../Router/EventHandler'
 import { LOBBY_ROOM_NAME } from '../constants'
 import { DecoratedRoom, decorateRoom } from '../decorators/RoomDecorator'
 import Room from '../models/Room'
@@ -28,8 +28,8 @@ type OutputT = {
   readonly room: DecoratedRoom
 }
 
-export default class CreateRoomHandler extends ResponseReturningMessageHandler<OutputT> {
-  public async handle(): Promise<MessageHandlerReturnValue<OutputT>> {
+export default class CreateRoomHandler extends ResponseReturningEventHandler<OutputT> {
+  public async handle(): Promise<EventHandlerReturnValue<OutputT>> {
     const { app, socket, currentUser } = this
 
     if (currentUser.room) {

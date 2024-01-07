@@ -1,4 +1,4 @@
-import { ConnectHandler as BaseConnectHandler } from '../Router/MessageHandler'
+import { ConnectHandler as BaseConnectHandler } from '../Router/EventHandler'
 import { LOBBY_ROOM_NAME } from '../constants'
 import User from '../models/User'
 

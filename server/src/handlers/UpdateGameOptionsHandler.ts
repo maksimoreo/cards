@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { VoidMessageHandler, VoidMessageHandlerReturnValue } from '../Router/MessageHandler'
+import { VoidEventHandler, VoidEventHandlerReturnValue } from '../Router/EventHandler'
 
 const inputSchema = z.object({
   type: z.literal('takeSix'),
@@ -10,8 +10,8 @@ const inputSchema = z.object({
     .optional(),
 })
 
-export default class UpdateGameOptionsHandler extends VoidMessageHandler {
-  public async handle(): Promise<VoidMessageHandlerReturnValue> {
+export default class UpdateGameOptionsHandler extends VoidEventHandler {
+  public async handle(): Promise<VoidEventHandlerReturnValue> {
     const { currentUser } = this
     const { room } = currentUser
 

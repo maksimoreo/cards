@@ -1,7 +1,7 @@
-import { VoidMessageHandler, VoidMessageHandlerReturnValue } from '../Router/MessageHandler'
+import { VoidEventHandler, VoidEventHandlerReturnValue } from '../Router/EventHandler'
 
-export default class StopGameHandler extends VoidMessageHandler {
-  public async handle(): Promise<VoidMessageHandlerReturnValue> {
+export default class StopGameHandler extends VoidEventHandler {
+  public async handle(): Promise<VoidEventHandlerReturnValue> {
     const { currentUser } = this
     const { room } = currentUser
 

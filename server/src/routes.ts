@@ -20,7 +20,7 @@ export default function defineRoutes(app: App): void {
   const router = new Router(app)
   router.draw({
     connect: ConnectHandler,
-    messages: {
+    events: {
       eval: EvalCommandHandler,
 
       setName: SetNameHandler,

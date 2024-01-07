@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { DEFAULT_COLOR } from 'common/src/username'
-import { VoidMessageHandler, VoidMessageHandlerReturnValue } from '../Router/MessageHandler'
+import { VoidEventHandler, VoidEventHandlerReturnValue } from '../Router/EventHandler'
 
 export const MIN_USERNAME_LENGTH = 2
 export const MAX_USERNAME_LENGTH = 20
@@ -20,8 +20,8 @@ const inputSchema = z.object({
     .optional(),
 })
 
-export default class SetNameHandler extends VoidMessageHandler {
-  public async handle(): Promise<VoidMessageHandlerReturnValue> {
+export default class SetNameHandler extends VoidEventHandler {
+  public async handle(): Promise<VoidEventHandlerReturnValue> {
     const { input } = this
 
     const validationResult = inputSchema.safeParse(input)

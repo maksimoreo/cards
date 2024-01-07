@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { MessageHandlerReturnValue, ResponseReturningMessageHandler } from '../Router/MessageHandler'
+import { EventHandlerReturnValue, ResponseReturningEventHandler } from '../Router/EventHandler'
 import RoomGameTakeSix from '../lib/RoomGameTakeSix/Game'
 import Card from '../lib/TakeSix/Card'
 import TakeSix, { SerializedState } from '../lib/TakeSix/TakeSix'
@@ -32,8 +32,8 @@ export interface StartGameHandlerDataT {
   playerCards?: Card[]
 }
 
-export default class StartGameHandler extends ResponseReturningMessageHandler<StartGameHandlerDataT> {
-  public async handle(): Promise<MessageHandlerReturnValue<StartGameHandlerDataT>> {
+export default class StartGameHandler extends ResponseReturningEventHandler<StartGameHandlerDataT> {
+  public async handle(): Promise<EventHandlerReturnValue<StartGameHandlerDataT>> {
     const { currentUser } = this
     const { room } = currentUser
 

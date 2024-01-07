@@ -1,12 +1,12 @@
 import App from './App'
 import { SocketT } from './ISocketData'
-import { ConnectHandlerConstructor, MessageHandlerConstructor } from './Router/MessageHandler'
 import { AcknowledgeCallback } from './Router/AcknowledgeCallback'
+import { ConnectHandlerConstructor, EventHandlerConstructor } from './Router/EventHandler'
 
 type RouterDocument = {
   connect: ConnectHandlerConstructor | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  messages: Record<string, MessageHandlerConstructor<any>>
+  events: Record<string, EventHandlerConstructor<any>>
 }
 
 export class Router {
@@ -20,8 +20,8 @@ export class Router {
     this.app.io.on('connect', async (socket) => {
       await this.handleConnect(socket)
 
-      Object.entries(document.messages).forEach(([clientMessage, messageHandlerConstructor]) => {
-        socket.on(clientMessage, this.wrap(socket, clientMessage, messageHandlerConstructor))
+      Object.entries(document.events).forEach(([clientEvent, eventHandlerConstructor]) => {
+        socket.on(clientEvent, this.wrap(socket, clientEvent, eventHandlerConstructor))
       })
     })
   }
@@ -39,17 +39,17 @@ export class Router {
     }
   }
 
-  private wrap<MessageHandlerReturnT>(
+  private wrap<EventHandlerReturnT>(
     socket: SocketT,
-    clientMessage: string,
-    handlerConstructor: MessageHandlerConstructor<MessageHandlerReturnT>,
+    clientEvent: string,
+    handlerConstructor: EventHandlerConstructor<EventHandlerReturnT>,
   ) {
     return async (firstArgument: unknown, secondArgument: unknown): Promise<void> => {
       try {
         this.app.logger.info({
-          message: `Received new message: '${clientMessage}' from ${socket.id} (${socket.data.user?.name})`,
+          message: `Received new event: '${clientEvent}' from ${socket.id} (${socket.data.user?.name})`,
           isSocketMessageLog: true,
-          socketEvent: clientMessage,
+          socketEvent: clientEvent,
           socketId: socket.id,
           userName: socket.data.user?.name,
           isBot: socket.data.user?.isBot,
@@ -63,7 +63,7 @@ export class Router {
         }
 
         const acknowledgeCallback = new AcknowledgeCallback(secondArgument)
-        const messageHandler = new handlerConstructor({
+        const eventHandler = new handlerConstructor({
           app: this.app,
           socket,
           input: firstArgument,
@@ -71,9 +71,9 @@ export class Router {
           acknowledgeCallback,
         })
 
-        await messageHandler.call()
+        await eventHandler.call()
 
-        if (clientMessage !== 'disconnect' && !acknowledgeCallback.wasCalled) {
+        if (clientEvent !== 'disconnect' && !acknowledgeCallback.wasCalled) {
           this.app.logger.warn('AcknowledgeCallback was not called')
         }
       } catch (e) {

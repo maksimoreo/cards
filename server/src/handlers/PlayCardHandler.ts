@@ -1,11 +1,11 @@
 import { z } from 'zod'
-import { BasicMessageHandler } from '../Router/MessageHandler'
+import { BasicEventHandler } from '../Router/EventHandler'
 
 const inputSchema = z.object({
   card: z.number().nonnegative(),
 })
 
-export default class PlayCardHandler extends BasicMessageHandler<void> {
+export default class PlayCardHandler extends BasicEventHandler<void> {
   public async handle(): Promise<void> {
     const { currentUser, input } = this
     const { room } = currentUser

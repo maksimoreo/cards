@@ -1,12 +1,12 @@
 import { z } from 'zod'
-import { VoidMessageHandler, VoidMessageHandlerReturnValue } from '../Router/MessageHandler'
+import { VoidEventHandler, VoidEventHandlerReturnValue } from '../Router/EventHandler'
 
 const inputSchema = z.object({
   rowIndex: z.number().nonnegative(),
 })
 
-export default class SelectRowHandler extends VoidMessageHandler {
-  public async handle(): Promise<VoidMessageHandlerReturnValue> {
+export default class SelectRowHandler extends VoidEventHandler {
+  public async handle(): Promise<VoidEventHandlerReturnValue> {
     const { currentUser, input } = this
     const { room } = currentUser
 

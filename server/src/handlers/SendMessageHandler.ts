@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { decorateUser } from '../decorators/UserDecorator'
-import { VoidMessageHandler, VoidMessageHandlerReturnValue } from '../Router/MessageHandler'
+import { VoidEventHandler, VoidEventHandlerReturnValue } from '../Router/EventHandler'
 
 const MAX_MESSAGE_LENGTH = 1000
 
@@ -9,8 +9,8 @@ const inputSchema = z.object({
   message: z.string().max(MAX_MESSAGE_LENGTH),
 })
 
-export default class SendMessageHandler extends VoidMessageHandler {
-  public async handle(): Promise<VoidMessageHandlerReturnValue> {
+export default class SendMessageHandler extends VoidEventHandler {
+  public async handle(): Promise<VoidEventHandlerReturnValue> {
     const { socket, currentUser } = this
     const { room } = currentUser
 
