@@ -123,8 +123,10 @@ export default function Game(props: Props): JSX.Element {
   const [postponedCardSelections, setPostponedCardSelections] = useState<readonly string[]>([])
 
   // Step timeout indication
-  const [stepTimeoutIndicatorKey, setStepTimeoutIndicatorKey] = useState(false)
-  const resetStepTimeoutIndicator = () => setStepTimeoutIndicatorKey((currentValue) => !currentValue)
+  // Note: Cannot use true/false here (i.e., need more than 2 states), bc sometimes there are multiple (2) messages per single render frame
+  const [stepTimeoutIndicatorEnabled, setStepTimeoutIndicatorEnabled] = useState(true)
+  const [stepTimeoutIndicatorKey, setStepTimeoutIndicatorKey] = useState(0)
+  const resetStepTimeoutIndicator = () => setStepTimeoutIndicatorKey((currentValue) => currentValue + 1)
 
   useSocketEventListener('s2c_userPlayedCard', ({ userId }) => {
     if (animationStep) {
@@ -495,6 +497,8 @@ export default function Game(props: Props): JSX.Element {
 
     // Process this event after animations are completed
     setDelayedGameCompletedEvent(data)
+
+    setStepTimeoutIndicatorEnabled(false)
   })
 
   const handleRowSelected = (rowIndex: number): void => {
@@ -586,7 +590,7 @@ export default function Game(props: Props): JSX.Element {
       <FlyingCardsContainer flyingCards={flyingCards} />
 
       {/* By changing React's key, we can forcefully re-render this component, to restart animations */}
-      <StepTimeoutIndicator key={stepTimeoutIndicatorKey.toString()} />
+      {stepTimeoutIndicatorEnabled && <StepTimeoutIndicator key={stepTimeoutIndicatorKey.toString()} />}
     </>
   )
 }
