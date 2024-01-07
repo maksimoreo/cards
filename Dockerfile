@@ -1,4 +1,4 @@
-FROM node:18.17
+FROM node:20.10
 WORKDIR /app
 
 ARG VITE_SERVER_URL="http://localhost:5001"
