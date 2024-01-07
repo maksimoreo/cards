@@ -400,6 +400,38 @@ describe('Player Inactivity Strategy: Kick', () => {
       await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'playerInactivity',
         winners: [],
+        game: {
+          rows: [
+            c([2, 10, 11]), //
+            c([13, 15]),
+            c([23, 34]),
+            c([20]),
+          ],
+          players: [
+            {
+              id: client2.id,
+              hasSelectedCard: false,
+              penaltyPoints: 0,
+              isActive: true,
+              user: { id: client2.id, color: 'D1D5DB', name: client2.id },
+            },
+            {
+              id: client1.id,
+              hasSelectedCard: false,
+              penaltyPoints: 1,
+              isActive: false,
+              user: { id: client1.id, color: 'D1D5DB', name: client1.id },
+            },
+            {
+              id: client3.id,
+              hasSelectedCard: true,
+              penaltyPoints: 0,
+              isActive: true,
+              user: { id: client3.id, color: 'D1D5DB', name: client3.id },
+            },
+          ],
+          stepsLeft: 8,
+        },
       })
     }
 

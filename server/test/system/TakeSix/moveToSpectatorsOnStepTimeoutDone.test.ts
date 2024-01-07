@@ -404,18 +404,54 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
         newRoomState: sharedData_newRoomState,
       })
 
+      const game = {
+        rows: [
+          c([26]), //
+          c([6, 7, 8, 9, 10]),
+          c([3]),
+          c([18, 19]),
+        ],
+        players: [
+          {
+            id: client3.id,
+            hasSelectedCard: false,
+            penaltyPoints: 0,
+            isActive: true,
+            user: { id: client3.id, color: 'D1D5DB', name: client3.id },
+          },
+          {
+            id: client1.id,
+            hasSelectedCard: true,
+            penaltyPoints: 0,
+            isActive: true,
+            user: { id: client1.id, color: 'D1D5DB', name: client1.id },
+          },
+          {
+            id: client2.id,
+            hasSelectedCard: false,
+            penaltyPoints: 0,
+            isActive: false,
+            user: { id: client2.id, color: 'D1D5DB', name: client2.id },
+          },
+        ],
+        stepsLeft: 8,
+      }
+
       // All clients receive 's2c_gameStopped' event
       await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'playerInactivity',
         winners: [],
+        game,
       })
       await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'playerInactivity',
         winners: [],
+        game,
       })
       await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'playerInactivity',
         winners: [],
+        game,
       })
     }
 

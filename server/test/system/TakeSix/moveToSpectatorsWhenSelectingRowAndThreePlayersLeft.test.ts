@@ -338,20 +338,56 @@ describe('Player Inactivity Strategy: Move To Spectators', () => {
         },
       })
 
+      const game = {
+        rows: [
+          c([1, 2, 7]), //
+          c([8]),
+          c([26]),
+          c([22]),
+        ],
+        players: [
+          {
+            id: client1.id,
+            hasSelectedCard: false,
+            penaltyPoints: 0,
+            isActive: true,
+            user: { id: client1.id, color: 'D1D5DB', name: client1.id },
+          },
+          {
+            id: client2.id,
+            hasSelectedCard: false,
+            penaltyPoints: 1,
+            isActive: false,
+            user: { id: client2.id, color: 'D1D5DB', name: client2.id },
+          },
+          {
+            id: client3.id,
+            hasSelectedCard: true,
+            penaltyPoints: 0,
+            isActive: true,
+            user: { id: client3.id, color: 'D1D5DB', name: client3.id },
+          },
+        ],
+        stepsLeft: 9,
+      }
+
       // Everyone receives 's2c_gameStopped' event
       await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'playerInactivity',
         winners: [],
+        game,
       })
 
       await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'playerInactivity',
         winners: [],
+        game,
       })
 
       await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({
         reason: 'playerInactivity',
         winners: [],
+        game,
       })
     }
 

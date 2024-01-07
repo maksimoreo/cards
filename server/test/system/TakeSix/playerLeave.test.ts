@@ -350,10 +350,50 @@ describe('Player leaving behavior', () => {
 
       await expect(client2.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
 
+      const game = {
+        rows: [
+          c([9, 12, 28, 37, 43]), //
+          c([6, 29, 31, 32, 33]),
+          c([3, 7, 20, 24]),
+          c([2, 16, 21, 25]),
+        ],
+        players: [
+          {
+            id: client1.id,
+            hasSelectedCard: false,
+            penaltyPoints: 1,
+            isActive: false,
+            user: { id: client1.id, color: 'D1D5DB', name: client1.id },
+          },
+          {
+            id: client2.id,
+            hasSelectedCard: false,
+            penaltyPoints: 2,
+            isActive: false,
+            user: { id: client2.id, color: 'D1D5DB', name: client2.id },
+          },
+          {
+            id: client3.id,
+            hasSelectedCard: false,
+            penaltyPoints: 3,
+            isActive: false,
+            user: { id: client3.id, color: 'D1D5DB', name: client3.id },
+          },
+          {
+            id: client4.id,
+            hasSelectedCard: false,
+            penaltyPoints: 4,
+            isActive: true,
+            user: { id: client4.id, color: 'D1D5DB', name: client4.id },
+          },
+        ],
+        stepsLeft: 3,
+      }
+
       await expect(client3Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client4.id } } })
       await expect(client4Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client4.id } } })
-      await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'playerLeft', winners: [] })
-      await expect(client4Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'playerLeft', winners: [] })
+      await expect(client3Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'playerLeft', winners: [], game })
+      await expect(client4Promise_s2c_gameStopped).resolves.toStrictEqual({ reason: 'playerLeft', winners: [], game })
       await expect(client1Promise_s2c_rooms).toResolve()
       await expect(client2Promise_s2c_rooms).toResolve()
     }

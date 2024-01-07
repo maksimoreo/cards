@@ -836,6 +836,32 @@ describe('Game #1', () => {
 
       // await expect(client2.emitEvent('selectRow', { rowIndex: 2 })).resolves.toStrictEqual({ success: true })
 
+      const gameState = {
+        rows: [
+          c([6, 17]), //
+          c([7, 18, 19]),
+          c([23, 24]),
+          c([1, 2, 8, 20]),
+        ],
+        players: [
+          {
+            id: client1.id,
+            hasSelectedCard: false,
+            penaltyPoints: 18,
+            isActive: true,
+            user: { id: client1.id, color: 'D1D5DB', name: client1.id },
+          },
+          {
+            id: client2.id,
+            hasSelectedCard: false,
+            penaltyPoints: 7,
+            isActive: true,
+            user: { id: client2.id, color: 'D1D5DB', name: client2.id },
+          },
+        ],
+        stepsLeft: 0,
+      }
+
       const sharedData = {
         step: {
           selectedCards: [
@@ -847,31 +873,7 @@ describe('Game #1', () => {
             { playerId: client1.id, card: c(17), rowIndex: 0, takesRow: false },
           ],
         },
-        gameState: {
-          rows: [
-            c([6, 17]), //
-            c([7, 18, 19]),
-            c([23, 24]),
-            c([1, 2, 8, 20]),
-          ],
-          players: [
-            {
-              id: client1.id,
-              hasSelectedCard: false,
-              penaltyPoints: 18,
-              isActive: true,
-              user: { id: client1.id, color: 'D1D5DB', name: client1.id },
-            },
-            {
-              id: client2.id,
-              hasSelectedCard: false,
-              penaltyPoints: 7,
-              isActive: true,
-              user: { id: client2.id, color: 'D1D5DB', name: client2.id },
-            },
-          ],
-          stepsLeft: 0,
-        },
+        gameState,
       }
 
       await expect(client1GameStepPromise).resolves.toStrictEqual({
@@ -887,6 +889,7 @@ describe('Game #1', () => {
       const eventData_gameStopped = {
         reason: 'completed',
         winners: [{ id: client2.id, user: { id: client2.id, color: 'D1D5DB', name: client2.id }, penaltyPoints: 7 }],
+        game: gameState,
       }
       await expect(client1Promise_s2c_gameStopped).resolves.toStrictEqual(eventData_gameStopped)
       await expect(client2Promise_s2c_gameStopped).resolves.toStrictEqual(eventData_gameStopped)
