@@ -2,7 +2,8 @@ import BotInternals from '../BotInternals'
 import { State, UnexpectedEventError } from '../StateMachine'
 import { Room } from '../dataTypes'
 import { StateUpdateEvent } from '../events'
-import { gracefullyDisconnectSocket, toWaitingBeforePlayingCard } from './shared'
+import WaitingForPlayersState from './WaitingForPlayersState'
+import { canStartGame, gracefullyDisconnectSocket, toWaitingBeforePlayingCard } from './shared'
 
 interface WaitingBeforeStartingTheGameStateProps {
   readonly botInternals: BotInternals
@@ -29,21 +30,32 @@ export default class WaitingBeforeStartingTheGameState {
       const data = await botInternals.socketEmit('startGame', null)
 
       if (!data.playerCards) {
+        clearTimeout(props.timer)
         throw new Error('Did not receive cards from the server')
       }
 
+      clearTimeout(props.timer)
       return toWaitingBeforePlayingCard({ ...props, playerCards: data.playerCards, gameState: data.game })
     }
 
     if (event.type === 'serverEvent') {
       const { serverEvent } = event.props
 
-      if (serverEvent.type === 's2c_userMessage' || serverEvent.type === 's2c_userPlayedCard') {
+      if (serverEvent.type === 's2c_userMessage' || serverEvent.type === 's2c_gameStopped') {
         return this
       }
 
-      if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_usersLeft') {
+      if (serverEvent.type === 's2c_userJoined') {
         return new WaitingBeforeStartingTheGameState({ ...props, room: serverEvent.data.newRoomState })
+      }
+
+      if (serverEvent.type === 's2c_usersLeft') {
+        if (canStartGame(props)) {
+          return new WaitingBeforeStartingTheGameState({ ...props, room: serverEvent.data.newRoomState })
+        } else {
+          clearTimeout(props.timer)
+          return new WaitingForPlayersState({ ...props, room: serverEvent.data.newRoomState })
+        }
       }
     }
 

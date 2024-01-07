@@ -35,10 +35,9 @@ export function createSocketEventEmittingFunction(socket: ClientSocketT) {
           const responseSchema = wrapApiResponseDataSchema(dataSchema)
           const response = responseSchema.parse(unknownResponse)
 
-          // NOTE: `'data' in response` check should not be necessary.
-          // 'data' property is guaranteed to exist when 'code' is 'SUCCESS'.
-          if (response.code === 'SUCCESS' && 'data' in response) {
-            resolve(response.data)
+          if (response.code === 'SUCCESS') {
+            // Note: For some events, data property is unknown and might be undefined or not present (meaning, we don't care about the data for some events)
+            resolve('data' in response ? response.data : undefined)
 
             return
           }

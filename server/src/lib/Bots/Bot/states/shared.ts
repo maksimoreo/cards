@@ -4,6 +4,7 @@ import BotInternals from '../BotInternals'
 import { Card, GameState, Room } from '../dataTypes'
 import WaitingBeforePlayingCardState from './WaitingBeforePlayingCard'
 import WaitingBeforeStartingTheGameState from './WaitingBeforeStartingTheGame'
+import WaitingForPlayersState from './WaitingForPlayersState'
 import WaitingForSocketDisconnectState from './WaitingForSocketDisconnect'
 
 export function canStartGame({ botInternals, room }: { botInternals: BotInternals; room: Room }): boolean {
@@ -22,6 +23,14 @@ export function toWaitingBeforeStartingTheGame({
     room,
     timer: botInternals.sendTimerDoneAfter(random(3000, 10000)),
   })
+}
+
+export function toWaitingForGame(props: { botInternals: BotInternals; room: Room }) {
+  if (canStartGame(props)) {
+    return toWaitingBeforeStartingTheGame(props)
+  }
+
+  return new WaitingForPlayersState(props)
 }
 
 export function toWaitingBeforePlayingCard(partialProps: {

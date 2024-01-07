@@ -4,7 +4,7 @@ import { State, UnexpectedEventError } from '../StateMachine'
 import { Card, GameState, Room } from '../dataTypes'
 import { StateUpdateEvent } from '../events'
 import WaitingForGameStepState from './WaitingForGameStep'
-import { gracefullyDisconnectSocket } from './shared'
+import { gracefullyDisconnectSocket, toWaitingForGame } from './shared'
 
 interface WaitingBeforePlayingCardStateProps {
   readonly botInternals: BotInternals
@@ -24,6 +24,7 @@ export default class WaitingBeforePlayingCardState {
     const { botInternals } = props
 
     if (event.type === 'disconnectRequest') {
+      clearTimeout(props.timer)
       return gracefullyDisconnectSocket(props)
     }
 
@@ -44,6 +45,11 @@ export default class WaitingBeforePlayingCardState {
 
       if (serverEvent.type === 's2c_userJoined' || serverEvent.type === 's2c_usersLeft') {
         return new WaitingBeforePlayingCardState({ ...props, room: serverEvent.data.newRoomState })
+      }
+
+      if (serverEvent.type === 's2c_gameStopped') {
+        clearTimeout(props.timer)
+        return toWaitingForGame(props)
       }
     }
 

@@ -38,7 +38,11 @@ export default class WaitingForPlayersState {
         return newState
       }
 
-      if (serverEvent.type === 's2c_userMessage') {
+      if (
+        serverEvent.type === 's2c_userMessage' ||
+        serverEvent.type === 's2c_gameOptionsUpdated' ||
+        serverEvent.type === 's2c_gameStopped'
+      ) {
         return this
       }
 

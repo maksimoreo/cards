@@ -3,13 +3,7 @@ import BotInternals from '../BotInternals'
 import { State, UnexpectedEventError } from '../StateMachine'
 import { Card, GameState, Room } from '../dataTypes'
 import { StateUpdateEvent } from '../events'
-import WaitingForPlayersState from './WaitingForPlayersState'
-import {
-  canStartGame,
-  gracefullyDisconnectSocket,
-  toWaitingBeforePlayingCard,
-  toWaitingBeforeStartingTheGame,
-} from './shared'
+import { gracefullyDisconnectSocket, toWaitingBeforePlayingCard, toWaitingForGame } from './shared'
 
 interface WaitingForGameStepStateProps {
   readonly botInternals: BotInternals
@@ -78,11 +72,7 @@ export default class WaitingForGameStepState {
             return gracefullyDisconnectSocket(props)
           }
 
-          if (canStartGame(props)) {
-            return toWaitingBeforeStartingTheGame(props)
-          }
-
-          return new WaitingForPlayersState(props)
+          return toWaitingForGame(props)
         }
 
         if (!serverEvent.data.playerCards) {
