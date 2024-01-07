@@ -14,9 +14,9 @@ export const RESPONSE_CODE_SERVER_ERROR = 'SERVER_ERROR'
 export type ResponseCodeServerError = typeof RESPONSE_CODE_SERVER_ERROR
 
 // See response generation on the server side
-export function wrapApiResponseDataSchema<SchemaT extends EventToOutputDataSchemaMapT[keyof EventToOutputDataSchemaMapT]>(
-  dataSchema: SchemaT,
-) {
+export function wrapApiResponseDataSchema<
+  SchemaT extends EventToOutputDataSchemaMapT[keyof EventToOutputDataSchemaMapT]
+>(dataSchema: SchemaT) {
   return z.discriminatedUnion('code', [
     z.object({
       code: z.literal(RESPONSE_CODE_SUCCESS),
@@ -39,9 +39,7 @@ export function createSocketEventSender(socket: ClientSocketT) {
   return function emit<EventT extends keyof EventToInputDataTypeMapT>(
     event: EventT,
     data: EventToInputDataTypeMapT[EventT],
-    onResponse: (
-      response: z.infer<ReturnType<typeof wrapApiResponseDataSchema<(typeof EVENT_TO_OUTPUT_DATA_SCHEMA_MAP)[EventT]>>>,
-    ) => void,
+    onResponse: (response: ApiResponse<EventT>) => void
   ): void {
     socket.emit.apply(socket, [
       event,
@@ -56,3 +54,7 @@ export function createSocketEventSender(socket: ClientSocketT) {
     ])
   }
 }
+
+export type ApiResponse<EventT extends keyof EventToInputDataTypeMapT> = z.infer<
+  ReturnType<typeof wrapApiResponseDataSchema<(typeof EVENT_TO_OUTPUT_DATA_SCHEMA_MAP)[EventT]>>
+>

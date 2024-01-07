@@ -52,7 +52,7 @@ export async function leaveCurrentRoom(
   // Note: client that leaves the room also received 'rooms' event
   const globalClientsPromises = [...globalClients, client].map((client) => client.waitForEvent('s2c_rooms'))
 
-  await expect(client.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+  await expect(client.emitEvent('leaveCurrentRoom', null)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
   await expect(Promise.all(roomClientsPromises)).resolves.toMatchObject(
     roomClientsPromises.map(() => ({ userIds: [client.id], reason: 'selfAction' })),

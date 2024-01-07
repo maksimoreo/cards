@@ -1,13 +1,13 @@
 import { PlayerInactivityStrategy } from '../misc'
 
 export interface EventToInputDataTypeMapT {
-  setName: { name: string; color: string }
+  setName: { name: string; color?: string }
   createRoom: { name: string; password?: string }
-  joinRoom: { name: string } | { id: string }
+  joinRoom: { name: string; password?: string } | { id: string }
   getAllRooms: undefined | null
   leaveCurrentRoom: undefined | null
   sendMessage: { message: string }
-  startGame: undefined | null
+  startGame: { cardsPool?: number[]; stepTimeout?: number; selectRowTimeout?: number } | undefined | null
   playCard: { card: number }
   selectRow: { rowIndex: number }
   updateGameOptions: {

@@ -266,7 +266,7 @@ describe('Player leaving behavior', () => {
       const client3Promise_s2c_gameStep = client3.waitForEvent('s2c_gameStep')
       const client4Promise_s2c_gameStep = client4.waitForEvent('s2c_gameStep')
 
-      await expect(client1.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+      await expect(client1.emitEvent('leaveCurrentRoom', null)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client1Promise_s2c_rooms).toResolve()
       await expect(client2Promise_s2c_usersLeft).resolves.toMatchObject({ newRoomState: { owner: { id: client2.id } } })
@@ -348,7 +348,7 @@ describe('Player leaving behavior', () => {
       const client3Promise_s2c_gameStopped = client3.waitForEvent('s2c_gameStopped')
       const client4Promise_s2c_gameStopped = client4.waitForEvent('s2c_gameStopped')
 
-      await expect(client2.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+      await expect(client2.emitEvent('leaveCurrentRoom', null)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       const game = {
         rows: [

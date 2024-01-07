@@ -10,7 +10,7 @@ describe('Send chat messages to other clients', () => {
   it('sends message from client to other clients', async () => {
     const [client1, client2, client3] = getClients()
 
-    await expect(client1.emitEvent('sendMessage', 'hi')).resolves.toStrictEqual({
+    await expect(client1.emitEvent('sendMessage', { message: 'hi' })).resolves.toStrictEqual({
       code: 'BAD_REQUEST',
       message: 'Not in a room',
       validationErrors: [],

@@ -11,7 +11,7 @@ describe('Send setName event', () => {
     it('changes user name to specified value', async () => {
       const app = getApp()
 
-      const response: string = await getClients()[0].emitEvent('setName', { name: 'newname' })
+      const response = await getClients()[0].emitEvent('setName', { name: 'newname' })
 
       expect(response).toStrictEqual({ code: 'SUCCESS' })
       expect(app.users.all[0].name).toBe('newname')

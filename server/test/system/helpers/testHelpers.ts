@@ -1,5 +1,8 @@
 import Client, { Socket } from 'socket.io-client'
 
+import { EventToInputDataTypeMapT } from 'common/src/TypedClientSocket/ClientToServerEvents'
+import { EVENT_TO_OUTPUT_DATA_SCHEMA_MAP } from 'common/src/TypedClientSocket/EventToOutputDataSchemaMap'
+import { ApiResponse, wrapApiResponseDataSchema } from 'common/src/TypedClientSocket/send'
 import App from '../../../src/App'
 import { createTestLogger } from '../../../src/Logger'
 import { withTimeout } from '../../../src/utils'
@@ -39,14 +42,18 @@ export function connectClientAsync(port: number): Promise<Socket> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function emitEvent<RequestDataT = any, ResponseDataT = any>(
+export function emitEvent<EventT extends keyof EventToInputDataTypeMapT>(
   client: Socket,
-  event: string,
-  data: RequestDataT,
+  event: EventT,
+  data: EventToInputDataTypeMapT[EventT],
   timeout = 1000,
-): Promise<ResponseDataT> {
+): Promise<ApiResponse<EventT>> {
   return withTimeout(timeout, (resolve) => {
-    client.emit(event, data, (response: ResponseDataT) => {
+    client.emit(event, data, (unknownResponse: unknown) => {
+      const dataSchema = EVENT_TO_OUTPUT_DATA_SCHEMA_MAP[event]
+      const responseSchema = wrapApiResponseDataSchema(dataSchema)
+      const response = responseSchema.parse(unknownResponse)
+
       resolve(response)
     })
   })

@@ -1,3 +1,4 @@
+import { EventToInputDataTypeMapT } from 'common/src/TypedClientSocket/ClientToServerEvents'
 import {
   SERVER_NOTIFICATION_DATA_SCHEMA_MAP,
   ServerToClientEventsUnion,
@@ -46,11 +47,11 @@ export class TestClient {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public emitEvent<RequestDataT = any, ResponseDataT = any>(
-    event: string,
-    data: RequestDataT,
+  public emitEvent<EventT extends keyof EventToInputDataTypeMapT>(
+    event: EventT,
+    data: EventToInputDataTypeMapT[EventT],
     timeout = 1000,
-  ): Promise<ResponseDataT> {
+  ) {
     return emitEvent(this.socket, event, data, timeout)
   }
 

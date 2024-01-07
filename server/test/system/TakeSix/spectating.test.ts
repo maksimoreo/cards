@@ -511,7 +511,7 @@ describe('Game spectating', () => {
       const client5Promise_s2c_usersLeft = client5.waitForEvent('s2c_usersLeft')
       const client6Promise_s2c_usersLeft = client6.waitForEvent('s2c_usersLeft')
 
-      await expect(client2.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+      await expect(client2.emitEvent('leaveCurrentRoom', null)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client2Promise_s2c_rooms).toResolve()
       await expect(client1Promise_s2c_usersLeft).resolves.toMatchObject({ userIds: [client2.id] })
@@ -535,7 +535,7 @@ describe('Game spectating', () => {
       const client5Promise_s2c_gameStopped = client5.waitForEvent('s2c_gameStopped')
       const client6Promise_s2c_gameStopped = client6.waitForEvent('s2c_gameStopped')
 
-      await expect(client3.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+      await expect(client3.emitEvent('leaveCurrentRoom', null)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client2Promise_s2c_rooms).toResolve()
       await expect(client3Promise_s2c_rooms).toResolve()
@@ -561,7 +561,7 @@ describe('Game spectating', () => {
       const client5Promise_s2c_usersLeft = client5.waitForEvent('s2c_usersLeft')
       const client6Promise_s2c_usersLeft = client6.waitForEvent('s2c_usersLeft')
 
-      await expect(client4.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+      await expect(client4.emitEvent('leaveCurrentRoom', null)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client2Promise_s2c_rooms).toResolve()
       await expect(client3Promise_s2c_rooms).toResolve()
@@ -581,7 +581,7 @@ describe('Game spectating', () => {
       const client5Promise_s2c_usersLeft = client5.waitForEvent('s2c_usersLeft')
       const client6Promise_s2c_usersLeft = client6.waitForEvent('s2c_usersLeft')
 
-      await expect(client1.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+      await expect(client1.emitEvent('leaveCurrentRoom', null)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client1Promise_s2c_rooms).toResolve()
       await expect(client2Promise_s2c_rooms).toResolve()
@@ -601,7 +601,7 @@ describe('Game spectating', () => {
       const client5Promise_s2c_rooms = client5.waitForEvent('s2c_rooms')
       const client6Promise_s2c_usersLeft = client6.waitForEvent('s2c_usersLeft')
 
-      await expect(client5.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+      await expect(client5.emitEvent('leaveCurrentRoom', null)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client1Promise_s2c_rooms).toResolve()
       await expect(client2Promise_s2c_rooms).toResolve()
@@ -621,7 +621,7 @@ describe('Game spectating', () => {
       const client5Promise_s2c_rooms = client5.waitForEvent('s2c_rooms')
       const client6Promise_s2c_rooms = client6.waitForEvent('s2c_rooms')
 
-      await expect(client6.emitEvent('leaveCurrentRoom', {})).resolves.toStrictEqual({ code: 'SUCCESS' })
+      await expect(client6.emitEvent('leaveCurrentRoom', null)).resolves.toStrictEqual({ code: 'SUCCESS' })
 
       await expect(client1Promise_s2c_rooms).toResolve()
       await expect(client2Promise_s2c_rooms).toResolve()
