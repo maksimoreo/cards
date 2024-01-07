@@ -36,13 +36,18 @@ export default function FieldsetOption({
     <label
       htmlFor={id}
       className={classNames(
-        'flex flex-col justify-center rounded-lg p-2 outline',
+        'flex flex-col justify-center rounded-lg p-2 outline transition-[outline-color]',
         labelClasses,
         isSelected ? 'outline-2' : 'outline-1',
         isSelected ? labelSelectedClasses : labelNotSelectedClasses,
       )}
     >
-      <p className={classNames('text-center text-xl font-bold text-neutral-300', isSelected && titleSelectedClasses)}>
+      <p
+        className={classNames(
+          'text-center text-xl font-bold transition-colors',
+          isSelected ? titleSelectedClasses : 'text-neutral-300',
+        )}
+      >
         <input
           type='radio'
           name={name}
